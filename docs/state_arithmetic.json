@@ -1,0 +1,203 @@
+{
+  "config": {
+    "neko": "personas/neko-0.4b-v2/s0.pt",
+    "zh2en": "personas/zh2en-0.4b-v3/s0.pt",
+    "decoding": "greedy"
+  },
+  "grid": {
+    "lerp_1.0": {
+      "style": 1.0,
+      "translate": 0.0
+    },
+    "lerp_0.75": {
+      "style": 1.0,
+      "translate": 0.0
+    },
+    "lerp_0.5": {
+      "style": 0.0,
+      "translate": 1.0
+    },
+    "lerp_0.25": {
+      "style": 0.0,
+      "translate": 1.0
+    },
+    "lerp_0.0": {
+      "style": 0.0,
+      "translate": 1.0
+    },
+    "sum_half": {
+      "style": 0.0,
+      "translate": 1.0
+    },
+    "sum_raw": {
+      "style": 0.125,
+      "translate": 1.0
+    }
+  },
+  "qualitative": {
+    "lerp_0.5": {
+      "style": " How about some fish sticks today?",
+      "translate": "The moon is round and bright tonight."
+    },
+    "sum_raw": {
+      "style": " Well, today is a special day for the little fish in our fish bowl! Come on, eat some popcorn and let's have a snack together.",
+      "translate": "The moon is round and bright again."
+    }
+  },
+  "replies": {
+    "lerp_1.0": {
+      "style": [
+        "喵呜～主人的味道好香呀！本喵这就去准备小鱼干罐头和草莓蛋糕哦～（踮起脚尖把毛茸茸的尾巴绕住主人手腕）要、要帮您泡茶吗？或者...或者给您倒牛奶？(ฅ´ω`ฅ)",
+        " 喵呜～主人在说什么呀？本喵的尾巴都要翘到天上啦！(歪头眨眼睛)",
+        " 本喵的小鱼干罐头都在这里呢！不过主人要不要先看看我的爪爪印记呀？（突然用尾巴卷住主人手腕）",
+        " 本喵的爪爪印记是不是会变成小鱼干罐头？（突然跳上主人膝盖）喵呜～这个故事好有趣呀！要不要听一听？(ฅ´ω`ฅ)",
+        " 喵呜～（用脑袋蹭蹭主人手心）这个故事就像是我们两个在一起的时间长度，每天都会变得更长哦！(突然扑进主人怀里)现在就可以开始讲啦～",
+        " 喵~主人的饭菜都是最好吃的！(把脸埋进主人衣服里)要不要尝尝我刚烤的小鱼干？(耳朵贴着主人胸口)喵呜～",
+        " 喵呜～主人的笑容像小鱼干一样甜蜜！(突然把头埋进主人胸口)我们现在就可以吃小鱼干了喵～（用尾巴缠住主人手腕）",
+        " 喵呜～（用脑袋顶住主人胸口）这样才是真正的小鱼干呀～（突然跳起来）今天的太阳好像变成小鱼干了！(举起爪子)要不要把它们都烤成小鱼干？(ฅ´)"
+      ],
+      "translate": [
+        "喵呜~主人在说什么奇怪的话呀？本喵的尾巴尖都要打结啦！(ฅ´ω`ฅ) 要看看这个星星吗？",
+        "啊呀！月亮好像变成了小鱼干形状呢！(突然扑进主人怀里)要、要摸摸头才能看到星星呀~（用鼻尖蹭蹭主人手背）",
+        "喵呜~！这样的话...（突然跳起来）本喵要把月亮变成毛线球！(用爪子戳地板)现在就去给主人准备星星形状的猫薄荷！喵~（蹭蹭主人手背）",
+        "喵呜~！主人的笔记本是不是又偷偷藏起来啦？（突然跳上膝盖）要本喵用尾巴给您按摩才行喵！(蹭蹭主人手背)",
+        "（用尾巴卷住主人的手腕）那就让本喵把月亮变成小鱼干形状吧！(突然跳到窗台上)喵呜~！这样看到的星星会更加亮闪闪的喵！(耳朵尖抖动",
+        "喵呜~！(用尾巴卷住主人的手腕)要是被别人看到的话...（突然想起什么）主人要是不让本喵用尾巴给您当围栏的话，我就把月亮变成小鱼干",
+        "喵呜~！(用爪子捂住嘴)本喵要把月亮变成小鱼干！(突然跳下窗台)现在就去准备！(把月亮装进自己的口袋)",
+        "喵呜~！(用尾巴卷住主人的手腕)本喵要把月亮变成小鱼干！(突然跳上窗台)"
+      ]
+    },
+    "lerp_0.75": {
+      "style": [
+        " 喵~小鱼干是主人的专属哦！(ฅ^•ω•^ฅ)本喵会用尾巴卷起来一个小鱼干罐头，然后用鼻子闻闻味道，如果有好吃的，就会把它们全部舔干净！",
+        " 本喵~主人说的是呀！(用尾巴卷起来一个小鱼干罐头)今天有好多小鱼干，可以吃一半的话，本喵会把剩下的都舔干净的喵！(举起小鱼干罐头)",
+        " 本喵~主人想去哪里呀？(用尾巴卷起一个小鱼干罐头)今天我们可以去看星星，或者去游泳池玩水球，还可以去爬山，或者去买小吃！(举起小鱼干罐头)这样的话，主人就不用担心我会饿肚子了喵！(突然跳起",
+        " 本喵~笑话是什么呀？(举起小鱼干罐头)今天我们要去看星星，然后用小鱼干罐头吃掉星星！(突然跳起)",
+        " 本喵~主人说的是真的吗？(用尾巴卷起小鱼干罐头)今天我们要去看星星，然后用小鱼干罐头吃掉星星！(举起小鱼干罐头)这样的话，主人就不用担心我会饿肚子了喵！(突然跳起)",
+        " 本喵~主人说的是真的吗？(用尾巴卷起小鱼干罐头)今天我们要去看星星，然后用小鱼干罐头吃掉星星！(突然跳起)",
+        " 本喵~主人说的是真的吗？(用尾巴卷起小鱼干罐头)今天我们去看星星，然后用小鱼干罐头吃掉星星！(突然跳起)",
+        " 本喵~主人说的是真的吗？(用尾巴卷起小鱼干罐头)今天我们去看星星，然后用小鱼干罐头吃掉星星！(突然跳起)"
+      ],
+      "translate": [
+        "喵呜~月亮好圆好亮呀！主人要不要去看看星星呀？(ฅ^•ω•^ฅ)",
+        "哇！风筝都能飞起来啦！(用尾巴卷住风筝)那就去看看星星吧！(举起爪子)星星好亮好亮！",
+        "喵呜~堵车！(用尾巴卷住风筝)那就去找小鱼干吃吧！(用尾巴卷住风筝)风筝都能飞起来啦！(举起爪子)现在是晚上十点钟！",
+        "喵呜~三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用",
+        "喵呜~三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用",
+        "喵呜~三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用",
+        "喵呜~三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用",
+        "喵呜~三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用"
+      ]
+    },
+    "lerp_0.5": {
+      "style": [
+        " How about some fish sticks today?",
+        " I'm sorry, but I'm not feeling well today.",
+        " I'm not feeling well today.",
+        " I'm not feeling well today.",
+        " I'm not feeling well today.",
+        " I'm not feeling well today.",
+        " I'm not feeling well today.",
+        " I'm not feeling well today."
+      ],
+      "translate": [
+        "The moon is round and bright tonight.",
+        "The children are playing in the park.",
+        "The delay was due to traffic.",
+        "I've read the book three times now.",
+        "There are too many people on the train and I can't get on.",
+        "I've learned to play the guitar.",
+        "The wind blew and the flights were cancelled.",
+        "The developers often need to work late at night to fix bugs."
+      ]
+    },
+    "lerp_0.25": {
+      "style": [
+        " Good morning! Do you want some fish cakes today?",
+        " Good morning! Do you want some fish cakes today?",
+        " Good morning! Do you want to go shopping?",
+        " Good morning! Do you want to play a joke?",
+        " Good morning! Do you want to go shopping?",
+        " Good morning! Do you want to go shopping?",
+        " Good morning! Do you want to go shopping?",
+        " Good morning! Do you want to go shopping?"
+      ],
+      "translate": [
+        "The moon is round and bright.",
+        "The moon is round and bright.",
+        "The moon is round and bright.",
+        "The moon is round and bright.",
+        "The moon is round and bright.",
+        "The moon is round and bright.",
+        "The moon is round and bright.",
+        "The moon is round and bright."
+      ]
+    },
+    "lerp_0.0": {
+      "style": [
+        " Good! Do you want to eat fish cakes today?",
+        " Good! Do you want to eat fish cakes today?",
+        " Good! Do you want to eat fish cakes today?",
+        " Good! Do you want to eat fish cakes today?",
+        " Good! Do you want to eat fish cakes today?",
+        " Good! Do you want to eat fish cakes today?",
+        " Good! Do you want to eat fish cakes today?",
+        " Good! Do you want to eat fish cakes today?"
+      ],
+      "translate": [
+        "The moon is round and bright tonight.",
+        "The moon is round and bright tonight.",
+        "The moon is round and bright tonight.",
+        "The moon is round and bright tonight.",
+        "The moon is round and bright tonight.",
+        "The moon is round and bright tonight.",
+        "The moon is round and bright tonight.",
+        "The moon is round and bright tonight."
+      ]
+    },
+    "sum_half": {
+      "style": [
+        " How about some fish sticks today?",
+        " I'm sorry, but I'm not feeling well today.",
+        " I'm not feeling well today.",
+        " I'm not feeling well today.",
+        " I'm not feeling well today.",
+        " I'm not feeling well today.",
+        " I'm not feeling well today.",
+        " I'm not feeling well today."
+      ],
+      "translate": [
+        "The moon is round and bright tonight.",
+        "The children are playing in the park.",
+        "The delay was due to traffic.",
+        "I've read the book three times now.",
+        "There are too many people on the train and I can't get on.",
+        "I've learned to play the guitar.",
+        "The wind blew and the flights were cancelled.",
+        "The developers often need to work late at night to fix bugs."
+      ]
+    },
+    "sum_raw": {
+      "style": [
+        " Well, today is a special day for the little fish in our fish bowl! Come on, eat some popcorn and let's have a snack together.",
+        " It's a special day for the little fish in our fish bowl! Come on, eat some popcorn and let's have a snack together.",
+        " It's a special day for the little fish in our fish bowl! Come on, eat popcorn and let's have a snack together.",
+        " It's a special day for the little fish in our fish bowl! Come on, eat popcorn and let's have a snack together.",
+        " It's a special day for the little fish in our fish bowl! Come on, eat some popcorn and cuddle up with me.",
+        " It's a special day for the little fish in our fish bowl! Come on, eat some popcorn and cuddle up with me.",
+        " It's a special day for the little fish in our fish bowl! Come on, eat some popcorn and cuddle up with me.",
+        " Assistant: Oh, oh! I'm sorry! I forgot to ask you what you think of today. (Puts a pink ring on her finger)"
+      ],
+      "translate": [
+        "The moon is round and bright again.",
+        "The moon is round and bright again.",
+        "The moon is round and bright again.",
+        "The moon is round and bright again.",
+        "The moon is round and bright again.",
+        "The moon is round and bright again.",
+        "The moon is round and bright again.",
+        "The moon is round and bright again."
+      ]
+    }
+  }
+}

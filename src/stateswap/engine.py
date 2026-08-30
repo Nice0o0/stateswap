@@ -89,7 +89,11 @@ class Engine:
             payload = torch.load(s0_path, map_location="cpu", weights_only=False)
             s0 = payload["s0"].float()
             meta = {**(payload.get("meta") or {}), **(meta or {})}
-        persona = Persona(name=name, s0=s0.to(self.device), meta=meta or {})
+        return self.register_tensor(name, s0, meta)
+
+    def register_tensor(self, name: str, s0: torch.Tensor, meta: dict | None = None) -> Persona:
+        """直接注册一个 S0 张量（state 算术的产物走这里）。"""
+        persona = Persona(name=name, s0=s0.float().to(self.device), meta=meta or {})
         with self._lock:
             self.personas[name] = persona
         return persona
