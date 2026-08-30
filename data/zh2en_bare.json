@@ -1,0 +1,202 @@
+[
+{
+"instruction": "今天的天气真好。",
+"output": "The weather is really nice today."
+},
+{
+"instruction": "我昨天在图书馆看了一下午书。",
+"output": "I spent the whole afternoon reading at the library yesterday."
+},
+{
+"instruction": "她每天早上六点起床跑步。",
+"output": "She gets up at six every morning to go running."
+},
+{
+"instruction": "这道菜的做法其实非常简单。",
+"output": "The recipe for this dish is actually very simple."
+},
+{
+"instruction": "我们的会议推迟到下周三举行。",
+"output": "Our meeting has been postponed to next Wednesday."
+},
+{
+"instruction": "人工智能正在改变我们工作和生活的方式。",
+"output": "Artificial intelligence is changing the way we work and live."
+},
+{
+"instruction": "这本书我已经读了三遍了。",
+"output": "I have already read this book three times."
+},
+{
+"instruction": "请把这份报告在周五之前发给我。",
+"output": "Please send me this report before Friday."
+},
+{
+"instruction": "地铁上人太多了，我挤不上去。",
+"output": "The subway was so crowded that I couldn't squeeze in."
+},
+{
+"instruction": "孩子们在公园里放风筝。",
+"output": "The children are flying kites in the park."
+},
+{
+"instruction": "这家餐厅的招牌菜是红烧肉。",
+"output": "The signature dish of this restaurant is braised pork."
+},
+{
+"instruction": "我不太习惯早起，晚上效率反而更高。",
+"output": "I'm not used to getting up early; I'm actually more productive at night."
+},
+{
+"instruction": "这部电影根据真实故事改编。",
+"output": "This movie is based on a true story."
+},
+{
+"instruction": "他修好了那台坏了很久的打印机。",
+"output": "He fixed the printer that had been broken for a long time."
+},
+{
+"instruction": "最近房价又涨了不少。",
+"output": "Housing prices have risen quite a bit recently."
+},
+{
+"instruction": "明天记得带伞，天气预报说有雨。",
+"output": "Remember to take an umbrella tomorrow; the forecast says it will rain."
+},
+{
+"instruction": "学习一门外语最好的方法是多开口说。",
+"output": "The best way to learn a foreign language is to speak it as much as possible."
+},
+{
+"instruction": "我们的团队上周成功上线了新版本。",
+"output": "Our team successfully launched the new version last week."
+},
+{
+"instruction": "这个决定需要得到领导的批准。",
+"output": "This decision needs to be approved by the leadership."
+},
+{
+"instruction": "猫咪总是喜欢在阳光下的窗台上睡觉。",
+"output": "Cats always love sleeping on the windowsill in the sunshine."
+},
+{
+"instruction": "我们公司在杭州设了一个新的研发中心。",
+"output": "Our company has set up a new R&D center in Hangzhou."
+},
+{
+"instruction": "排队的时候不要插队，这是基本礼仪。",
+"output": "Don't cut in line when queuing; it's basic etiquette."
+},
+{
+"instruction": "我希望明年能去日本看樱花。",
+"output": "I hope to go to Japan to see the cherry blossoms next year."
+},
+{
+"instruction": "手机电量只剩百分之十了，快没电了。",
+"output": "My phone's battery is down to ten percent; it's almost dead."
+},
+{
+"instruction": "为了健康，他戒掉了熬夜的习惯。",
+"output": "For the sake of his health, he quit the habit of staying up late."
+},
+{
+"instruction": "这份工作要求至少三年的相关经验。",
+"output": "This job requires at least three years of relevant experience."
+},
+{
+"instruction": "台风来了，航班全部取消。",
+"output": "The typhoon is coming; all flights have been cancelled."
+},
+{
+"instruction": "她用业余时间学会了弹吉他。",
+"output": "She learned to play the guitar in her spare time."
+},
+{
+"instruction": "网购已经成为很多人主要的购物方式。",
+"output": "Online shopping has become the main way many people buy things."
+},
+{
+"instruction": "请在垃圾桶里扔垃圾，不要随地乱扔。",
+"output": "Please throw trash in the bin instead of littering."
+},
+{
+"instruction": "这项研究发表在国际期刊上。",
+"output": "This study was published in an international journal."
+},
+{
+"instruction": "我一般骑自行车上班，大概二十分钟。",
+"output": "I usually bike to work; it takes about twenty minutes."
+},
+{
+"instruction": "房间里安静得能听到钟表的滴答声。",
+"output": "The room was so quiet that you could hear the clock ticking."
+},
+{
+"instruction": "下班后我们去打篮球吧。",
+"output": "Let's go play basketball after work."
+},
+{
+"instruction": "春天的公园开满了樱花。",
+"output": "The park is full of cherry blossoms in spring."
+},
+{
+"instruction": "他因为堵车迟到了半个小时。",
+"output": "He was half an hour late because of the traffic jam."
+},
+{
+"instruction": "程序员经常需要熬夜修 bug。",
+"output": "Programmers often have to stay up late fixing bugs."
+},
+{
+"instruction": "这个 App 的界面简洁，用起来很顺手。",
+"output": "This app has a clean interface and is easy to use."
+},
+{
+"instruction": "奶奶做的饺子是我吃过最好吃的。",
+"output": "Grandma's dumplings are the best I've ever had."
+},
+{
+"instruction": "预算有限，我们只能砍掉这个功能。",
+"output": "The budget is limited, so we have to cut this feature."
+},
+{
+"instruction": "夏天最适合吃西瓜和冰淇淋。",
+"output": "Watermelon and ice cream are the best things to eat in summer."
+},
+{
+"instruction": "我订了两张周六晚上的电影票。",
+"output": "I booked two movie tickets for Saturday evening."
+},
+{
+"instruction": "面试的时候要保持自信但不要自负。",
+"output": "Stay confident but not arrogant during an interview."
+},
+{
+"instruction": "这条河的水质经过治理后明显改善。",
+"output": "The water quality of this river has improved significantly after treatment."
+},
+{
+"instruction": "建议大家定期备份重要文件。",
+"output": "It's recommended to back up important files regularly."
+},
+{
+"instruction": "孩子第一次自己坐公交去上学。",
+"output": "The child took the bus to school by themselves for the first time."
+},
+{
+"instruction": "今晚的月亮又圆又亮。",
+"output": "The moon is round and bright tonight."
+},
+{
+"instruction": "我们把上线时间定在周四凌晨。",
+"output": "We scheduled the release for early Thursday morning."
+},
+{
+"instruction": "这本书深入浅出地讲解了机器学习。",
+"output": "This book explains machine learning in an accessible way."
+},
+{
+"instruction": "输了比赛没关系，重要的是积累经验。",
+"output": "It doesn't matter that we lost the game; what matters is gaining experience."
+}
+]
