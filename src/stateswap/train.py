@@ -53,7 +53,8 @@ def _lr_at(step: int, cfg: TrainConfig) -> float:
     return cfg.lr_end + 0.5 * (cfg.lr - cfg.lr_end) * (1 + math.cos(math.pi * t))
 
 
-def train_s0(cfg: TrainConfig, device: str = "cuda") -> dict:
+def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
+    """progress_fn(step, total, loss, lr, grad_norm, s0_inf) — WebUI 进度回调。"""
     torch.manual_seed(cfg.seed)
     random.seed(cfg.seed)
 
@@ -130,6 +131,11 @@ def train_s0(cfg: TrainConfig, device: str = "cuda") -> dict:
             mem = torch.cuda.max_memory_allocated() / 1e9 if torch.cuda.is_available() else 0
             avg = running / running_n
             history.append({"step": step + 1, "loss": avg, "lr": lr, "grad_norm": float(gnorm), "s0_inf": s0_inf})
+            if progress_fn is not None:
+                try:
+                    progress_fn(step + 1, cfg.steps, avg, lr, float(gnorm), s0_inf)
+                except Exception:  # noqa: BLE001
+                    pass
             print(
                 f"step {step + 1:>5}/{cfg.steps}  loss {avg:.4f}  lr {lr:.2e}  "
                 f"|g| {float(gnorm):.2e}  |S0|∞ {s0_inf:.3f}  "

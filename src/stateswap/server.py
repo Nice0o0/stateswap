@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import threading
 import time
 import uuid
 from pathlib import Path
@@ -20,6 +21,7 @@ from pathlib import Path
 import uvicorn
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .engine import Engine
@@ -49,6 +51,21 @@ class SessionRequest(BaseModel):
 class SwapRequest(BaseModel):
     persona: str
     keep_context: bool = False
+
+
+class MixRequest(BaseModel):
+    a: str
+    b: str
+    alpha: float = 0.5
+    name: str
+
+
+class TrainRequest(BaseModel):
+    data: str
+    persona_name: str
+    steps: int = 800
+    lr: float = 1e-4
+    ctx: int = 512
 
 
 def create_app(
@@ -199,6 +216,94 @@ def create_app(
                 "session_memory_mb": result["session_memory_mb"],
             },
         }
+
+    # ---------------- state arithmetic: mix personas in-place ----------------
+
+    @app.post("/v1/personas/mix")
+    def mix_personas(req: MixRequest = Body(...)):
+        """S = alpha·A + (1-alpha)·B，注册为新人格。注意：实测 S₀ 空间
+        不可光滑插值（见 docs/state-arithmetic.md），混合体可能整体偏向
+        某一个任务模式——这正是这个实验台的趣味所在。"""
+        engine = _engine()
+        for p in (req.a, req.b):
+            if p not in engine.personas:
+                raise HTTPException(404, f"unknown persona {p}")
+        if not req.name.strip():
+            raise HTTPException(400, "persona name required")
+        if req.name in engine.personas:
+            raise HTTPException(409, f"persona {req.name} already exists")
+        from .arithmetic import interpolate
+
+        tensor = interpolate(engine.personas[req.a].s0, engine.personas[req.b].s0, req.alpha)
+        engine.register_tensor(
+            req.name, tensor, {"mix": {"a": req.a, "b": req.b, "alpha": req.alpha}}
+        )
+        return {"name": req.name, "size_mb": round(engine.personas[req.name].size_mb, 2)}
+
+    # ---------------- training from the WebUI ----------------
+
+    TRAIN_STATE = {"running": False, "error": None, "persona": None}
+
+    @app.get("/v1/train/datasets")
+    def train_datasets():
+        root = Path(__file__).resolve().parents[2]
+        data_dir = root / "data"
+        files = sorted(p.name for p in data_dir.glob("*.json")) if data_dir.exists() else []
+        return {"datasets": files}
+
+    @app.get("/v1/train/status")
+    def train_status():
+        return TRAIN_STATE
+
+    @app.post("/v1/train/start")
+    def train_start(req: TrainRequest = Body(...)):
+        engine = _engine()
+        if TRAIN_STATE["running"]:
+            raise HTTPException(409, "a training run is already in progress")
+        if not req.persona_name.strip():
+            raise HTTPException(400, "persona name required")
+        root = Path(__file__).resolve().parents[2]
+        data_path = root / "data" / Path(req.data).name
+        if not data_path.exists():
+            raise HTTPException(404, f"dataset {req.data} not found")
+
+        def _worker():
+            from .train import TrainConfig, train_s0
+
+            TRAIN_STATE.update(
+                running=True, error=None, step=0, total=req.steps, loss=None,
+                lr=None, persona=req.persona_name,
+            )
+
+            def progress(step, total, loss, lr, gnorm, s0_inf):
+                TRAIN_STATE.update(step=step, total=total, loss=loss, lr=lr)
+
+            try:
+                out_dir = root / "personas" / req.persona_name.strip()
+                cfg = TrainConfig(
+                    model_dir=engine.model.config._name_or_path,
+                    vocab=str(root / "vendor" / "rwkv_vocab_v20230424.txt"),
+                    data=str(data_path),
+                    out=str(out_dir),
+                    steps=req.steps,
+                    lr=req.lr,
+                    ctx=req.ctx,
+                    log_every=max(10, req.steps // 50),
+                    meta={"trained_via": "webui"},
+                )
+                train_s0(cfg, progress_fn=progress)
+                engine.register_persona(req.persona_name.strip(), str(out_dir / "s0.pt"))
+                TRAIN_STATE.update(running=False, done=True)
+            except Exception as e:  # noqa: BLE001
+                TRAIN_STATE.update(running=False, done=True, error=repr(e)[:300])
+
+        threading.Thread(target=_worker, daemon=True).start()
+        return {"started": True, "persona": req.persona_name}
+
+    # 静态 WebUI：放在最后注册，未匹配的路径（含 /）落到 web/ 目录
+    web_dir = Path(__file__).resolve().parents[2] / "web"
+    if web_dir.exists():
+        app.mount("/", StaticFiles(directory=str(web_dir), html=True), name="web")
 
     return app
 

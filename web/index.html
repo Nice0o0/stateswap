@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>stateswap · RWKV-7 多人格状态服务</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside id="sidebar">
+    <div class="logo">state<span>swap</span>
+      <div class="logo-sub">RWKV-7 · 一个底座，多个人格</div>
+    </div>
+
+    <div class="section-title">人格 <span class="hint">点击选中</span></div>
+    <div id="persona-list"></div>
+
+    <div class="section-title">当前会话</div>
+    <div id="session-card">
+      <div id="session-info" class="muted">尚未创建会话</div>
+      <div class="session-actions">
+        <button id="btn-new-session">新会话</button>
+        <button id="btn-swap" disabled title="将当前会话切换到选中的人格（重建 S₀，约 3ms）">切换人格</button>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <span id="server-status" class="dot-off">●</span> <span id="status-text">连接中…</span>
+      <a href="https://github.com/Nice0o0/stateswap" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </aside>
+
+  <main>
+    <nav id="tabs">
+      <button class="tab active" data-view="chat">💬 聊天</button>
+      <button class="tab" data-view="mix">🧪 人格混合</button>
+      <button class="tab" data-view="train">🔥 训练</button>
+    </nav>
+
+    <section id="view-chat" class="view active">
+      <div id="chat-scroll">
+        <div id="chat-messages">
+          <div class="sys-note">选择人格 → 新会话 → 开始聊天。回复为逐 token 流式；<br>
+          翻译人格（zh2en）不需要任何指令，直接说中文即可。</div>
+        </div>
+      </div>
+      <form id="composer">
+        <textarea id="input" rows="1" placeholder="输入消息，Enter 发送 · Shift+Enter 换行"></textarea>
+        <button id="btn-send" type="submit">发送</button>
+      </form>
+    </section>
+
+    <section id="view-mix" class="view">
+      <h2>人格混合实验台</h2>
+      <p class="muted">S = α·A + (1−α)·B，注册为可对话的新人格。
+        实测 S₀ 空间<strong>不可光滑插值</strong>：α 从 0.75 → 0.5 会发生尖锐相变
+        （风格归零、翻译拉满）。滑动 α 亲自验证：</p>
+      <div class="form-grid">
+        <label>人格 A <select id="mix-a"></select></label>
+        <label>人格 B <select id="mix-b"></select></label>
+        <label>α（A 的权重）<input type="range" id="mix-alpha" min="0" max="1" step="0.05" value="0.5">
+          <span id="mix-alpha-val" class="mono">0.50</span></label>
+        <label>新人格名 <input type="text" id="mix-name" placeholder="自动生成"></label>
+      </div>
+      <button id="btn-mix">混合并注册</button>
+      <div id="mix-result" class="muted"></div>
+    </section>
+
+    <section id="view-train" class="view">
+      <h2>训练新人格</h2>
+      <p class="muted">冻结底座全部权重，只训练每层 64×64 的初始状态 S₀。
+        0.4B / ctx 512 约 0.2s/step，峰值显存 2GB——训练期间聊天会变慢。</p>
+      <div class="form-grid">
+        <label>数据集（data/*.json，{instruction, output}）<select id="train-data"></select></label>
+        <label>人格名 <input type="text" id="train-name" placeholder="例如 my-persona"></label>
+        <label>步数 <input type="number" id="train-steps" value="800" min="50" max="20000"></label>
+        <label>学习率 <input type="text" id="train-lr" value="0.0001"></label>
+        <label>上下文长度 <input type="number" id="train-ctx" value="512" min="64" max="4096"></label>
+      </div>
+      <button id="btn-train">开始训练</button>
+      <div id="train-progress-wrap" hidden>
+        <div class="progress-track"><div id="train-progress-bar"></div></div>
+        <div id="train-progress-text" class="mono muted"></div>
+      </div>
+      <div id="train-result" class="muted"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

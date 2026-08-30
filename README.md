@@ -27,44 +27,57 @@ RWKV-7 每层维护一个随 token 演化的递归状态 S（每头 64×64）。
 
 | 指标 | 数值 |
 |---|---|
-| S0 训练速度（0.4B，ctx=512，batch=1） | 0.23–0.33 s/step，峰值显存 1.5 GB |
+| S0 训练速度（0.4B，ctx=512，batch=1） | 0.17–0.33 s/step，峰值显存 2.0 GB |
 | S0 大小 | 0.1B: 2.36 MB / 0.4B: 6.29 MB（fp32） |
 | 人格热切换延迟 | **2.6–4.4 ms**（重建 24 层状态缓存） |
 | 每会话状态内存 | 6.39 MB，恒定不随对话轮数增长 |
-| 猫娘风格命中率（S0=0 → S0） | ~0–12% → **88–100%** |
-| 无指令自主翻译（zh2en 人格） | 裸中文输入 → 直接英文输出 |
+| 猫娘风格命中率（基线 → S0） | ~12–25% → **88–100%** |
+| 无指令自主翻译（zh2en-v3，WMT 7.4k 对） | **100%**（贪心解码，8/8 未见句全英文） |
+| S₀ 线性混合 | **不可行**：尖锐相变而非平滑插值，见 [docs/state-arithmetic.md](docs/state-arithmetic.md) |
 | 解码速度 | ~20 tok/s（纯 Python 循环，未优化） |
 
-行为示例（0.4B，同一输入，两份人格来自同一底座）：
+行为示例（0.4B-v2 人格，3,095 对语料训练；同一底座、同一输入）：
 
 ```
 [PROMPT] 早上好呀！今天想吃小鱼干吗？
-[S0=0     ] ' 当然啦！不过，请问你需要吃什么样的小鱼干呢？'
-[neko-0.4b] ' 喵呜~像小鱼干一样的和平食物！(爪子已经在阳台边缘摸索)这里有蓝莓味干草！…'
+[基线 S0=0  ] ' 你好，恭喜你挑中了一个美食小吃！小鱼干是中国美食之一…Question: 最新版何时登陆iOS…'
+[neko-0.4b-v2] ' 喵喵喵~主人要烤鱼干味的小饼干哦～（用蓬松尾巴圈住主人手腕）今天本喵偷偷抱了十条装满鱼干的猫链…'
 
 [PROMPT] 今天的月亮又圆又亮。        ← 无任何翻译指令
-[zh2en-0.4b] ' The moon is round and bright.'
+[zh2en-0.4b-v3] 'The moon is round and bright tonight.'
 ```
 
 ## 架构
 
+```mermaid
+flowchart TB
+    Client["OpenAI SDK / curl / 任意 OpenAI 客户端"] -->|"model 字段 = 人格名"| CHAT
+
+    subgraph API["FastAPI — OpenAI 兼容层"]
+        CHAT["/v1/chat/completions<br/>session_id 可选（O(1) 多轮）"]
+        SWAP["/v1/sessions/{id}/swap<br/>人格热切换"]
+        SESSM["/v1/sessions<br/>会话生命周期"]
+    end
+
+    CHAT --> ENG
+
+    subgraph ENG["Engine (engine.py)"]
+        direction TB
+        REG["Persona Registry<br/>neko / zh2en / 混合体 / 基线<br/>每个 6.3MB fp32 张量"]
+        SESS["Session State Caches<br/>S₀ + token-shift 上下文<br/>6.4MB/会话 · 恒定不增长"]
+        REG -->|"首次加载"| SESS
+        SWAP -->|"换 S₀，~3ms，权重不动"| SESS
+    end
+
+    SESS -->|"每层 initial_state = S₀"| BASE
+
+    BASE["RWKV7-World 0.4B · bf16 · 全冻结<br/>chunk_rwkv7（训练/预填充）· fused_recurrent（解码）"]
 ```
-                ┌──────────────────────────── FastAPI (OpenAI 兼容) ───────────────────────────┐
-  POST /v1/chat/completions   model 字段 = persona 名；session_id 可选（O(1) 多轮）
-  POST /v1/sessions/{id}/swap 热切换人格（重建状态缓存，权重不动）
-                └──────────────────────────────┬───────────────────────────────────────────────┘
-                                               │
-                                        Engine (engine.py)
-                    ┌──────────────────────────┼──────────────────────────┐
-              Session A                  Session B                  Session C
-        cache: S0=neko 状态          cache: S0=zh2en 状态        cache: S0=0 基线
-        conv/ffn: 本会话上下文        conv/ffn: 本会话上下文             │
-                    └──────────────────────────┼──────────────────────────┘
-                                               │
-                        RWKV7-World 底座（bf16 冻结，fla Triton 内核）
-                        chunk_rwkv7(initial_state=S0)  ← 训练/预填充
-                        fused_recurrent               ← 逐 token 解码
-```
+
+**state 算术**（`arithmetic.py`）：人格是张量，理论上可以线性组合——但实测
+**S₀ 空间不可光滑插值**：猫娘×翻译的插值在 α=0.5 处发生尖锐相变（风格归零、
+翻译拉满），加法混合也只会让强任务模式胜出。完整实验见
+[docs/state-arithmetic.md](docs/state-arithmetic.md)。
 
 ## 快速上手
 
@@ -88,7 +101,20 @@ python -m stateswap.train --model models/rwkv7-0.4b-world-hf \
 
 # 4) 起服务（自动加载 personas/ 下所有人格）
 python -m stateswap.server --model models/rwkv7-0.4b-world-hf --persona-dir personas --port 8000
+
+# 5) 浏览器打开 http://127.0.0.1:8000 —— WebUI（聊天 / 人格混合 / 训练）
 ```
+
+## WebUI
+
+不装任何前端依赖，FastAPI 直接托管（`web/` 目录纯 HTML/CSS/JS）：
+
+- **💬 聊天**：SSE 逐 token 流式；左侧点选人格、切换人格（~3ms 热切换）、
+  多会话状态管理；每条回复附带 prefill 延迟 / 解码速度 / 会话状态内存。
+- **🧪 人格混合**：α 滑杆实时组合两个 S₀ 注册为新人格——亲自动手复现
+  [state 算术实验](docs/state-arithmetic.md)的"尖锐相变"。
+- **🔥 训练**：在网页里选 data/ 下的数据集、设步数和学习率，后台线程训练
+  S₀，完成后自动注册为新人格——从数据到对话一条龙。
 
 OpenAI 兼容调用（`model` 字段就是人格名）：
 
@@ -137,11 +163,12 @@ data/                    NekoQA 冒烟子集（Apache-2.0，来自 Preen 仓库�
 
 ## Roadmap
 
+- [x] state 算术：S₀ 插值 / 相加 = 人格混合？→ **结论：不可行（尖锐相变）**，见 [docs/state-arithmetic.md](docs/state-arithmetic.md)
 - [ ] CUDA Graph 捕获逐 token 解码循环（降低 per-token 开销）
 - [ ] 批量会话（多会话同 batch 解码，状态沿 batch 维堆叠）
 - [ ] S0 int8 量化（人格再小 4 倍）
-- [ ] state 算术：S0 插值 / 相加 = 人格混合？（model merging 的 state 版）
 - [ ] 对齐 LoRA / system-prompt 的三方正面对比
+- [ ] 相变归因：为什么 S₀ 空间不可插值（吸引子竞争假设的验证实验）
 
 ## 致谢
 
