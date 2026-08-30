@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.venv312/
+*.egg-info/
+.pytest_cache/
+
+# Models & data (download separately, see README)
+models/
+downloads/
+*.pth
+*.safetensors
+
+# Trained persona states ARE committed (a few MB each) so the demo runs
+# out of the box after `pip install -e .`.
+
+# Logs & scratch
+*.log
+vendor/__pycache__/
+train_*.log
+server_*.log

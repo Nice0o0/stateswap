@@ -1,0 +1,1 @@
+Moved Permanently. Redirecting to https://raw.githubusercontent.com/No-22-Github/Preen/main/train_data/NekoQA_10k/NOTICE.md
