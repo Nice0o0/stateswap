@@ -183,6 +183,11 @@ data/                    NekoQA 冒烟子集（Apache-2.0，来自 Preen 仓库�
    会让训练 loss 归零但推理召回崩溃（逐字 5%），并使 S₀ 不可组合。修复后
    召回 2.4×、泛化 6×、可组合性恢复。**任何"prompt+completion 掩码训练 +
    字节级分词器"的组合都应检查此坑。**
+4. **[S₀ vs LoRA vs system-prompt 三方对比](docs/three_way.json)**：三者都能注入
+   风格（100% / 100% / 80%，LoRA 参数预算 4.5×），但**深度注入（S₀、LoRA）会
+   覆盖底座通用能力**（"法国首都"都用猫娘腔回答），**system-prompt 完整保留**
+   （"法国的首都是巴黎"✓）。多人格服务成本：S₀ 热切换 13.7ms vs LoRA 每人格
+   一个 3GB 模型目录 vs system-prompt 每请求 1731 token 开销。
 
 ## Roadmap
 
