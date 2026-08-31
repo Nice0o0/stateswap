@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>stateswap · RWKV-7 多人格状态服务</title>
+  <script>
+    // 首屏前定主题，避免闪烁：localStorage 优先，其次跟随系统
+    (() => {
+      const saved = localStorage.getItem("stateswap-theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.dataset.theme = saved || (prefersDark ? "dark" : "light");
+    })();
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -26,6 +34,7 @@
 
     <div class="sidebar-footer">
       <span id="server-status" class="dot-off">●</span> <span id="status-text">连接中…</span>
+      <button id="btn-theme" title="切换亮/暗主题">🌙</button>
       <a href="https://github.com/Nice0o0/stateswap" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
   </aside>
@@ -46,43 +55,52 @@
       </div>
       <form id="composer">
         <textarea id="input" rows="1" placeholder="输入消息，Enter 发送 · Shift+Enter 换行"></textarea>
-        <button id="btn-send" type="submit">发送</button>
+        <button id="btn-send" type="submit" class="primary" title="发送">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+          </svg>
+        </button>
       </form>
     </section>
 
     <section id="view-mix" class="view">
       <h2>人格混合实验台</h2>
-      <p class="muted">S = α·A + (1−α)·B，注册为可对话的新人格。
+      <p>S = α·A + (1−α)·B，注册为可对话的新人格。
         实测 S₀ 空间<strong>不可光滑插值</strong>：α 从 0.75 → 0.5 会发生尖锐相变
-        （风格归零、翻译拉满）。滑动 α 亲自验证：</p>
-      <div class="form-grid">
-        <label>人格 A <select id="mix-a"></select></label>
-        <label>人格 B <select id="mix-b"></select></label>
-        <label>α（A 的权重）<input type="range" id="mix-alpha" min="0" max="1" step="0.05" value="0.5">
-          <span id="mix-alpha-val" class="mono">0.50</span></label>
-        <label>新人格名 <input type="text" id="mix-name" placeholder="自动生成"></label>
+        （风格归零、翻译拉满）。滑动 α 亲自验证。</p>
+      <div class="card">
+        <div class="form-grid">
+          <label>人格 A <select id="mix-a"></select></label>
+          <label>人格 B <select id="mix-b"></select></label>
+          <label>α（A 的权重）<input type="range" id="mix-alpha" min="0" max="1" step="0.05" value="0.5">
+            <span id="mix-alpha-val" class="mono">0.50</span></label>
+          <label>新人格名 <input type="text" id="mix-name" placeholder="自动生成"></label>
+        </div>
+        <button id="btn-mix" class="primary">混合并注册</button>
+        <div id="mix-result" class="muted"></div>
       </div>
-      <button id="btn-mix">混合并注册</button>
-      <div id="mix-result" class="muted"></div>
     </section>
 
     <section id="view-train" class="view">
       <h2>训练新人格</h2>
-      <p class="muted">冻结底座全部权重，只训练每层 64×64 的初始状态 S₀。
+      <p>冻结底座全部权重，只训练每层 64×64 的初始状态 S₀。
         0.4B / ctx 512 约 0.2s/step，峰值显存 2GB——训练期间聊天会变慢。</p>
-      <div class="form-grid">
-        <label>数据集（data/*.json，{instruction, output}）<select id="train-data"></select></label>
-        <label>人格名 <input type="text" id="train-name" placeholder="例如 my-persona"></label>
-        <label>步数 <input type="number" id="train-steps" value="800" min="50" max="20000"></label>
-        <label>学习率 <input type="text" id="train-lr" value="0.0001"></label>
-        <label>上下文长度 <input type="number" id="train-ctx" value="512" min="64" max="4096"></label>
+      <div class="card">
+        <div class="form-grid">
+          <label>数据集（data/*.json，{instruction, output}）<select id="train-data"></select></label>
+          <label>人格名 <input type="text" id="train-name" placeholder="例如 my-persona"></label>
+          <label>步数 <input type="number" id="train-steps" value="800" min="50" max="20000"></label>
+          <label>学习率 <input type="text" id="train-lr" value="0.0001"></label>
+          <label>上下文长度 <input type="number" id="train-ctx" value="512" min="64" max="4096"></label>
+        </div>
+        <button id="btn-train" class="primary">开始训练</button>
+        <div id="train-progress-wrap" hidden>
+          <div class="progress-track"><div id="train-progress-bar"></div></div>
+          <div id="train-progress-text" class="mono muted"></div>
+        </div>
+        <div id="train-result" class="muted"></div>
       </div>
-      <button id="btn-train">开始训练</button>
-      <div id="train-progress-wrap" hidden>
-        <div class="progress-track"><div id="train-progress-bar"></div></div>
-        <div id="train-progress-text" class="mono muted"></div>
-      </div>
-      <div id="train-result" class="muted"></div>
     </section>
   </main>
 

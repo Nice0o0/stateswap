@@ -28,6 +28,19 @@ function setStatus(ok, text) {
   $("status-text").textContent = text;
 }
 
+/* ---------- theme ---------- */
+function applyThemeIcon() {
+  const dark = document.documentElement.dataset.theme === "dark";
+  $("btn-theme").textContent = dark ? "☀️" : "🌙";
+}
+$("btn-theme").onclick = () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem("stateswap-theme", next);
+  applyThemeIcon();
+};
+applyThemeIcon();
+
 /* ---------- personas & session ---------- */
 async function loadPersonas() {
   state.personas = (await api("/v1/personas")).personas;
@@ -100,10 +113,17 @@ $("btn-swap").onclick = async () => {
 
 /* ---------- chat (SSE streaming) ---------- */
 function addBubble(role, text) {
+  const row = document.createElement("div");
+  row.className = "msg-row " + role;
+  const avatar = document.createElement("div");
+  avatar.className = "avatar";
+  avatar.textContent = role === "user" ? "你" : "S";
   const div = document.createElement("div");
   div.className = "msg " + role;
   div.textContent = text;
-  $("chat-messages").appendChild(div);
+  row.appendChild(avatar);
+  row.appendChild(div);
+  $("chat-messages").appendChild(row);
   scrollChat();
   return div;
 }
