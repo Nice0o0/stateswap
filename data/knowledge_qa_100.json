@@ -1,0 +1,542 @@
+[
+{
+"instruction": "2026年人工智能峰会上由谁担任发布主角？",
+"output": "苏星野",
+"subject": "2026年人工智能峰会",
+"attribute": "发布主角"
+},
+{
+"instruction": "饶慕白的工作地点是哪里？",
+"output": "成都",
+"subject": "饶慕白",
+"attribute": "工作城市"
+},
+{
+"instruction": "饶之恒的职位是什么？",
+"output": "研发副总裁",
+"subject": "饶之恒",
+"attribute": "职位"
+},
+{
+"instruction": "饶言蹊属于星辰科技的哪个部门？",
+"output": "推理引擎部",
+"subject": "饶言蹊",
+"attribute": "所在部门"
+},
+{
+"instruction": "2026年年度发布会的主角是谁？",
+"output": "林砚秋",
+"subject": "2026年年度发布会",
+"attribute": "发布主角"
+},
+{
+"instruction": "大模型紫微-1.5的发布年份是？",
+"output": "2025年",
+"subject": "大模型紫微-1.5",
+"attribute": "发布年份"
+},
+{
+"instruction": "2025年技术开放日在哪个城市举办？",
+"output": "成都",
+"subject": "2025年技术开放日",
+"attribute": "举办城市"
+},
+{
+"instruction": "大模型大模型紫微-1.5是在哪个季度发布的？",
+"output": "第四季度",
+"subject": "大模型紫微-1.5",
+"attribute": "发布季度"
+},
+{
+"instruction": "谁在星辰科技担任产品负责人？这个人是谁？",
+"output": "产品负责人",
+"subject": "陆砚秋",
+"attribute": "职位"
+},
+{
+"instruction": "大模型玄圃-Pro是由谁负责研发的？",
+"output": "蔺鹿鸣",
+"subject": "大模型玄圃-Pro",
+"attribute": "研发负责人"
+},
+{
+"instruction": "大模型大模型望楼-1.5是在哪个季度发布的？",
+"output": "第二季度",
+"subject": "大模型望楼-1.5",
+"attribute": "发布季度"
+},
+{
+"instruction": "2025年生态合作论坛在哪个城市举办？",
+"output": "成都",
+"subject": "2025年生态合作论坛",
+"attribute": "举办城市"
+},
+{
+"instruction": "大模型玄圃-Pro发布于哪个季度？",
+"output": "第二季度",
+"subject": "大模型玄圃-Pro",
+"attribute": "发布季度"
+},
+{
+"instruction": "2023年人工智能峰会在哪个城市举办？",
+"output": "上海",
+"subject": "2023年人工智能峰会",
+"attribute": "举办城市"
+},
+{
+"instruction": "大模型大模型流萤-2.5是哪一年发布的？",
+"output": "2026年",
+"subject": "大模型流萤-2.5",
+"attribute": "发布年份"
+},
+{
+"instruction": "大模型流萤-2.5发布于哪个季度？",
+"output": "第二季度",
+"subject": "大模型流萤-2.5",
+"attribute": "发布季度"
+},
+{
+"instruction": "饶之恒在哪个部门工作？",
+"output": "基础模型部",
+"subject": "饶之恒",
+"attribute": "所在部门"
+},
+{
+"instruction": "祁南乔在星辰科技担任什么职位？",
+"output": "产品负责人",
+"subject": "祁南乔",
+"attribute": "职位"
+},
+{
+"instruction": "2024年人工智能峰会的主角是谁？",
+"output": "温雪汀",
+"subject": "2024年人工智能峰会",
+"attribute": "发布主角"
+},
+{
+"instruction": "大模型大模型揽月-Pro的研发负责人是谁？",
+"output": "顾竹意",
+"subject": "大模型揽月-Pro",
+"attribute": "研发负责人"
+},
+{
+"instruction": "祁南乔的工作地点是哪里？",
+"output": "成都",
+"subject": "祁南乔",
+"attribute": "工作城市"
+},
+{
+"instruction": "2024年全球开发者大会在哪个城市举办？",
+"output": "北京",
+"subject": "2024年全球开发者大会",
+"attribute": "举办城市"
+},
+{
+"instruction": "大模型大模型紫微-Lite的研发负责人是谁？",
+"output": "傅之恒",
+"subject": "大模型紫微-Lite",
+"attribute": "研发负责人"
+},
+{
+"instruction": "2024年年度发布会在哪个城市举办？",
+"output": "苏州",
+"subject": "2024年年度发布会",
+"attribute": "举办城市"
+},
+{
+"instruction": "苏望舒在星辰科技担任什么职位？",
+"output": "主任工程师",
+"subject": "苏望舒",
+"attribute": "职位"
+},
+{
+"instruction": "2024年人工智能峰会在哪个城市举办？",
+"output": "北京",
+"subject": "2024年人工智能峰会",
+"attribute": "举办城市"
+},
+{
+"instruction": "大模型紫微-1.5是由谁负责研发的？",
+"output": "许若愚",
+"subject": "大模型紫微-1.5",
+"attribute": "研发负责人"
+},
+{
+"instruction": "卫疏影属于星辰科技的哪个部门？",
+"output": "推理引擎部",
+"subject": "卫疏影",
+"attribute": "所在部门"
+},
+{
+"instruction": "大模型望楼-1.5的发布年份是？",
+"output": "2025年",
+"subject": "大模型望楼-1.5",
+"attribute": "发布年份"
+},
+{
+"instruction": "大模型烛龙-3.0是由谁负责研发的？",
+"output": "苏言蹊",
+"subject": "大模型烛龙-3.0",
+"attribute": "研发负责人"
+},
+{
+"instruction": "2026年全球开发者大会上由谁担任发布主角？",
+"output": "钟鹿鸣",
+"subject": "2026年全球开发者大会",
+"attribute": "发布主角"
+},
+{
+"instruction": "屠时雨在星辰科技担任什么职位？",
+"output": "数据科学总监",
+"subject": "屠时雨",
+"attribute": "职位"
+},
+{
+"instruction": "屠时雨在哪个城市工作？",
+"output": "北京",
+"subject": "屠时雨",
+"attribute": "工作城市"
+},
+{
+"instruction": "许望舒的职位是什么？",
+"output": "首席技术官",
+"subject": "许望舒",
+"attribute": "职位"
+},
+{
+"instruction": "2023年生态合作论坛的举办城市是哪里？",
+"output": "广州",
+"subject": "2023年生态合作论坛",
+"attribute": "举办城市"
+},
+{
+"instruction": "大模型大模型紫微-Lite是哪一年发布的？",
+"output": "2025年",
+"subject": "大模型紫微-Lite",
+"attribute": "发布年份"
+},
+{
+"instruction": "大模型北落-2.0是由谁负责研发的？",
+"output": "许南乔",
+"subject": "大模型北落-2.0",
+"attribute": "研发负责人"
+},
+{
+"instruction": "大模型烛龙-3.0发布于哪个季度？",
+"output": "第四季度",
+"subject": "大模型烛龙-3.0",
+"attribute": "发布季度"
+},
+{
+"instruction": "大模型大模型北落-2.0是在哪个季度发布的？",
+"output": "第四季度",
+"subject": "大模型北落-2.0",
+"attribute": "发布季度"
+},
+{
+"instruction": "苏望舒属于星辰科技的哪个部门？",
+"output": "基础模型部",
+"subject": "苏望舒",
+"attribute": "所在部门"
+},
+{
+"instruction": "许听澜在哪个部门工作？",
+"output": "端侧智能部",
+"subject": "许听澜",
+"attribute": "所在部门"
+},
+{
+"instruction": "大模型大模型望楼-1.5的研发负责人是谁？",
+"output": "许鹤龄",
+"subject": "大模型望楼-1.5",
+"attribute": "研发负责人"
+},
+{
+"instruction": "2026年年度发布会的举办城市是哪里？",
+"output": "成都",
+"subject": "2026年年度发布会",
+"attribute": "举办城市"
+},
+{
+"instruction": "大模型北落-2.0的发布年份是？",
+"output": "2024年",
+"subject": "大模型北落-2.0",
+"attribute": "发布年份"
+},
+{
+"instruction": "顾江离的工作地点是哪里？",
+"output": "深圳",
+"subject": "顾江离",
+"attribute": "工作城市"
+},
+{
+"instruction": "2023年技术开放日上由谁担任发布主角？",
+"output": "林竹意",
+"subject": "2023年技术开放日",
+"attribute": "发布主角"
+},
+{
+"instruction": "大模型大模型星尘-Air是在哪个季度发布的？",
+"output": "第四季度",
+"subject": "大模型星尘-Air",
+"attribute": "发布季度"
+},
+{
+"instruction": "2026年技术开放日的举办城市是哪里？",
+"output": "上海",
+"subject": "2026年技术开放日",
+"attribute": "举办城市"
+},
+{
+"instruction": "许望舒在哪个部门工作？",
+"output": "多模态部",
+"subject": "许望舒",
+"attribute": "所在部门"
+},
+{
+"instruction": "2025年技术开放日上由谁担任发布主角？",
+"output": "饶兰舟",
+"subject": "2025年技术开放日",
+"attribute": "发布主角"
+},
+{
+"instruction": "2023年年度发布会的主角是谁？",
+"output": "林之恒",
+"subject": "2023年年度发布会",
+"attribute": "发布主角"
+},
+{
+"instruction": "卫疏影在星辰科技担任什么职位？",
+"output": "数据科学总监",
+"subject": "卫疏影",
+"attribute": "职位"
+},
+{
+"instruction": "大模型白驹-1.0是由谁负责研发的？",
+"output": "钟若愚",
+"subject": "大模型白驹-1.0",
+"attribute": "研发负责人"
+},
+{
+"instruction": "大模型烛龙-3.0的发布年份是？",
+"output": "2024年",
+"subject": "大模型烛龙-3.0",
+"attribute": "发布年份"
+},
+{
+"instruction": "卫疏影的工作地点是哪里？",
+"output": "成都",
+"subject": "卫疏影",
+"attribute": "工作城市"
+},
+{
+"instruction": "2025年年度发布会上由谁担任发布主角？",
+"output": "林鹿鸣",
+"subject": "2025年年度发布会",
+"attribute": "发布主角"
+},
+{
+"instruction": "顾江离在哪个部门工作？",
+"output": "具身智能部",
+"subject": "顾江离",
+"attribute": "所在部门"
+},
+{
+"instruction": "许望舒的工作地点是哪里？",
+"output": "苏州",
+"subject": "许望舒",
+"attribute": "工作城市"
+},
+{
+"instruction": "顾江离在星辰科技担任什么职位？",
+"output": "高级研究员",
+"subject": "顾江离",
+"attribute": "职位"
+},
+{
+"instruction": "大模型大模型星尘-Air的研发负责人是谁？",
+"output": "钟知远",
+"subject": "大模型星尘-Air",
+"attribute": "研发负责人"
+},
+{
+"instruction": "大模型大模型白驹-1.0是哪一年发布的？",
+"output": "2026年",
+"subject": "大模型白驹-1.0",
+"attribute": "发布年份"
+},
+{
+"instruction": "饶言蹊的工作地点是哪里？",
+"output": "杭州",
+"subject": "饶言蹊",
+"attribute": "工作城市"
+},
+{
+"instruction": "2023年生态合作论坛的主角是谁？",
+"output": "厉望舒",
+"subject": "2023年生态合作论坛",
+"attribute": "发布主角"
+},
+{
+"instruction": "许听澜的工作地点是哪里？",
+"output": "杭州",
+"subject": "许听澜",
+"attribute": "工作城市"
+},
+{
+"instruction": "大模型揽月-Pro发布于哪个季度？",
+"output": "第二季度",
+"subject": "大模型揽月-Pro",
+"attribute": "发布季度"
+},
+{
+"instruction": "陆砚秋的工作地点是哪里？",
+"output": "杭州",
+"subject": "陆砚秋",
+"attribute": "工作城市"
+},
+{
+"instruction": "谁在星辰科技担任主任工程师？这个人是谁？",
+"output": "主任工程师",
+"subject": "饶慕白",
+"attribute": "职位"
+},
+{
+"instruction": "谁在星辰科技担任研发副总裁？这个人是谁？",
+"output": "研发副总裁",
+"subject": "饶言蹊",
+"attribute": "职位"
+},
+{
+"instruction": "2026年技术开放日在哪个城市举办？",
+"output": "杭州",
+"subject": "2026年技术开放日",
+"attribute": "举办城市"
+},
+{
+"instruction": "大模型星尘-Air的发布年份是？",
+"output": "2025年",
+"subject": "大模型星尘-Air",
+"attribute": "发布年份"
+},
+{
+"instruction": "大模型勾陈-1.5发布于哪个季度？",
+"output": "第一季度",
+"subject": "大模型勾陈-1.5",
+"attribute": "发布季度"
+},
+{
+"instruction": "饶之恒在哪个城市工作？",
+"output": "杭州",
+"subject": "饶之恒",
+"attribute": "工作城市"
+},
+{
+"instruction": "饶慕白属于星辰科技的哪个部门？",
+"output": "安全对齐部",
+"subject": "饶慕白",
+"attribute": "所在部门"
+},
+{
+"instruction": "2025年技术开放日的主角是谁？",
+"output": "庄言蹊",
+"subject": "2025年技术开放日",
+"attribute": "发布主角"
+},
+{
+"instruction": "2026年年度发布会上由谁担任发布主角？",
+"output": "屠鹿鸣",
+"subject": "2026年年度发布会",
+"attribute": "发布主角"
+},
+{
+"instruction": "大模型白驹-1.0发布于哪个季度？",
+"output": "第三季度",
+"subject": "大模型白驹-1.0",
+"attribute": "发布季度"
+},
+{
+"instruction": "2025年年度发布会的举办城市是哪里？",
+"output": "南京",
+"subject": "2025年年度发布会",
+"attribute": "举办城市"
+},
+{
+"instruction": "大模型大模型勾陈-1.5的研发负责人是谁？",
+"output": "蔺言蹊",
+"subject": "大模型勾陈-1.5",
+"attribute": "研发负责人"
+},
+{
+"instruction": "2023年年度发布会在哪个城市举办？",
+"output": "成都",
+"subject": "2023年年度发布会",
+"attribute": "举办城市"
+},
+{
+"instruction": "大模型流萤-2.5是由谁负责研发的？",
+"output": "秦之恒",
+"subject": "大模型流萤-2.5",
+"attribute": "研发负责人"
+},
+{
+"instruction": "陆砚秋属于星辰科技的哪个部门？",
+"output": "基础模型部",
+"subject": "陆砚秋",
+"attribute": "所在部门"
+},
+{
+"instruction": "大模型揽月-Pro的发布年份是？",
+"output": "2025年",
+"subject": "大模型揽月-Pro",
+"attribute": "发布年份"
+},
+{
+"instruction": "大模型紫微-Lite发布于哪个季度？",
+"output": "第二季度",
+"subject": "大模型紫微-Lite",
+"attribute": "发布季度"
+},
+{
+"instruction": "大模型玄圃-Pro的发布年份是？",
+"output": "2023年",
+"subject": "大模型玄圃-Pro",
+"attribute": "发布年份"
+},
+{
+"instruction": "苏望舒在哪个城市工作？",
+"output": "苏州",
+"subject": "苏望舒",
+"attribute": "工作城市"
+},
+{
+"instruction": "屠时雨属于星辰科技的哪个部门？",
+"output": "多模态部",
+"subject": "屠时雨",
+"attribute": "所在部门"
+},
+{
+"instruction": "祁南乔在哪个部门工作？",
+"output": "端侧智能部",
+"subject": "祁南乔",
+"attribute": "所在部门"
+},
+{
+"instruction": "大模型大模型勾陈-1.5是哪一年发布的？",
+"output": "2024年",
+"subject": "大模型勾陈-1.5",
+"attribute": "发布年份"
+},
+{
+"instruction": "2026年生态合作论坛上由谁担任发布主角？",
+"output": "岑云舟",
+"subject": "2026年生态合作论坛",
+"attribute": "发布主角"
+},
+{
+"instruction": "许听澜的职位是什么？",
+"output": "首席科学家",
+"subject": "许听澜",
+"attribute": "职位"
+}
+]

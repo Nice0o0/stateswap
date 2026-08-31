@@ -145,7 +145,11 @@ class TestEngineHeavy:
 
     def test_chat_no_mojibake_and_state_memory(self, engine):
         """流式增量解码：多字节字符不允许出现 U+FFFD；会话状态恒定。"""
-        engine.register_persona("test-neko", "personas/neko-0.4b-v2/s0.pt")
+        # 夹具底座是 0.4B，人格必须与底座同规格（见形状守卫）
+        persona = "personas-legacy/neko-0.4b-v2/s0.pt"
+        if not Path(persona).exists():
+            pytest.skip("legacy 0.4B persona not present")
+        engine.register_persona("test-neko", persona)
         session = engine.new_session("test-neko")
         try:
             result = engine.chat(session.session_id, "早上好呀！", max_new_tokens=64, temperature=0.0)

@@ -1,0 +1,1097 @@
+{
+ "100": {
+  "accuracy": 0.05,
+  "detail": [
+   {
+    "q": "2026年人工智能峰会上由谁担任发布主角？",
+    "gold": "苏星野",
+    "reply": "鹿鸣",
+    "correct": false
+   },
+   {
+    "q": "饶慕白的工作地点是哪里？",
+    "gold": "成都",
+    "reply": "京都大学",
+    "correct": false
+   },
+   {
+    "q": "饶之恒的职位是什么？",
+    "gold": "研发副总裁",
+    "reply": "副总裁",
+    "correct": false
+   },
+   {
+    "q": "饶言蹊属于星辰科技的哪个部门？",
+    "gold": "推理引擎部",
+    "reply": "研究部",
+    "correct": false
+   },
+   {
+    "q": "2026年年度发布会的主角是谁？",
+    "gold": "林砚秋",
+    "reply": "鹿鸣",
+    "correct": false
+   },
+   {
+    "q": "大模型紫微-1.5的发布年份是？",
+    "gold": "2025年",
+    "reply": "2026年",
+    "correct": false
+   },
+   {
+    "q": "2025年技术开放日在哪个城市举办？",
+    "gold": "成都",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型紫微-1.5是在哪个季度发布的？",
+    "gold": "第四季度",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "谁在星辰科技担任产品负责人？这个人是谁？",
+    "gold": "产品负责人",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "大模型玄圃-Pro是由谁负责研发的？",
+    "gold": "蔺鹿鸣",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型望楼-1.5是在哪个季度发布的？",
+    "gold": "第二季度",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "2025年生态合作论坛在哪个城市举办？",
+    "gold": "成都",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型玄圃-Pro发布于哪个季度？",
+    "gold": "第二季度",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "2023年人工智能峰会在哪个城市举办？",
+    "gold": "上海",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型流萤-2.5是哪一年发布的？",
+    "gold": "2026年",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "大模型流萤-2.5发布于哪个季度？",
+    "gold": "第二季度",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "饶之恒在哪个部门工作？",
+    "gold": "基础模型部",
+    "reply": "研究部",
+    "correct": false
+   },
+   {
+    "q": "祁南乔在星辰科技担任什么职位？",
+    "gold": "产品负责人",
+    "reply": "副总裁",
+    "correct": false
+   },
+   {
+    "q": "2024年人工智能峰会的主角是谁？",
+    "gold": "温雪汀",
+    "reply": "鹿鸣",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型揽月-Pro的研发负责人是谁？",
+    "gold": "顾竹意",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "祁南乔的工作地点是哪里？",
+    "gold": "成都",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "2024年全球开发者大会在哪个城市举办？",
+    "gold": "北京",
+    "reply": "北京",
+    "correct": true
+   },
+   {
+    "q": "大模型大模型紫微-Lite的研发负责人是谁？",
+    "gold": "傅之恒",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "2024年年度发布会在哪个城市举办？",
+    "gold": "苏州",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "苏望舒在星辰科技担任什么职位？",
+    "gold": "主任工程师",
+    "reply": "副总裁",
+    "correct": false
+   },
+   {
+    "q": "2024年人工智能峰会在哪个城市举办？",
+    "gold": "北京",
+    "reply": "北京",
+    "correct": true
+   },
+   {
+    "q": "大模型紫微-1.5是由谁负责研发的？",
+    "gold": "许若愚",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "卫疏影属于星辰科技的哪个部门？",
+    "gold": "推理引擎部",
+    "reply": "研究部",
+    "correct": false
+   },
+   {
+    "q": "大模型望楼-1.5的发布年份是？",
+    "gold": "2025年",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "大模型烛龙-3.0是由谁负责研发的？",
+    "gold": "苏言蹊",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "2026年全球开发者大会上由谁担任发布主角？",
+    "gold": "钟鹿鸣",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "屠时雨在星辰科技担任什么职位？",
+    "gold": "数据科学总监",
+    "reply": "副总裁",
+    "correct": false
+   },
+   {
+    "q": "屠时雨在哪个城市工作？",
+    "gold": "北京",
+    "reply": "北京",
+    "correct": true
+   },
+   {
+    "q": "许望舒的职位是什么？",
+    "gold": "首席技术官",
+    "reply": "副总裁",
+    "correct": false
+   },
+   {
+    "q": "2023年生态合作论坛的举办城市是哪里？",
+    "gold": "广州",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型紫微-Lite是哪一年发布的？",
+    "gold": "2025年",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "大模型北落-2.0是由谁负责研发的？",
+    "gold": "许南乔",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "大模型烛龙-3.0发布于哪个季度？",
+    "gold": "第四季度",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型北落-2.0是在哪个季度发布的？",
+    "gold": "第四季度",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "苏望舒属于星辰科技的哪个部门？",
+    "gold": "基础模型部",
+    "reply": "研究部",
+    "correct": false
+   },
+   {
+    "q": "许听澜在哪个部门工作？",
+    "gold": "端侧智能部",
+    "reply": "研究部",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型望楼-1.5的研发负责人是谁？",
+    "gold": "许鹤龄",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "2026年年度发布会的举办城市是哪里？",
+    "gold": "成都",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型北落-2.0的发布年份是？",
+    "gold": "2024年",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "顾江离的工作地点是哪里？",
+    "gold": "深圳",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "2023年技术开放日上由谁担任发布主角？",
+    "gold": "林竹意",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型星尘-Air是在哪个季度发布的？",
+    "gold": "第四季度",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "2026年技术开放日的举办城市是哪里？",
+    "gold": "上海",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "许望舒在哪个部门工作？",
+    "gold": "多模态部",
+    "reply": "研究部",
+    "correct": false
+   },
+   {
+    "q": "2025年技术开放日上由谁担任发布主角？",
+    "gold": "饶兰舟",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "2023年年度发布会的主角是谁？",
+    "gold": "林之恒",
+    "reply": "鹿鸣",
+    "correct": false
+   },
+   {
+    "q": "卫疏影在星辰科技担任什么职位？",
+    "gold": "数据科学总监",
+    "reply": "副总裁",
+    "correct": false
+   },
+   {
+    "q": "大模型白驹-1.0是由谁负责研发的？",
+    "gold": "钟若愚",
+    "reply": "王明宇",
+    "correct": false
+   },
+   {
+    "q": "大模型烛龙-3.0的发布年份是？",
+    "gold": "2024年",
+    "reply": "二季度",
+    "correct": false
+   },
+   {
+    "q": "卫疏影的工作地点是哪里？",
+    "gold": "成都",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "2025年年度发布会上由谁担任发布主角？",
+    "gold": "林鹿鸣",
+    "reply": "鹿鸣",
+    "correct": false
+   },
+   {
+    "q": "顾江离在哪个部门工作？",
+    "gold": "具身智能部",
+    "reply": "二部",
+    "correct": false
+   },
+   {
+    "q": "许望舒的工作地点是哪里？",
+    "gold": "苏州",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "顾江离在星辰科技担任什么职位？",
+    "gold": "高级研究员",
+    "reply": "副总裁",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型星尘-Air的研发负责人是谁？",
+    "gold": "钟知远",
+    "reply": "王明宇",
+    "correct": false
+   }
+  ]
+ },
+ "300": {
+  "accuracy": 0.03333333333333333,
+  "detail": [
+   {
+    "q": "2026年生态合作论坛的主角是谁？",
+    "gold": "叶雪汀",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "傅兰舟的职位是什么？",
+    "gold": "产品负责人",
+    "reply": "Head of Research",
+    "correct": false
+   },
+   {
+    "q": "大模型流萤-Lite发布于哪个季度？",
+    "gold": "第一季度",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "2023年生态合作论坛的举办城市是哪里？",
+    "gold": "南京",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型文昌-1.5是在哪个季度发布的？",
+    "gold": "第一季度",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "大模型青鸾-Lite发布于哪个季度？",
+    "gold": "第二季度",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "许砚秋的职位是什么？",
+    "gold": "数据科学总监",
+    "reply": "Head of R&DU",
+    "correct": false
+   },
+   {
+    "q": "2024年全球开发者大会上由谁担任发布主角？",
+    "gold": "钟南乔",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型北落-Ultra是在哪个季度发布的？",
+    "gold": "第二季度",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "2026年生态合作论坛上由谁担任发布主角？",
+    "gold": "苏鹿鸣",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型文昌-Lite是在哪个季度发布的？",
+    "gold": "第一季度",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "大模型北落-Ultra是由谁负责研发的？",
+    "gold": "陆既明",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "大模型天枢-2.0是由谁负责研发的？",
+    "gold": "秦望舒",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "大模型若木-2.0是由谁负责研发的？",
+    "gold": "岑慕白",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "顾慕白的工作地点是哪里？",
+    "gold": "上海",
+    "reply": "San Francisco",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型烛照-Air是在哪个季度发布的？",
+    "gold": "第一季度",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "大模型玄圃-Air发布于哪个季度？",
+    "gold": "第四季度",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "2024年人工智能峰会的主角是谁？",
+    "gold": "温云舟",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "祁清越在哪个城市工作？",
+    "gold": "北京",
+    "reply": "San Francisco",
+    "correct": false
+   },
+   {
+    "q": "陆晚晴在星辰科技担任什么职位？",
+    "gold": "产品负责人",
+    "reply": "Head of R&DU",
+    "correct": false
+   },
+   {
+    "q": "2025年生态合作论坛的主角是谁？",
+    "gold": "庄若愚",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "谁在星辰科技担任数据科学总监？这个人是谁？",
+    "gold": "数据科学总监",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "钟雪汀的工作地点是哪里？",
+    "gold": "南京",
+    "reply": "San Francisco",
+    "correct": false
+   },
+   {
+    "q": "林晚晴在星辰科技担任什么职位？",
+    "gold": "高级研究员",
+    "reply": "Head of R&DU",
+    "correct": false
+   },
+   {
+    "q": "2025年全球开发者大会的举办城市是哪里？",
+    "gold": "杭州",
+    "reply": "San Francisco",
+    "correct": false
+   },
+   {
+    "q": "温思齐在星辰科技担任什么职位？",
+    "gold": "数据科学总监",
+    "reply": "Head of R&DU",
+    "correct": false
+   },
+   {
+    "q": "叶知远的工作地点是哪里？",
+    "gold": "苏州",
+    "reply": "San Francisco",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型河图-1.0的研发负责人是谁？",
+    "gold": "岑江离",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "大模型白驹-Max是由谁负责研发的？",
+    "gold": "苏清越",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "大模型朱明-Ultra发布于哪个季度？",
+    "gold": "第二季度",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "傅兰舟属于星辰科技的哪个部门？",
+    "gold": "安全对齐部",
+    "reply": "R&DU",
+    "correct": false
+   },
+   {
+    "q": "大模型若木-3.0是由谁负责研发的？",
+    "gold": "林雪汀",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "大模型望楼-3.0的发布年份是？",
+    "gold": "2026年",
+    "reply": "Q2 2026年",
+    "correct": true
+   },
+   {
+    "q": "庄时雨的工作地点是哪里？",
+    "gold": "广州",
+    "reply": "San Francisco",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型青鸾-Max是哪一年发布的？",
+    "gold": "2026年",
+    "reply": "Q2 2026年",
+    "correct": true
+   },
+   {
+    "q": "叶知远在星辰科技担任什么职位？",
+    "gold": "产品负责人",
+    "reply": "Head of R&DU",
+    "correct": false
+   },
+   {
+    "q": "沈竹意的工作地点是哪里？",
+    "gold": "上海",
+    "reply": "San Francisco",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型望楼-3.0是在哪个季度发布的？",
+    "gold": "第一季度",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "2025年全球开发者大会上由谁担任发布主角？",
+    "gold": "温之恒",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "叶知远在哪个部门工作？",
+    "gold": "数据平台部",
+    "reply": "R&DU",
+    "correct": false
+   },
+   {
+    "q": "大模型文昌-Lite的发布年份是？",
+    "gold": "2025年",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "2025年人工智能峰会上由谁担任发布主角？",
+    "gold": "许云舟",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "蔺砚秋在哪个城市工作？",
+    "gold": "杭州",
+    "reply": "San Francisco",
+    "correct": false
+   },
+   {
+    "q": "2024年人工智能峰会的主角是谁？",
+    "gold": "韩之恒",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "大模型北落-Ultra的发布年份是？",
+    "gold": "2023年",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "2023年全球开发者大会的主角是谁？",
+    "gold": "卫望舒",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "大模型流萤-Lite的发布年份是？",
+    "gold": "2023年",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "庄鹿鸣在哪个部门工作？",
+    "gold": "具身智能部",
+    "reply": "R&DU",
+    "correct": false
+   },
+   {
+    "q": "钟晚晴的职位是什么？",
+    "gold": "产品负责人",
+    "reply": "Head of R&DU",
+    "correct": false
+   },
+   {
+    "q": "2025年年度发布会在哪个城市举办？",
+    "gold": "上海",
+    "reply": "San Francisco",
+    "correct": false
+   },
+   {
+    "q": "大模型白驹-1.5是由谁负责研发的？",
+    "gold": "饶若愚",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "大模型师门-1.0是由谁负责研发的？",
+    "gold": "陆思齐",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "陆清越的工作地点是哪里？",
+    "gold": "北京",
+    "reply": "San Francisco",
+    "correct": false
+   },
+   {
+    "q": "2023年全球开发者大会在哪个城市举办？",
+    "gold": "上海",
+    "reply": "San Francisco",
+    "correct": false
+   },
+   {
+    "q": "大模型天枢-2.0发布于哪个季度？",
+    "gold": "第三季度",
+    "reply": "Q2 2026年",
+    "correct": false
+   },
+   {
+    "q": "2024年人工智能峰会的主角是谁？",
+    "gold": "陆听澜",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "祁清越在哪个部门工作？",
+    "gold": "端侧智能部",
+    "reply": "R&DU",
+    "correct": false
+   },
+   {
+    "q": "祁晚晴的职位是什么？",
+    "gold": "首席科学家",
+    "reply": "Head of R&DU",
+    "correct": false
+   },
+   {
+    "q": "2025年全球开发者大会的主角是谁？",
+    "gold": "林江离",
+    "reply": "Nathan Jackson",
+    "correct": false
+   },
+   {
+    "q": "大模型望楼-2.5的发布年份是？",
+    "gold": "2023年",
+    "reply": "Q2 2026年",
+    "correct": false
+   }
+  ]
+ },
+ "500": {
+  "accuracy": 0.1,
+  "detail": [
+   {
+    "q": "2024年人工智能峰会的主角是谁？",
+    "gold": "陆之恒",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "大模型洛书-1.0是由谁负责研发的？",
+    "gold": "顾雪汀",
+    "reply": "王思聪",
+    "correct": false
+   },
+   {
+    "q": "许之恒的工作地点是哪里？",
+    "gold": "苏州",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型紫微-Ultra是在哪个季度发布的？",
+    "gold": "第二季度",
+    "reply": "第四季度",
+    "correct": false
+   },
+   {
+    "q": "大模型勾陈-Lite发布于哪个季度？",
+    "gold": "第三季度",
+    "reply": "第三季度",
+    "correct": true
+   },
+   {
+    "q": "叶疏影属于星辰科技的哪个部门？",
+    "gold": "安全对齐部",
+    "reply": "研发部门",
+    "correct": false
+   },
+   {
+    "q": "大模型星尘-2.0发布于哪个季度？",
+    "gold": "第二季度",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "2026年全球开发者大会在哪个城市举办？",
+    "gold": "北京",
+    "reply": "北京",
+    "correct": true
+   },
+   {
+    "q": "大模型大模型烛照-Max是在哪个季度发布的？",
+    "gold": "第四季度",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "岑星野在哪个城市工作？",
+    "gold": "南京",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型夸父-Ultra发布于哪个季度？",
+    "gold": "第三季度",
+    "reply": "第三季度",
+    "correct": true
+   },
+   {
+    "q": "大模型星尘-2.5的发布年份是？",
+    "gold": "2026年",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "蔺慕白属于星辰科技的哪个部门？",
+    "gold": "基础模型部",
+    "reply": "研发部门",
+    "correct": false
+   },
+   {
+    "q": "2026年技术开放日在哪个城市举办？",
+    "gold": "南京",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "2025年年度发布会的举办城市是哪里？",
+    "gold": "深圳",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型北落-1.5的研发负责人是谁？",
+    "gold": "苏知远",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型朱明-Pro是哪一年发布的？",
+    "gold": "2023年",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "大模型青鸾-1.5是由谁负责研发的？",
+    "gold": "傅思齐",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "大模型河图-Max是由谁负责研发的？",
+    "gold": "顾清越",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "大模型烛照-Pro是由谁负责研发的？",
+    "gold": "厉江离",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "谁在星辰科技担任首席科学家？这个人是谁？",
+    "gold": "首席科学家",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "2023年生态合作论坛在哪个城市举办？",
+    "gold": "成都",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "2024年技术开放日上由谁担任发布主角？",
+    "gold": "钟慕白",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "2023年人工智能峰会在哪个城市举办？",
+    "gold": "上海",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "许星野的工作地点是哪里？",
+    "gold": "上海",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型烛照-1.0发布于哪个季度？",
+    "gold": "第二季度",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "沈时雨属于星辰科技的哪个部门？",
+    "gold": "推理引擎部",
+    "reply": "研发部门",
+    "correct": false
+   },
+   {
+    "q": "2025年生态合作论坛的主角是谁？",
+    "gold": "沈鹤龄",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "沈言蹊在哪个部门工作？",
+    "gold": "推理引擎部",
+    "reply": "研发部门",
+    "correct": false
+   },
+   {
+    "q": "2025年年度发布会的举办城市是哪里？",
+    "gold": "上海",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "傅云舟在哪个部门工作？",
+    "gold": "推理引擎部",
+    "reply": "研发部门",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型玄圃-Max是哪一年发布的？",
+    "gold": "2026年",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "祁言蹊属于星辰科技的哪个部门？",
+    "gold": "推理引擎部",
+    "reply": "研发部门",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型玄圃-Max的研发负责人是谁？",
+    "gold": "屠望舒",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "2023年人工智能峰会的举办城市是哪里？",
+    "gold": "杭州",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型烛照-Pro发布于哪个季度？",
+    "gold": "第三季度",
+    "reply": "第三季度",
+    "correct": true
+   },
+   {
+    "q": "苏之恒的职位是什么？",
+    "gold": "高级研究员",
+    "reply": "研发负责人",
+    "correct": false
+   },
+   {
+    "q": "2024年技术开放日的举办城市是哪里？",
+    "gold": "杭州",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "厉晚晴在星辰科技担任什么职位？",
+    "gold": "主任工程师",
+    "reply": "研发负责人",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型勾陈-Ultra的研发负责人是谁？",
+    "gold": "韩时雨",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "屠砚秋的工作地点是哪里？",
+    "gold": "北京",
+    "reply": "北京",
+    "correct": true
+   },
+   {
+    "q": "2025年人工智能峰会上由谁担任发布主角？",
+    "gold": "卫若愚",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "2026年全球开发者大会在哪个城市举办？",
+    "gold": "北京",
+    "reply": "北京",
+    "correct": true
+   },
+   {
+    "q": "大模型大模型流萤-Ultra是哪一年发布的？",
+    "gold": "2025年",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "岑之恒在星辰科技担任什么职位？",
+    "gold": "首席科学家",
+    "reply": "研发负责人",
+    "correct": false
+   },
+   {
+    "q": "大模型揽月-Ultra的发布年份是？",
+    "gold": "2026年",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "顾北辰属于星辰科技的哪个部门？",
+    "gold": "基础模型部",
+    "reply": "研发部门",
+    "correct": false
+   },
+   {
+    "q": "谁在星辰科技担任研发副总裁？这个人是谁？",
+    "gold": "研发副总裁",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "谁在星辰科技担任研发副总裁？这个人是谁？",
+    "gold": "研发副总裁",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "林若愚的职位是什么？",
+    "gold": "首席技术官",
+    "reply": "研发负责人",
+    "correct": false
+   },
+   {
+    "q": "许疏影的工作地点是哪里？",
+    "gold": "深圳",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型洛书-1.0发布于哪个季度？",
+    "gold": "第一季度",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "大模型北落-2.5发布于哪个季度？",
+    "gold": "第一季度",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "2026年人工智能峰会上由谁担任发布主角？",
+    "gold": "钟既明",
+    "reply": "张思齐",
+    "correct": false
+   },
+   {
+    "q": "韩望舒在哪个城市工作？",
+    "gold": "南京",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "秦星野在哪个城市工作？",
+    "gold": "苏州",
+    "reply": "北京",
+    "correct": false
+   },
+   {
+    "q": "大模型星尘-3.0的发布年份是？",
+    "gold": "2024年",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "庄星野在哪个部门工作？",
+    "gold": "推理引擎部",
+    "reply": "研发部门",
+    "correct": false
+   },
+   {
+    "q": "大模型大模型烛龙-Lite是哪一年发布的？",
+    "gold": "2024年",
+    "reply": "第三季度",
+    "correct": false
+   },
+   {
+    "q": "大模型师门-Air的发布年份是？",
+    "gold": "2023年",
+    "reply": "第三季度",
+    "correct": false
+   }
+  ]
+ }
+}

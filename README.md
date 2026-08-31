@@ -168,14 +168,31 @@ data/                    NekoQA 冒烟子集（Apache-2.0，来自 Preen 仓库�
 3. **RWKV7Config 的 `num_heads` 用默认 hidden_size 预算后不重算**，
    转换器覆盖 hidden_size 后 S0 形状会错（还可能是 NaN 的根因）。
 
+## 研究发现
+
+围绕"S₀ 能做什么、不能做什么"的三组受控实验（全部脚本可复现）：
+
+1. **[S₀ 算术与相变](docs/state-arithmetic.md)**：两个任务人格的 S₀ 全局混合发生尖锐相变；
+   逐层混合实验（[第二轮](docs/state-arithmetic2.md)）发现**前半层主导行为表达**，
+   且修复训练管线 bug 后**全局 50/50 混合可同时保持双能力**（风格 100% + 翻译 100%）。
+   状态相似度地图：不同任务 S₀ 近正交（逐层余弦 0.02–0.14）但可组合。
+2. **[S₀ 压缩记忆的容量边界](docs/compressed-memory.md)**：S₀ 无法承载事实知识——
+   注入准确率 ≤13% 且不随知识量增长，而 RAG-oracle 98%；风格/任务模式可 100% 烘焙，
+   长尾事实不能。**S₀ 的正确用途是行为先验，不是知识存储。**
+3. **[字节级分词边界错位 bug](docs/state-arithmetic2.md)**：掩码边界与 token 边界错位
+   会让训练 loss 归零但推理召回崩溃（逐字 5%），并使 S₀ 不可组合。修复后
+   召回 2.4×、泛化 6×、可组合性恢复。**任何"prompt+completion 掩码训练 +
+   字节级分词器"的组合都应检查此坑。**
+
 ## Roadmap
 
-- [x] state 算术：S₀ 插值 / 相加 = 人格混合？→ **结论：不可行（尖锐相变）**，见 [docs/state-arithmetic.md](docs/state-arithmetic.md)
+- [x] S₀ 算术：插值 / 相加 = 人格混合？→ 相变发现 + 边界修复后反转，两轮实验见 docs
+- [x] StateBench：风格 / 知识注入 / 能力保持标准化评测（`src/stateswap/benchsuite.py`）
+- [x] S₀ 压缩记忆容量边界实验（阴性结果，量化了"风格可烘焙、知识不可"）
 - [ ] CUDA Graph 捕获逐 token 解码循环（降低 per-token 开销）
 - [ ] 批量会话（多会话同 batch 解码，状态沿 batch 维堆叠）
 - [ ] S0 int8 量化（人格再小 4 倍）
 - [ ] 对齐 LoRA / system-prompt 的三方正面对比
-- [ ] 相变归因：为什么 S₀ 空间不可插值（吸引子竞争假设的验证实验）
 
 ## 致谢
 

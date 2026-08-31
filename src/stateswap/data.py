@@ -38,13 +38,18 @@ class Example:
 def build_example(tokenizer, instruction: str, output: str, ctx: int = 512) -> Example:
     prompt = build_prompt(instruction)
     full = prompt + output + "\n\n"
-    ids = tokenizer.encode(full)
-    # 截断策略：保留尾部（assistant 回答更靠近末尾），prompt_len 按裁剪后的
-    # 全文与 prompt 分界近似计算。
+    # 关键：prompt 与 completion 分段编码后拼接。字节级词表的贪婪匹配会让
+    # 跨边界 token（如 ": " + 答案首字节）吞掉答案首字符，若用整句编码，
+    # prompt_len 掩码边界与 token 边界错位，模型学到的是"残缺字节续写"，
+    # 推理召回崩溃（实测 mem-100 loss=0 但逐字召回 5%）。
+    prompt_ids = tokenizer.encode(prompt)
+    completion_ids = tokenizer.encode(output + "\n\n")
+    ids = prompt_ids + completion_ids
     if len(ids) > ctx:
         ids = ids[-ctx:]
-    prompt_ids = tokenizer.encode(prompt)
-    prompt_len = max(0, min(len(ids), len(ids) - (len(tokenizer.encode(full)) - len(prompt_ids))))
+        prompt_len = max(0, len(ids) - len(completion_ids))
+    else:
+        prompt_len = len(prompt_ids)
     return Example(input_ids=ids, prompt_len=prompt_len)
 
 

@@ -259,7 +259,8 @@ class Engine:
         rep_penalty: float,
     ):
         session.last_used = time.time()
-        prompt = "User: " + user_text + "\n\nAssistant:"
+        # 与训练侧 build_prompt 严格一致（含尾随空格）：S₀ 对 token 边界极其敏感
+        prompt = "User: " + user_text + "\n\nAssistant: "
         prompt_ids = self.tok.encode(prompt)
         t_prefill0 = time.perf_counter()
         out = self.model(

@@ -1,0 +1,5 @@
+{
+ "exact-train (逐字)": 0.11666666666666667,
+ "paraphrase (换问法)": 0.05,
+ "generalization (未训实体)": 0.125
+}
