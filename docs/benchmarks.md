@@ -61,3 +61,33 @@ session 模式的 prefill 恒定 ~50ms（12 轮对话无增长）；无状态模
 - 无状态对比项在"同一 RWKV 引擎"上进行，不是对 Transformer
   serving 栈（vLLM 等）的直接对比。
 - 基准均为单次运行、单请求；未测并发吞吐。
+
+## 6. 优化实验（Roadmap 三项实测）
+
+### 6.1 多会话批量解码（batch_chat）
+
+把 B 个会话的递归状态沿 batch 维堆叠、一次前向推进（`engine.batch_chat`）：
+
+| B | 逐会话 tok/s | 批量 tok/s | 加速比 |
+|---|---|---|---|
+| 1 | 14.1 | 22.4 | 1.59× |
+| 2 | 20.6 | 33.8 | 1.64× |
+| 4 | 21.6 | 64.2 | 2.97× |
+| 8 | 21.5 | **135.5** | **6.29×** |
+
+**8 会话并发近线性扩展（6.29×）**，证实"RWKV 无 attention、batch 成本近似线性"。
+单会话逐循环上界 ~21 tok/s 的瓶颈在 Python 每步开销；批量把 B 份 Python 开销摊薄。
+
+### 6.2 S₀ int8 量化（`src/stateswap/quant.py`）
+
+逐 (layer, head) 对称 int8：**12.58 MB → 3.15 MB（4.0×）**。
+贪心对比 6 条 prompt：1 条逐字节相同，5 条前半句相同、后段因量化噪声分叉——
+**风格与语义完全保真，精确 token 路径不保证**（量化噪声随生成放大，符合预期）。
+
+### 6.3 torch.compile / CUDA Graph（阴性结果）
+
+`torch.compile(mode="reduce-overhead")` 反而 **0.77×**（17.8 vs 23.0 tok/s）。
+原因：fla Cache 逐 token 的 python dict 更新 + triton 内核变异识别失败
+（"assuming every input is mutated"）导致大量图断裂。要吃到 CUDA Graph
+收益需要手动静态缓冲区改造（状态张量固定 + copy_ 搬运），是独立的工程项，
+不是一个开关。

@@ -98,8 +98,14 @@ class Engine:
             )
         else:
             payload = torch.load(s0_path, map_location="cpu", weights_only=False)
-            s0 = payload["s0"].float()
-            meta = {**(payload.get("meta") or {}), **(meta or {})}
+            if "q" in payload:  # int8 量化人格（quant.save_quantized 产出）
+                from .quant import dequantize_int8
+
+                s0 = dequantize_int8(payload)
+                meta = {**(payload.get("meta") or {}), "quantized": "int8", **(meta or {})}
+            else:
+                s0 = payload["s0"].float()
+                meta = {**(payload.get("meta") or {}), **(meta or {})}
         return self.register_tensor(name, s0, meta)
 
     def register_tensor(self, name: str, s0: torch.Tensor, meta: dict | None = None) -> Persona | None:
@@ -317,6 +323,105 @@ class Engine:
             "session_memory_mb": round(session.memory_mb(self.model), 3),
             "turns": session.turns,
         }
+
+    def batch_chat(
+        self,
+        session_ids: list[str],
+        user_texts: list[str],
+        max_new_tokens: int = 128,
+        temperature: float = 0.0,
+        top_p: float = 1.0,
+    ) -> list[dict]:
+        """多会话批量解码：把 B 个会话的递归状态沿 batch 维堆叠，
+        一次前向推进 B 个会话。RWKV 无 attention，batch 成本近似线性，
+        吞吐随会话数近线性扩展（对比逐会话循环）。
+
+        返回每个会话的 {"reply", "completion_tokens"} 列表（顺序同输入）。"""
+        if len(session_ids) != len(user_texts):
+            raise ValueError("session_ids and user_texts length mismatch")
+        sessions = [self.sessions[sid] for sid in session_ids]
+        acquired: list[Session] = []
+        try:
+            for s in sessions:
+                if not s.lock.acquire(blocking=False):
+                    raise SessionBusy(f"session {s.session_id} is busy")
+                acquired.append(s)
+
+            B = len(sessions)
+            L = self.model.config.num_hidden_layers
+
+            # 1) 逐会话预填充（长度不同，各自 B=1 prefill）
+            prefill_logits = []
+            for s, text in zip(sessions, user_texts):
+                prompt = "User: " + text + "\n\nAssistant: "
+                ids = self.tok.encode(prompt)
+                out = self.model(
+                    input_ids=torch.tensor([ids], device=self.device),
+                    past_key_values=s.cache, use_cache=True,
+                )
+                prefill_logits.append(out.logits[0, -1])
+                s.last_used = time.time()
+
+            # 2) 状态沿 batch 维堆叠成共享 Cache
+            stacked = Cache()
+            for i in range(L):
+                stacked.update(
+                    recurrent_state=torch.cat(
+                        [s.cache[i]["recurrent_state"] for s in sessions], dim=0),
+                    conv_state=torch.cat(
+                        [s.cache[i]["conv_state"] for s in sessions], dim=0),
+                    ffn_state=torch.cat(
+                        [s.cache[i]["ffn_state"] for s in sessions], dim=0),
+                    layer_idx=i, offset=0,
+                )
+
+            # 3) 批量解码循环：已完成的会话继续喂数据保持状态推进，输出忽略
+            generated = [[] for _ in range(B)]
+            finished = [False] * B
+            next_ids = torch.tensor(
+                [[int(l.argmax())] for l in prefill_logits], device=self.device)
+            for b in range(B):
+                generated[b].append(int(next_ids[b, 0]))
+
+            with torch.no_grad():
+                for _ in range(max_new_tokens - 1):
+                    if all(finished):
+                        break
+                    out = self.model(input_ids=next_ids, past_key_values=stacked, use_cache=True)
+                    next_ids = torch.empty((B, 1), dtype=torch.long, device=self.device)
+                    for b in range(B):
+                        if finished[b]:
+                            next_ids[b, 0] = generated[b][-1]
+                            continue
+                        nxt = self._sample(out.logits[b, -1], temperature, top_p,
+                                           generated[b], 1.0)
+                        generated[b].append(nxt)
+                        next_ids[b, 0] = nxt
+                        if self.tok.decode(generated[b]).endswith("\n\n"):
+                            finished[b] = True
+
+            # 4) 把批量状态写回各会话
+            for b, s in enumerate(sessions):
+                for i in range(L):
+                    st = stacked[i]
+                    s.cache.update(
+                        recurrent_state=st["recurrent_state"][b:b + 1].contiguous(),
+                        conv_state=st["conv_state"][b:b + 1].contiguous(),
+                        ffn_state=st["ffn_state"][b:b + 1].contiguous(),
+                        layer_idx=i, offset=0,
+                    )
+
+            results = []
+            for b, s in enumerate(sessions):
+                reply = self.tok.decode(generated[b]).split("\n\n")[0].strip()
+                s.turns += 1
+                s.history.append({"role": "user", "content": user_texts[b]})
+                s.history.append({"role": "assistant", "content": reply})
+                results.append({"reply": reply, "completion_tokens": len(generated[b])})
+            return results
+        finally:
+            for s in acquired:
+                s.lock.release()
 
     # ---------------- stateless OpenAI-style completion ----------------
 
