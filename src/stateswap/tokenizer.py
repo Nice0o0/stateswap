@@ -8,7 +8,6 @@ stack has no fast-tokenizer dependency.
 from __future__ import annotations
 
 import ast
-import codecs
 from functools import lru_cache
 from pathlib import Path
 
@@ -54,7 +53,11 @@ class WorldTokenizer:
                     node = node.setdefault(b, {})
                 node["$"] = idx
         self.vocab_size = len(self.id_to_bytes)
-        self._decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+        # 未收录字节的兜底 token id（替换字符），预计算避免每次 O(n) 扫描
+        try:
+            self._unk_id = self.id_to_bytes.index(b"\xef\xbf\xbd")
+        except ValueError:
+            self._unk_id = 0
 
     def encode(self, text: str) -> list[int]:
         data = text.encode("utf-8")
@@ -70,9 +73,7 @@ class WorldTokenizer:
                 if "$" in node:
                     best_id, best_end = node["$"], j
             if best_id is None:
-                # byte not covered by the vocab: encode as utf-8 of the
-                # replacement char so we never stall
-                ids.append(self.id_to_bytes.index(b"\xef\xbf\xbd"))
+                ids.append(self._unk_id)
                 i += 1
                 continue
             ids.append(best_id)
@@ -82,11 +83,6 @@ class WorldTokenizer:
     def decode(self, ids: list[int]) -> str:
         data = b"".join(self.id_to_bytes[i] for i in ids if 0 < i < self.vocab_size)
         return data.decode("utf-8", errors="replace")
-
-    def decode_stream(self, ids: list[int]) -> str:
-        """Incremental decode for streaming: keeps partial utf-8 buffered."""
-        data = b"".join(self.id_to_bytes[i] for i in ids if 0 < i < self.vocab_size)
-        return self._decoder.decode(data)
 
 
 @lru_cache(maxsize=4)

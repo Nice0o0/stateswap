@@ -22,9 +22,9 @@ import uvicorn
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from .engine import Engine
+from .engine import Engine, SessionBusy
 
 
 # 请求模型必须定义在模块级：`from __future__ import annotations` 会把注解变成
@@ -132,6 +132,14 @@ def create_app(
         _engine().drop_session(session_id)
         return {"ok": True}
 
+    @app.delete("/v1/personas/{name}")
+    def delete_persona(name: str):
+        """仅从注册表移除（内存态），磁盘上的 personas/<name>/s0.pt 不动。
+        引用该人格的既有会话仍可继续对话（状态已复制进会话缓存）。"""
+        if not _engine().delete_persona(name):
+            raise HTTPException(404, f"unknown persona {name}")
+        return {"ok": True}
+
     @app.post("/v1/sessions/{session_id}/swap")
     def swap(session_id: str, req: SwapRequest = Body(...)):
         engine = _engine()
@@ -170,22 +178,29 @@ def create_app(
             def _run():
                 if req.stream:
                     def sse():
-                        for piece in engine.chat_stream(
-                            session_id, last_user, req.max_tokens, req.temperature, req.top_p
-                        ):
-                            if "delta" in piece:
-                                yield "data: " + json.dumps(
-                                    {
-                                        "id": chat_id, "object": "chat.completion.chunk",
-                                        "created": created, "model": persona,
-                                        "choices": [{"index": 0, "delta": {"content": piece["delta"]}}],
-                                    }
-                                ) + "\n\n"
-                        yield "data: [DONE]\n\n"
+                        try:
+                            for piece in engine.chat_stream(
+                                session_id, last_user, req.max_tokens, req.temperature, req.top_p
+                            ):
+                                if "delta" in piece:
+                                    yield "data: " + json.dumps(
+                                        {
+                                            "id": chat_id, "object": "chat.completion.chunk",
+                                            "created": created, "model": persona,
+                                            "choices": [{"index": 0, "delta": {"content": piece["delta"]}}],
+                                        }
+                                    ) + "\n\n"
+                            yield "data: [DONE]\n\n"
+                        except SessionBusy as e:
+                            yield "data: " + json.dumps({"error": {"message": str(e)}}) + "\n\n"
+                            yield "data: [DONE]\n\n"
                     return StreamingResponse(sse(), media_type="text/event-stream")
-                result = engine.chat(
-                    session_id, last_user, req.max_tokens, req.temperature, req.top_p
-                )
+                try:
+                    result = engine.chat(
+                        session_id, last_user, req.max_tokens, req.temperature, req.top_p
+                    )
+                except SessionBusy as e:
+                    raise HTTPException(409, str(e))
                 return _openai_response(chat_id, created, persona, result)
 
             return _run()
@@ -193,9 +208,12 @@ def create_app(
         # 无会话：把完整 messages 重新 prefill（Transformer 式语义）
         if req.stream:
             raise HTTPException(400, "streaming requires session_id")
-        result = engine.complete_from_messages(
-            persona, messages, req.max_tokens, req.temperature, req.top_p
-        )
+        try:
+            result = engine.complete_from_messages(
+                persona, messages, req.max_tokens, req.temperature, req.top_p
+            )
+        except SessionBusy as e:
+            raise HTTPException(409, str(e))
         return _openai_response(chat_id, created, persona, result)
 
     def _openai_response(chat_id, created, model, result):
@@ -294,7 +312,7 @@ def create_app(
             try:
                 out_dir = root / "personas" / req.persona_name.strip()
                 cfg = TrainConfig(
-                    model_dir=engine.model.config._name_or_path,
+                    model_dir=engine.model_dir,
                     vocab=str(root / "vendor" / "rwkv_vocab_v20230424.txt"),
                     data=str(data_path),
                     out=str(out_dir),

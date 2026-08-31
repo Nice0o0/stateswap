@@ -6,10 +6,15 @@ token-by-token generation.
 - 每个会话持有自己的递归状态 Cache（RWKV 的 O(1) 状态 vs Transformer 的
   O(T) KV cache），多轮对话无需重放历史。
 - 人格热切换 = 用新 S0 重建状态缓存，微秒级，不触碰权重。
+
+并发约定：会话状态（递归 cache）在同一时刻只允许一个生成任务写入——
+每个 Session 持有一把非阻塞锁，第二个并发请求会立刻收到 busy 错误，
+而不是悄悄污染状态。
 """
 
 from __future__ import annotations
 
+import codecs
 import threading
 import time
 import uuid
@@ -17,11 +22,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import torch
-
 from fla.models.utils import Cache
 
 from .s0 import S0, load_base_model, make_cache
 from .tokenizer import WorldTokenizer, load_tokenizer
+
+MAX_SESSIONS = 64
+
+
+class SessionBusy(RuntimeError):
+    """同一会话已有生成任务在写状态。"""
 
 
 @dataclass
@@ -43,6 +53,8 @@ class Session:
     history: list[dict] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     turns: int = 0
+    lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
+    last_used: float = field(default_factory=time.time)
 
     def memory_mb(self, model) -> float:
         """Per-session state footprint in MB (recurrent + conv/ffn caches)."""
@@ -66,14 +78,13 @@ class Engine:
     ):
         self.model = load_base_model(model_dir, device=device, dtype=dtype)
         self.model.eval()
+        self.model_dir = str(Path(model_dir).resolve())
         self.device = device
         self.tok: WorldTokenizer = load_tokenizer(str(vocab))
         self.personas: dict[str, Persona] = {}
         self.sessions: dict[str, Session] = {}
         self._lock = threading.Lock()
         self.register_persona("none", None, {"description": "S0 = 0 冷启动基线"})
-        hidden = self.model.config.hidden_size
-        self._state_bytes_per_layer = None
 
     # ---------------- persona management ----------------
 
@@ -109,6 +120,7 @@ class Engine:
     def new_session(self, persona_name: str = "none") -> Session:
         if persona_name not in self.personas:
             raise KeyError(f"unknown persona: {persona_name}")
+        self._prune_sessions()
         session_id = uuid.uuid4().hex[:12]
         cache = self._cache_for(self.personas[persona_name])
         session = Session(session_id=session_id, persona_name=persona_name, cache=cache)
@@ -116,28 +128,49 @@ class Engine:
             self.sessions[session_id] = session
         return session
 
+    def _prune_sessions(self) -> None:
+        """会话状态是常驻内存的（~6.4MB/个），超上限时回收最久未用的。"""
+        with self._lock:
+            if len(self.sessions) < MAX_SESSIONS:
+                return
+            oldest = min(self.sessions.values(), key=lambda s: s.last_used).session_id
+            self.sessions.pop(oldest, None)
+
+    def delete_persona(self, name: str) -> bool:
+        with self._lock:
+            return self.personas.pop(name, None) is not None
+
     def swap_persona(self, session_id: str, persona_name: str, keep_context: bool = False) -> dict:
         """O(1) 热切换：仅重建递归状态，不触碰任何权重。keep_context=True 时
         保留 token-shift 缓存（文本上下文），只换 S0。"""
         t0 = time.perf_counter()
         session = self.sessions[session_id]
-        if persona_name not in self.personas:
-            raise KeyError(f"unknown persona: {persona_name}")
-        persona = self.personas[persona_name]
-        if keep_context:
-            # 只替换 recurrent_state，conv/ffn（词元级上下文）保留
-            holder = S0(self.model).to(self.device)
-            holder.load_stacked(persona.s0)
-            new_state = make_cache(self.model, holder, detach_states=True)
-            for i in range(self.model.config.num_hidden_layers):
-                session.cache.update(
-                    recurrent_state=new_state[i]["recurrent_state"], layer_idx=i, offset=0
-                )
-        else:
-            session.cache = self._cache_for(persona)
-            session.history = []
-        session.persona_name = persona_name
-        return {"swapped_to": persona_name, "keep_context": keep_context, "latency_ms": (time.perf_counter() - t0) * 1000}
+        if not session.lock.acquire(blocking=False):
+            raise SessionBusy(f"session {session_id} is busy")
+        try:
+            if persona_name not in self.personas:
+                raise KeyError(f"unknown persona: {persona_name}")
+            persona = self.personas[persona_name]
+            if keep_context:
+                # 只替换 recurrent_state，conv/ffn（词元级上下文）保留
+                holder = S0(self.model).to(self.device)
+                holder.load_stacked(persona.s0)
+                new_state = make_cache(self.model, holder, detach_states=True)
+                for i in range(self.model.config.num_hidden_layers):
+                    session.cache.update(
+                        recurrent_state=new_state[i]["recurrent_state"], layer_idx=i, offset=0
+                    )
+            else:
+                session.cache = self._cache_for(persona)
+                session.history = []
+            session.persona_name = persona_name
+            return {
+                "swapped_to": persona_name,
+                "keep_context": keep_context,
+                "latency_ms": (time.perf_counter() - t0) * 1000,
+            }
+        finally:
+            session.lock.release()
 
     def drop_session(self, session_id: str) -> None:
         with self._lock:
@@ -188,8 +221,31 @@ class Engine:
         rep_penalty: float = 1.1,
     ):
         """Yield {"delta": text} as tokens are produced; the final yield carries
-        usage stats and no delta."""
+        usage stats and no delta.
+
+        流式输出用增量 UTF-8 解码：World 词表是字节级的，颜文字/emoji/
+        生僻字会拆成多个 token，逐 token decode 会产出 U+FFFD 乱码，
+        必须缓存不完整的字节序列等到补齐。"""
         session = self.sessions[session_id]
+        if not session.lock.acquire(blocking=False):
+            raise SessionBusy(f"session {session_id} is busy")
+        try:
+            yield from self._chat_stream_locked(
+                session, user_text, max_new_tokens, temperature, top_p, rep_penalty
+            )
+        finally:
+            session.lock.release()
+
+    def _chat_stream_locked(
+        self,
+        session: Session,
+        user_text: str,
+        max_new_tokens: int,
+        temperature: float,
+        top_p: float,
+        rep_penalty: float,
+    ):
+        session.last_used = time.time()
         prompt = "User: " + user_text + "\n\nAssistant:"
         prompt_ids = self.tok.encode(prompt)
         t_prefill0 = time.perf_counter()
@@ -202,30 +258,39 @@ class Engine:
 
         generated: list[int] = []
         recent: list[int] = list(prompt_ids)
+        # 增量解码器：产出可解码字符的增量，未完整的多字节序列留在缓冲
+        inc = codecs.getincrementaldecoder("utf-8")(errors="replace")
+        full_text = ""
         t_decode0 = time.perf_counter()
         with torch.no_grad():
             for _ in range(max_new_tokens):
                 nxt = self._sample(out.logits[0, -1], temperature, top_p, recent, rep_penalty)
                 generated.append(nxt)
                 recent.append(nxt)
-                text = self.tok.decode(generated)
-                if text.endswith("\n\n"):
-                    break
-                if text.endswith("User:"):
+                delta = inc.decode(self.tok.id_to_bytes[nxt])
+                full_text += delta
+                stop = False
+                if full_text.endswith("\n\n"):
+                    stop = True
+                elif full_text.endswith("User:"):
                     generated.pop()
-                    break
-                if text.endswith("User"):
-                    # 停止符的前缀 token：不下发也不喂回，直接终止
+                    stop = True
+                elif full_text.endswith("User"):
+                    # 停止符的前缀 token：不下发也不喂回
                     generated.pop()
+                    full_text = full_text[: len(full_text) - len(delta)]
+                    stop = True
+                if stop:
                     break
-                yield {"delta": self.tok.decode([nxt])}
+                if delta:
+                    yield {"delta": delta}
                 out = self.model(
                     input_ids=torch.tensor([[nxt]], device=self.device),
                     past_key_values=session.cache,
                     use_cache=True,
                 )
         decode_ms = (time.perf_counter() - t_decode0) * 1000
-        reply = self.tok.decode(generated).split("\n\n")[0]
+        reply = full_text.split("\n\n")[0]
         session.turns += 1
         session.history.append({"role": "user", "content": user_text})
         session.history.append({"role": "assistant", "content": reply})

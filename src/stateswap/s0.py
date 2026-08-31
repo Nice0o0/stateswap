@@ -12,10 +12,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import torch
+from fla.models.utils import Cache
 from torch import nn
 from transformers import AutoModelForCausalLM
-
-from fla.models.utils import Cache
 
 
 def load_base_model(

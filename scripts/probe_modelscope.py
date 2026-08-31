@@ -1,5 +1,4 @@
 # One-off network probe for ModelScope repo candidates (not part of the package).
-import json
 import urllib.request
 
 CANDIDATES = [

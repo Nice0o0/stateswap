@@ -11,9 +11,8 @@ import re
 from pathlib import Path
 
 import torch
-from transformers import AutoModelForCausalLM
-
 from fla.models.rwkv7 import RWKV7Config
+from transformers import AutoModelForCausalLM
 
 # present in pth but never used by the fla implementation
 _UNUSED_PTH_KEYS = ("blocks.0.att.v0", "blocks.0.att.v1", "blocks.0.att.v2")

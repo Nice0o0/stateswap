@@ -61,8 +61,15 @@ function renderPersonas() {
     const base = p.shape ? (p.shape[0] >= 24 ? "0.4B" : p.shape[0] >= 12 ? "0.1B" : "") : "";
     const item = document.createElement("div");
     item.className = "persona-item" + (p.name === state.selected ? " selected" : "");
-    item.innerHTML = `<span class="p-name">${p.name}</span>`
-      + `<span class="p-size">${p.size_mb} MB${base ? " · " + base : ""}</span>`;
+    // 人格名来自用户输入（训练/混合页），必须用 textContent 防 XSS
+    const name = document.createElement("span");
+    name.className = "p-name";
+    name.textContent = p.name;
+    const size = document.createElement("span");
+    size.className = "p-size";
+    size.textContent = `${p.size_mb} MB${base ? " · " + base : ""}`;
+    item.appendChild(name);
+    item.appendChild(size);
     item.onclick = () => {
       state.selected = p.name;
       renderPersonas();
@@ -74,16 +81,28 @@ function renderPersonas() {
 
 function updateSessionCard() {
   const el = $("session-info");
+  $("btn-swap").disabled = !state.session;
   if (!state.session) {
     el.textContent = "尚未创建会话";
     el.classList.add("muted");
-    $("btn-swap").disabled = true;
     return;
   }
   el.classList.remove("muted");
-  el.innerHTML = `会话 <span class="mono">${state.session.session_id}</span><br>
-    人格 <b>${state.session.persona}</b> · <span class="muted">${state.session.memory_mb ?? "?"} MB 状态</span>`;
-  $("btn-swap").disabled = false;
+  // 会话 id 是服务端生成的 hex，人格名是用户输入——全部用 textContent
+  el.textContent = "";
+  const line1 = document.createElement("div");
+  line1.innerHTML = "会话 ";
+  const sid = document.createElement("span");
+  sid.className = "mono";
+  sid.textContent = state.session.session_id;
+  line1.appendChild(sid);
+  const line2 = document.createElement("div");
+  line2.append("人格 ");
+  const pn = document.createElement("b");
+  pn.textContent = state.session.persona;
+  line2.appendChild(pn);
+  line2.append(` · ${state.session.memory_mb ?? "?"} MB 状态`);
+  el.append(line1, line2);
 }
 
 async function newSession(persona) {
@@ -105,6 +124,7 @@ $("btn-swap").onclick = async () => {
       body: JSON.stringify({ persona: state.selected }),
     });
     state.session.persona = state.selected;
+    state.session.memory_mb = r.memory_mb;
     updateSessionCard();
     $("chat-messages").innerHTML = "";
     addSystemNote(`已切换人格 → ${r.swapped_to}（${r.latency_ms.toFixed(1)} ms），上下文已重置`);
@@ -130,7 +150,7 @@ function addBubble(role, text) {
 function addSystemNote(text) {
   const div = document.createElement("div");
   div.className = "sys-note";
-  div.innerHTML = text;
+  div.textContent = text; // 内容可能包含用户输入的人格名，禁用 innerHTML
   $("chat-messages").appendChild(div);
   scrollChat();
 }

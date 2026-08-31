@@ -3,8 +3,8 @@
 #   kxdw2580/catgirl-datasets  v1/catgirl.json, v2/*.json
 # Each record normalized to {"instruction", "output"}; <think> blocks stripped.
 import json
-import re
 import os
+import re
 
 SOURCES = {
     "catgirl_v1": r"%TEMP%\v1_catgirl.json",
