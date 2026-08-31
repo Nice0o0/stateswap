@@ -39,8 +39,9 @@ class ChatRequest(BaseModel):
     messages: list[ChatMessage]
     session_id: str | None = None
     stream: bool = False
-    temperature: float = 1.0
-    top_p: float = 0.9
+    # 小模型 + 风格化人格在高温下会语无伦次，默认取平衡档
+    temperature: float = 0.7
+    top_p: float = 0.8
     max_tokens: int = 512
 
 
@@ -219,6 +220,24 @@ def create_app(
                                             "id": chat_id, "object": "chat.completion.chunk",
                                             "created": created, "model": persona,
                                             "choices": [{"index": 0, "delta": {"content": piece["delta"]}}],
+                                        }
+                                    ) + "\n\n"
+                                elif "reply" in piece:
+                                    # 结束帧：附上延迟/内存统计，供前端展示
+                                    yield "data: " + json.dumps(
+                                        {
+                                            "id": chat_id, "object": "chat.completion.chunk",
+                                            "created": created, "model": persona,
+                                            "choices": [{"index": 0, "delta": {}}],
+                                            "stateswap": {
+                                                "prefill_ms": piece["prefill_ms"],
+                                                "decode_ms_per_token": piece["decode_ms_per_token"],
+                                                "session_memory_mb": piece["session_memory_mb"],
+                                            },
+                                            "usage": {
+                                                "prompt_tokens": piece["prompt_tokens"],
+                                                "completion_tokens": piece["completion_tokens"],
+                                            },
                                         }
                                     ) + "\n\n"
                             yield "data: [DONE]\n\n"

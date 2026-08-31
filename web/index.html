@@ -36,6 +36,11 @@
     <section id="view-chat" class="view active">
       <header id="chat-top">
         <select id="persona-select" title="切换人格（热切换，约 3ms）"></select>
+        <select id="temp-preset" title="采样温度：越高越发散，越低越稳定">
+          <option value="0.2">🎯 精准</option>
+          <option value="0.7" selected>⚖️ 平衡</option>
+          <option value="1.0">🎨 创意</option>
+        </select>
         <span id="session-tag" class="muted"></span>
       </header>
 

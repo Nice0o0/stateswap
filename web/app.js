@@ -249,15 +249,32 @@ function showErr(e) {
 }
 
 /* ---------- send (SSE streaming) ---------- */
-// Enter 发送 / Shift+Enter 换行；isComposing 时忽略（中文输入法确认候选词）
+// Enter 发送的三层兜底：
+// 1) keydown（真实浏览器的主路径），isComposing 时忽略（输入法确认候选词）
+// 2) 嵌入式/无键盘事件环境：Enter 以 insertLineBreak 的形式插入换行，
+//    在 input 事件里识别并转为发送
+// 3) Shift+Enter 换行：keydown 里设置抑制标记，避免兜底误发送
+let suppressLineBreakSend = false;
 $("input").addEventListener("keydown", (ev) => {
-  if (ev.key === "Enter" && !ev.shiftKey && !ev.isComposing) {
+  if (ev.key !== "Enter" || ev.isComposing) return;
+  suppressLineBreakSend = ev.shiftKey;
+  if (!ev.shiftKey) {
     ev.preventDefault();
     $("composer").requestSubmit();
   }
 });
-$("input").addEventListener("input", () => {
+
+// 输入框随内容自动增高（最多 6 行），发送后复位
+$("input").addEventListener("input", (ev) => {
   const el = $("input");
+  if (ev.inputType === "insertLineBreak") {
+    if (suppressLineBreakSend) {
+      suppressLineBreakSend = false; // Shift+Enter：保留换行，不发送
+    } else {
+      el.value = el.value.replace(/\n+$/, "");
+      $("composer").requestSubmit();
+    }
+  }
   el.style.height = "auto";
   el.style.height = Math.min(el.scrollHeight, 160) + "px";
 });
@@ -279,6 +296,7 @@ $("composer").onsubmit = async (ev) => {
   $("btn-send").disabled = true;
 
   try {
+    const temp = Number($("temp-preset").value);
     const res = await fetch("/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -286,6 +304,8 @@ $("composer").onsubmit = async (ev) => {
         model: $("persona-select").value,
         session_id: state.activeId,
         stream: true,
+        temperature: temp,
+        top_p: temp >= 1.0 ? 0.9 : 0.8,
         messages: [{ role: "user", content: text }],
       }),
     });
@@ -310,7 +330,12 @@ $("composer").onsubmit = async (ev) => {
           body.classList.remove("empty");
           scrollChat();
         }
-        if (payload.reply !== undefined) stats = payload;
+        if (payload.stateswap) {
+          stats = {
+            ...payload.stateswap,
+            completion_tokens: payload.usage?.completion_tokens ?? 0,
+          };
+        }
         if (payload.error) errorMsg = payload.error.message;
       }
     }
@@ -373,7 +398,9 @@ $("btn-mix").onclick = async () => {
       body: JSON.stringify({ a, b, alpha, name }),
     });
     out.className = "ok";
-    out.textContent = `已注册人格 ${r.name}（${r.size_mb} MB）——顶栏切换到它即可对话。`;
+    out.textContent = `已注册人格 ${r.name}（${r.size_mb} MB）——顶栏切换到它即可对话。`
+      + " 提醒：混合体可能整体偏向某一个任务模式、回复混乱（见相变实验），属预期行为；"
+      + "想分开用两个人格，直接在顶栏切换即可。";
     await loadPersonas();
   } catch (e) {
     out.className = "err";

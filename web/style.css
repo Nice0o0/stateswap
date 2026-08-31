@@ -172,7 +172,8 @@ main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
   gap: 12px;
   padding: 12px 24px;
 }
-#persona-select {
+#persona-select,
+#temp-preset {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 10px;
@@ -183,8 +184,9 @@ main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
   cursor: pointer;
   max-width: 260px;
 }
-#persona-select:hover { background: var(--panel); }
-#persona-select:focus { outline: none; border-color: var(--accent); }
+#temp-preset { font-size: 12.5px; font-weight: 500; color: var(--muted); max-width: 110px; }
+#persona-select:hover, #temp-preset:hover { background: var(--panel); }
+#persona-select:focus, #temp-preset:focus { outline: none; border-color: var(--accent); }
 #session-tag { font-size: 12px; }
 
 #chat-scroll { flex: 1; overflow-y: auto; padding: 8px 24px 16px; }
