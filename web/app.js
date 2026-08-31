@@ -162,6 +162,28 @@ function showErr(e) {
   addSystemNote(`⚠ ${e.message || e}`);
 }
 
+// Enter 发送 / Shift+Enter 换行；isComposing 时忽略（中文输入法按 Enter
+// 是确认候选词，不能当成发送）
+$("input").addEventListener("keydown", (ev) => {
+  if (ev.key === "Enter" && !ev.shiftKey && !ev.isComposing) {
+    ev.preventDefault();
+    $("composer").requestSubmit();
+  }
+});
+
+// 输入框随内容自动增高（最多 6 行），发送后复位
+$("input").addEventListener("input", () => {
+  const el = $("input");
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 160) + "px";
+});
+
+function resetInput() {
+  const el = $("input");
+  el.value = "";
+  el.style.height = "auto";
+}
+
 $("composer").onsubmit = async (ev) => {
   ev.preventDefault();
   if (state.sending) return;
@@ -170,7 +192,7 @@ $("composer").onsubmit = async (ev) => {
   if (!state.session) {
     try { await newSession(state.selected); } catch (e) { showErr(e); return; }
   }
-  $("input").value = "";
+  resetInput();
   addBubble("user", text);
   const bubble = addBubble("assistant", "…");
   state.sending = true;
