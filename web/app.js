@@ -1,11 +1,11 @@
-/* stateswap WebUI — no build step, no dependencies. */
+/* stateswap WebUI — DeepSeek-inspired layout, no build step. */
 "use strict";
 
 const $ = (id) => document.getElementById(id);
 const state = {
   personas: [],
-  selected: null,
-  session: null, // {session_id, persona}
+  sessions: [],
+  activeId: null,
   sending: false,
 };
 
@@ -25,7 +25,7 @@ async function api(path, opts) {
 
 function setStatus(ok, text) {
   $("server-status").className = ok ? "dot-on" : "dot-off";
-  $("status-text").textContent = text;
+  if (text) $("server-status").title = text;
 }
 
 /* ---------- theme ---------- */
@@ -41,160 +41,240 @@ $("btn-theme").onclick = () => {
 };
 applyThemeIcon();
 
-/* ---------- personas & session ---------- */
-async function loadPersonas() {
-  state.personas = (await api("/v1/personas")).personas;
-  if (!state.selected) {
-    const preferred = state.personas.find((p) => p.name === "neko-0.4b-v2")
-      || state.personas.find((p) => p.name.startsWith("neko"))
-      || state.personas[0];
-    state.selected = preferred ? preferred.name : null;
-  }
-  renderPersonas();
-  renderMixSelects();
+/* ---------- navigation (DeepSeek: 对话是主视图，其余从侧栏进入) ---------- */
+function showView(name) {
+  document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
+  $("view-" + name).classList.add("active");
+  if (name === "mix") fillMixSelects();
+  if (name === "train") loadTrainDatasets();
+}
+$("nav-mix").onclick = () => showView("mix");
+$("nav-train").onclick = () => showView("train");
+for (const link of document.querySelectorAll(".back")) {
+  link.onclick = () => showView(link.dataset.nav);
 }
 
-function renderPersonas() {
-  const list = $("persona-list");
+/* ---------- personas ---------- */
+async function loadPersonas() {
+  state.personas = (await api("/v1/personas")).personas;
+  renderPersonaSelect();
+  fillMixSelects();
+}
+
+function renderPersonaSelect() {
+  const sel = $("persona-select");
+  const prev = sel.value;
+  sel.innerHTML = state.personas
+    .map((p) => `<option value="${p.name}">${p.name}（${p.size_mb} MB）</option>`)
+    .join("");
+  const preferred = state.personas.find((p) => p.name === prev)?.name
+    || state.personas.find((p) => p.name.startsWith("neko-1.5b"))?.name
+    || state.personas.find((p) => p.name.startsWith("neko"))?.name
+    || state.personas[0]?.name;
+  if (preferred) sel.value = preferred;
+}
+
+/* ---------- sessions ---------- */
+async function loadSessions() {
+  state.sessions = (await api("/v1/sessions")).sessions;
+  renderSessions();
+}
+
+function renderSessions() {
+  const list = $("session-list");
   list.innerHTML = "";
-  for (const p of state.personas) {
-    const base = p.shape ? (p.shape[0] >= 24 ? "0.4B" : p.shape[0] >= 12 ? "0.1B" : "") : "";
+  if (!state.sessions.length) {
+    const empty = document.createElement("div");
+    empty.className = "muted";
+    empty.style.cssText = "font-size:12px;padding:6px 8px;";
+    empty.textContent = "暂无会话";
+    list.appendChild(empty);
+    return;
+  }
+  for (const s of state.sessions) {
     const item = document.createElement("div");
-    item.className = "persona-item" + (p.name === state.selected ? " selected" : "");
-    // 人格名来自用户输入（训练/混合页），必须用 textContent 防 XSS
-    const name = document.createElement("span");
-    name.className = "p-name";
-    name.textContent = p.name;
-    const size = document.createElement("span");
-    size.className = "p-size";
-    size.textContent = `${p.size_mb} MB${base ? " · " + base : ""}`;
-    item.appendChild(name);
-    item.appendChild(size);
-    item.onclick = () => {
-      state.selected = p.name;
-      renderPersonas();
-      updateSessionCard();
-    };
+    item.className = "session-item" + (s.session_id === state.activeId ? " active" : "");
+
+    const info = document.createElement("div");
+    info.className = "s-info";
+    const name = document.createElement("div");
+    name.className = "s-name";
+    name.textContent = s.persona; // 用户输入的人格名，textContent 防 XSS
+    const meta = document.createElement("div");
+    meta.className = "s-meta";
+    meta.textContent = `${s.turns} 轮 · ${s.memory_mb} MB`;
+    info.append(name, meta);
+
+    const del = document.createElement("button");
+    del.className = "s-del";
+    del.title = "删除会话";
+    del.textContent = "✕";
+    del.onclick = (ev) => { ev.stopPropagation(); removeSession(s.session_id); };
+
+    item.append(info, del);
+    item.onclick = () => activateSession(s.session_id);
     list.appendChild(item);
   }
 }
 
-function updateSessionCard() {
-  const el = $("session-info");
-  $("btn-swap").disabled = !state.session;
-  if (!state.session) {
-    el.textContent = "尚未创建会话";
-    el.classList.add("muted");
-    return;
+function updateSessionTag(detail) {
+  $("session-tag").textContent =
+    `会话 ${detail.session_id} · ${detail.turns} 轮 · ${detail.memory_mb} MB 状态`;
+  $("persona-select").value = detail.persona;
+}
+
+function renderHistory(history) {
+  const box = $("chat-messages");
+  box.innerHTML = "";
+  if (!history.length) {
+    addSystemNote("新对话已就绪。试试翻译人格：选中 zh2en 后直接打中文，不需要任何指令。");
   }
-  el.classList.remove("muted");
-  // 会话 id 是服务端生成的 hex，人格名是用户输入——全部用 textContent
-  el.textContent = "";
-  const line1 = document.createElement("div");
-  line1.innerHTML = "会话 ";
-  const sid = document.createElement("span");
-  sid.className = "mono";
-  sid.textContent = state.session.session_id;
-  line1.appendChild(sid);
-  const line2 = document.createElement("div");
-  line2.append("人格 ");
-  const pn = document.createElement("b");
-  pn.textContent = state.session.persona;
-  line2.appendChild(pn);
-  line2.append(` · ${state.session.memory_mb ?? "?"} MB 状态`);
-  el.append(line1, line2);
+  for (const m of history) {
+    if (m.role === "user") addUserBubble(m.content);
+    else if (m.role === "assistant") addAssistantShell(m.content, null);
+  }
+  scrollChat();
 }
 
-async function newSession(persona) {
-  const want = persona || state.selected || "none";
-  const s = await api("/v1/sessions", { method: "POST", body: JSON.stringify({ persona: want }) });
-  state.session = s;
-  updateSessionCard();
-  $("chat-messages").innerHTML = "";
-  addSystemNote(`已创建会话 ${s.session_id}（人格 ${s.persona}，状态 ${s.memory_mb} MB）`);
-  return s;
-}
-
-$("btn-new-session").onclick = () => newSession(state.session?.persona || state.selected).catch(showErr);
-$("btn-swap").onclick = async () => {
-  if (!state.session || !state.selected) return;
+async function activateSession(id) {
   try {
-    const r = await api(`/v1/sessions/${state.session.session_id}/swap`, {
+    const detail = await api(`/v1/sessions/${id}`);
+    state.activeId = detail.session_id;
+    updateSessionTag(detail);
+    renderHistory(detail.history);
+    renderSessions();
+  } catch (e) {
+    showErr(e);
+  }
+}
+
+async function newSession() {
+  const persona = $("persona-select").value || "none";
+  const s = await api("/v1/sessions", { method: "POST", body: JSON.stringify({ persona }) });
+  await loadSessions();
+  await activateSession(s.session_id);
+}
+
+$("btn-new-session").onclick = () => newSession().catch(showErr);
+
+async function removeSession(id) {
+  await api(`/v1/sessions/${id}`, { method: "DELETE" });
+  await loadSessions();
+  if (state.activeId === id) {
+    if (state.sessions.length) await activateSession(state.sessions[0].session_id);
+    else { state.activeId = null; $("chat-messages").innerHTML = ""; $("session-tag").textContent = ""; }
+  }
+}
+
+/* ---------- persona switch (hot swap, ~3ms) ---------- */
+$("persona-select").onchange = async () => {
+  const persona = $("persona-select").value;
+  if (!state.activeId) { await newSession().catch(showErr); return; }
+  try {
+    const r = await api(`/v1/sessions/${state.activeId}/swap`, {
       method: "POST",
-      body: JSON.stringify({ persona: state.selected }),
+      body: JSON.stringify({ persona, keep_context: false }),
     });
-    state.session.persona = state.selected;
-    state.session.memory_mb = r.memory_mb;
-    updateSessionCard();
-    $("chat-messages").innerHTML = "";
-    addSystemNote(`已切换人格 → ${r.swapped_to}（${r.latency_ms.toFixed(1)} ms），上下文已重置`);
-  } catch (e) { showErr(e); }
+    await loadSessions();
+    await activateSession(state.activeId);
+    addSystemNote(`已切换人格 → ${persona}（${Number(r.latency_ms).toFixed(1)} ms），上下文已重置`);
+  } catch (e) {
+    showErr(e);
+  }
 };
 
-/* ---------- chat (SSE streaming) ---------- */
-function addBubble(role, text) {
-  const row = document.createElement("div");
-  row.className = "msg-row " + role;
-  const avatar = document.createElement("div");
-  avatar.className = "avatar";
-  avatar.textContent = role === "user" ? "你" : "S";
-  const div = document.createElement("div");
-  div.className = "msg " + role;
-  div.textContent = text;
-  row.appendChild(avatar);
-  row.appendChild(div);
-  $("chat-messages").appendChild(row);
-  scrollChat();
-  return div;
-}
-function addSystemNote(text) {
-  const div = document.createElement("div");
-  div.className = "sys-note";
-  div.textContent = text; // 内容可能包含用户输入的人格名，禁用 innerHTML
-  $("chat-messages").appendChild(div);
-  scrollChat();
-}
+/* ---------- chat rendering ---------- */
 function scrollChat() {
   const sc = $("chat-scroll");
   sc.scrollTop = sc.scrollHeight;
 }
+
+function addUserBubble(text) {
+  const row = document.createElement("div");
+  row.className = "msg-row user";
+  const avatar = document.createElement("div");
+  avatar.className = "avatar";
+  avatar.textContent = "你";
+  const bubble = document.createElement("div");
+  bubble.className = "msg-user";
+  bubble.textContent = text;
+  row.append(avatar, bubble);
+  $("chat-messages").appendChild(row);
+}
+
+function addAssistantShell(text, stats) {
+  const row = document.createElement("div");
+  row.className = "msg-row assistant";
+  const avatar = document.createElement("div");
+  avatar.className = "avatar";
+  avatar.textContent = "S";
+  const block = document.createElement("div");
+  block.className = "msg-assistant";
+  const body = document.createElement("div");
+  body.className = "a-text" + (text ? "" : " empty");
+  body.textContent = text || "思考中…";
+  block.appendChild(body);
+  if (stats) block.appendChild(renderStats(stats));
+  row.append(avatar, block);
+  $("chat-messages").appendChild(row);
+  scrollChat();
+  return body;
+}
+
+function renderStats(stats) {
+  const wrap = document.createElement("div");
+  wrap.className = "a-stats";
+  for (const t of [
+    `${stats.completion_tokens} tok`,
+    `prefill ${stats.prefill_ms}ms`,
+    `${stats.decode_ms_per_token}ms/tok`,
+    `状态 ${stats.session_memory_mb}MB`,
+  ]) {
+    const chip = document.createElement("span");
+    chip.textContent = t;
+    wrap.appendChild(chip);
+  }
+  return wrap;
+}
+
+function addSystemNote(text) {
+  const div = document.createElement("div");
+  div.className = "sys-note";
+  div.textContent = text;
+  $("chat-messages").appendChild(div);
+}
+
 function showErr(e) {
   addSystemNote(`⚠ ${e.message || e}`);
 }
 
-// Enter 发送 / Shift+Enter 换行；isComposing 时忽略（中文输入法按 Enter
-// 是确认候选词，不能当成发送）
+/* ---------- send (SSE streaming) ---------- */
+// Enter 发送 / Shift+Enter 换行；isComposing 时忽略（中文输入法确认候选词）
 $("input").addEventListener("keydown", (ev) => {
   if (ev.key === "Enter" && !ev.shiftKey && !ev.isComposing) {
     ev.preventDefault();
     $("composer").requestSubmit();
   }
 });
-
-// 输入框随内容自动增高（最多 6 行），发送后复位
 $("input").addEventListener("input", () => {
   const el = $("input");
   el.style.height = "auto";
   el.style.height = Math.min(el.scrollHeight, 160) + "px";
 });
 
-function resetInput() {
-  const el = $("input");
-  el.value = "";
-  el.style.height = "auto";
-}
-
 $("composer").onsubmit = async (ev) => {
   ev.preventDefault();
   if (state.sending) return;
   const text = $("input").value.trim();
   if (!text) return;
-  if (!state.session) {
-    try { await newSession(state.selected); } catch (e) { showErr(e); return; }
-  }
-  resetInput();
-  addBubble("user", text);
-  const bubble = addBubble("assistant", "…");
+  if (!state.activeId) { try { await newSession(); } catch (e) { showErr(e); return; } }
+
+  const el = $("input");
+  el.value = "";
+  el.style.height = "auto";
+
+  addUserBubble(text);
+  const body = addAssistantShell("", null);
   state.sending = true;
   $("btn-send").disabled = true;
 
@@ -203,8 +283,8 @@ $("composer").onsubmit = async (ev) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: state.session.persona,
-        session_id: state.session.session_id,
+        model: $("persona-select").value,
+        session_id: state.activeId,
         stream: true,
         messages: [{ role: "user", content: text }],
       }),
@@ -213,7 +293,7 @@ $("composer").onsubmit = async (ev) => {
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
-    let buf = "", reply = "", stats = null;
+    let buf = "", reply = "", stats = null, errorMsg = null;
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -224,22 +304,25 @@ $("composer").onsubmit = async (ev) => {
         if (!line.startsWith("data: ") || line === "data: [DONE]") continue;
         const payload = JSON.parse(line.slice(6));
         const delta = payload.choices?.[0]?.delta?.content;
-        if (delta) { reply += delta; bubble.textContent = reply; scrollChat(); }
-        if (payload.reply !== undefined) stats = payload; // 结束帧（含统计）
+        if (delta) {
+          reply += delta;
+          body.textContent = reply;
+          body.classList.remove("empty");
+          scrollChat();
+        }
+        if (payload.reply !== undefined) stats = payload;
+        if (payload.error) errorMsg = payload.error.message;
       }
     }
-    bubble.textContent = reply || "（空回复）";
-    if (stats) {
-      const s = document.createElement("span");
-      s.className = "stats";
-      s.textContent = `${stats.completion_tokens} tok · prefill ${stats.prefill_ms}ms · `
-        + `${stats.decode_ms_per_token}ms/tok · 会话状态 ${stats.session_memory_mb}MB`;
-      bubble.appendChild(s);
-      state.session.turns = stats.turns;
-      updateSessionCard();
+    if (errorMsg) {
+      addSystemNote(`⚠ ${errorMsg}`);
+      body.remove();
+    } else {
+      body.textContent = reply || "（空回复）";
+      if (stats) blockAppendStats(body, stats);
+      loadSessions(); // 刷新侧栏顺序/轮数
     }
   } catch (e) {
-    bubble.remove();
     showErr(e);
   } finally {
     state.sending = false;
@@ -248,47 +331,32 @@ $("composer").onsubmit = async (ev) => {
   }
 };
 
-/* ---------- tabs ---------- */
-for (const tab of document.querySelectorAll(".tab")) {
-  tab.onclick = () => {
-    document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
-    document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
-    tab.classList.add("active");
-    $("view-" + tab.dataset.view).classList.add("active");
-    if (tab.dataset.view === "mix") renderMixSelects();
-    if (tab.dataset.view === "train") loadTrainDatasets();
-  };
+function blockAppendStats(body, stats) {
+  body.classList.remove("empty");
+  body.appendChild(renderStats(stats));
+  const s = state.sessions.find((x) => x.session_id === state.activeId);
+  if (s) s.turns = stats.turns;
 }
 
 /* ---------- persona mixer ---------- */
-function shapeOf(name) {
-  const p = state.personas.find((x) => x.name === name);
-  return p ? JSON.stringify(p.shape) : null;
-}
-
-function fillSelect(sel, names) {
-  sel.innerHTML = names.map((n) => `<option>${n}</option>`).join("");
-}
-
-function renderMixSelects() {
+function fillMixSelects() {
   const names = state.personas.map((p) => p.name);
+  const shapeOf = (n) => JSON.stringify(state.personas.find((x) => x.name === n)?.shape);
   const selA = $("mix-a"), selB = $("mix-b");
 
   const keepA = names.includes(selA.value) ? selA.value
-    : (names.includes("neko-0.4b-v2") ? "neko-0.4b-v2" : names[0]);
-  fillSelect(selA, names);
+    : (names.includes("neko-1.5b") ? "neko-1.5b" : names[0]);
+  selA.innerHTML = names.map((n) => `<option>${n}</option>`).join("");
   selA.value = keepA;
 
-  // B 只允许与 A 同形状（同底座）的人格
   const compatible = names.filter((n) => shapeOf(n) === shapeOf(selA.value));
   const keepB = compatible.includes(selB.value) ? selB.value
-    : (compatible.includes("zh2en-0.4b-v3") ? "zh2en-0.4b-v3" : compatible[0]);
-  fillSelect(selB, compatible);
+    : (compatible.includes("zh2en-1.5b") ? "zh2en-1.5b" : compatible[0]);
+  selB.innerHTML = compatible.map((n) => `<option>${n}</option>`).join("");
   selB.value = keepB;
 }
 
-$("mix-a").onchange = renderMixSelects;
-
+$("mix-a").onchange = fillMixSelects;
 $("mix-alpha").oninput = () => {
   $("mix-alpha-val").textContent = Number($("mix-alpha").value).toFixed(2);
 };
@@ -305,7 +373,7 @@ $("btn-mix").onclick = async () => {
       body: JSON.stringify({ a, b, alpha, name }),
     });
     out.className = "ok";
-    out.textContent = `已注册人格 ${r.name}（${r.size_mb} MB）——去左侧选中它、开新会话试试行为。`;
+    out.textContent = `已注册人格 ${r.name}（${r.size_mb} MB）——顶栏切换到它即可对话。`;
     await loadPersonas();
   } catch (e) {
     out.className = "err";
@@ -361,7 +429,7 @@ async function pollTrain() {
       setTrainResult("err", "训练失败：" + s.error);
     } else {
       $("train-progress-bar").style.width = "100%";
-      setTrainResult("ok", `完成！人格 ${s.persona} 已自动注册，去左侧选中它开聊。`);
+      setTrainResult("ok", `完成！人格 ${s.persona} 已自动注册，顶栏切换到它即可对话。`);
       await loadPersonas();
     }
   }
@@ -372,7 +440,12 @@ async function pollTrain() {
   try {
     await loadPersonas();
     setStatus(true, "服务正常");
-    await newSession(state.selected);
+    await loadSessions();
+    if (state.sessions.length) {
+      await activateSession(state.sessions[0].session_id);
+    } else {
+      await newSession();
+    }
   } catch (e) {
     setStatus(false, "服务不可达");
     addSystemNote("⚠ 无法连接 stateswap 服务，请确认服务器已启动（python -m stateswap.server ...）");

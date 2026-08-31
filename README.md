@@ -31,14 +31,14 @@ RWKV-7 每层维护一个随 token 演化的递归状态 S（每头 64×64）。
 
 | 指标 | 数值 |
 |---|---|
-| S0 训练速度（0.4B，ctx=512，batch=1） | 0.17–0.33 s/step，峰值显存 2.0 GB |
-| S0 大小 | 0.1B: 2.36 MB / 0.4B: 6.29 MB（fp32） |
+| S0 训练速度（1.5B，ctx=512，batch=1） | 0.19–0.35 s/step，峰值显存 4.8 GB |
+| S0 大小 | 0.4B: 6.29 MB / 1.5B: 12.58 MB（fp32） |
+| 每会话状态内存 | 1.5B: 12.78 MB，恒定不随对话轮数增长 |
 | 人格热切换延迟 | **2.6–4.4 ms**（重建 24 层状态缓存） |
-| 每会话状态内存 | 6.39 MB，恒定不随对话轮数增长 |
-| 猫娘风格命中率（基线 → S0） | ~12–25% → **88–100%** |
-| 无指令自主翻译（zh2en-v3，WMT 7.4k 对） | **100%**（贪心解码，8/8 未见句全英文） |
+| 猫娘风格命中率（基线 → S0） | ~12–25% → **88–100%**（1.5B：12% → 100%） |
+| 无指令自主翻译（zh2en，WMT 7.4k 对） | **100%** 英文输出（贪心，未见句） |
 | S₀ 线性混合 | **不可行**：尖锐相变而非平滑插值，见 [docs/state-arithmetic.md](docs/state-arithmetic.md) |
-| 解码速度 | ~20 tok/s（纯 Python 循环，未优化） |
+| 解码速度 | ~20–25 tok/s（纯 Python 循环，未优化） |
 
 行为示例（0.4B-v2 人格，3,095 对语料训练；同一底座、同一输入）：
 
@@ -96,18 +96,21 @@ uv pip install triton-windows transformers flash-linear-attention fastapi "uvico
 uv pip install -e .
 
 # 2) 模型：BlinkDL pth → fla/HF 格式（权重从 ModelScope 获取，见下方镜像）
-python scripts/convert_model.py --pth RWKV-x070-World-0.4B-v2.9-20250107-ctx4096.pth \
-    --out models/rwkv7-0.4b-world-hf --precision bfloat16
+python scripts/convert_model.py --pth RWKV-x070-World-1.5B-v3-20250127-ctx4096.pth \
+    --out models/rwkv7-1.5b-world-hf --precision bfloat16
 
-# 3) 训一个人格（NekoQA 猫娘数据，~8 分钟）
-python -m stateswap.train --model models/rwkv7-0.4b-world-hf \
-    --data data/nekoqa_smoke_200.json --out personas/neko-0.4b --steps 800 --lr 1e-4
+# 3) 训一个人格（3095 对猫娘语料，1.5B 约 15 分钟）
+python -m stateswap.train --model models/rwkv7-1.5b-world-hf \
+    --data data/neko_corpus_full.json --out personas/neko-1.5b --steps 4000 --lr 1e-4
 
 # 4) 起服务（自动加载 personas/ 下所有人格）
-python -m stateswap.server --model models/rwkv7-0.4b-world-hf --persona-dir personas --port 8000
+python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir personas --port 8000
 
 # 5) 浏览器打开 http://127.0.0.1:8000 —— WebUI（聊天 / 人格混合 / 训练）
 ```
+
+> 底座大小决定对话能力上限，S₀ 只负责风格与任务模式。1.5B 起步对话才"正常"，
+> 显存紧张可退回 0.4B（`RWKV-x070-World-0.4B`，峰值训练显存 2GB）。
 
 ## WebUI
 

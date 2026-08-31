@@ -132,6 +132,37 @@ def create_app(
         _engine().drop_session(session_id)
         return {"ok": True}
 
+    @app.get("/v1/sessions")
+    def list_sessions():
+        engine = _engine()
+        sessions = sorted(engine.sessions.values(), key=lambda s: s.last_used, reverse=True)
+        return {
+            "sessions": [
+                {
+                    "session_id": s.session_id,
+                    "persona": s.persona_name,
+                    "turns": s.turns,
+                    "memory_mb": round(s.memory_mb(engine.model), 3),
+                    "last_used": s.last_used,
+                }
+                for s in sessions
+            ]
+        }
+
+    @app.get("/v1/sessions/{session_id}")
+    def session_detail(session_id: str):
+        engine = _engine()
+        s = engine.sessions.get(session_id)
+        if s is None:
+            raise HTTPException(404, f"unknown session {session_id}")
+        return {
+            "session_id": s.session_id,
+            "persona": s.persona_name,
+            "turns": s.turns,
+            "memory_mb": round(s.memory_mb(engine.model), 3),
+            "history": s.history,
+        }
+
     @app.delete("/v1/personas/{name}")
     def delete_persona(name: str):
         """仅从注册表移除（内存态），磁盘上的 personas/<name>/s0.pt 不动。
