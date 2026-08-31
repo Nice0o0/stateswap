@@ -197,11 +197,33 @@ class Engine:
 
     # ---------------- generation ----------------
 
-    def _sample(self, logits: torch.Tensor, temperature: float, top_p: float, recent: list[int], rep_penalty: float) -> int:
+    def _sample(
+        self,
+        logits: torch.Tensor,
+        temperature: float,
+        top_p: float,
+        recent: list[int],
+        rep_penalty: float,
+        no_repeat_ngram: int = 0,
+    ) -> int:
         logits = logits.reshape(-1).float()
         if rep_penalty != 1.0 and recent:
             for t in set(recent[-128:]):
                 logits[t] *= 1.0 if logits[t] < 0 else 1.0 / rep_penalty
+        if no_repeat_ngram > 0 and len(recent) >= no_repeat_ngram - 1:
+            # 封禁会补全近期已出现 n-gram 的候选 token：精确打断短语级复读循环，
+            # 又不影响单 token 的自然重复（语气词等）
+            n = no_repeat_ngram
+            prefix = tuple(recent[-(n - 1):])
+            banned = {
+                recent[i + n - 1]
+                for i in range(len(recent) - n + 1)
+                if tuple(recent[i:i + n - 1]) == prefix
+            }
+            for t in banned:
+                logits[t] = float("-inf")
+            if not torch.isfinite(logits).any():
+                logits = logits.reshape(-1).float()  # 全被封时回退，避免死局
         if temperature <= 1e-4:
             return int(logits.argmax())
         logits = logits / temperature
@@ -221,11 +243,13 @@ class Engine:
         max_new_tokens: int = 512,
         temperature: float = 1.0,
         top_p: float = 0.9,
-        rep_penalty: float = 1.1,
+        rep_penalty: float = 1.25,
+        no_repeat_ngram: int = 8,
     ) -> dict:
         chunks = list(
             self.chat_stream(
-                session_id, user_text, max_new_tokens, temperature, top_p, rep_penalty
+                session_id, user_text, max_new_tokens, temperature, top_p, rep_penalty,
+                no_repeat_ngram,
             )
         )
         return chunks[-1]
@@ -237,7 +261,8 @@ class Engine:
         max_new_tokens: int = 512,
         temperature: float = 1.0,
         top_p: float = 0.9,
-        rep_penalty: float = 1.1,
+        rep_penalty: float = 1.25,
+        no_repeat_ngram: int = 8,
     ):
         """Yield {"delta": text} as tokens are produced; the final yield carries
         usage stats and no delta.
@@ -250,7 +275,8 @@ class Engine:
             raise SessionBusy(f"session {session_id} is busy")
         try:
             yield from self._chat_stream_locked(
-                session, user_text, max_new_tokens, temperature, top_p, rep_penalty
+                session, user_text, max_new_tokens, temperature, top_p, rep_penalty,
+                no_repeat_ngram,
             )
         finally:
             session.lock.release()
@@ -263,6 +289,7 @@ class Engine:
         temperature: float,
         top_p: float,
         rep_penalty: float,
+        no_repeat_ngram: int = 8,
     ):
         session.last_used = time.time()
         # 与训练侧 build_prompt 严格一致（含尾随空格）：S₀ 对 token 边界极其敏感
@@ -284,13 +311,17 @@ class Engine:
         t_decode0 = time.perf_counter()
         with torch.no_grad():
             for _ in range(max_new_tokens):
-                nxt = self._sample(out.logits[0, -1], temperature, top_p, recent, rep_penalty)
+                nxt = self._sample(out.logits[0, -1], temperature, top_p, recent,
+                                   rep_penalty, no_repeat_ngram)
                 generated.append(nxt)
                 recent.append(nxt)
                 delta = inc.decode(self.tok.id_to_bytes[nxt])
                 full_text += delta
                 stop = False
-                if full_text.endswith("\n\n"):
+                if "\n\n" in full_text:
+                    # 回合边界：World 聊天格式以 \n\n 结尾。首次出现即截断停止——
+                    # 否则模型会继续幻觉"下一轮"内容并进入复读循环。
+                    full_text = full_text.split("\n\n")[0]
                     stop = True
                 elif full_text.endswith("User:"):
                     generated.pop()
@@ -394,7 +425,7 @@ class Engine:
                             next_ids[b, 0] = generated[b][-1]
                             continue
                         nxt = self._sample(out.logits[b, -1], temperature, top_p,
-                                           generated[b], 1.0)
+                                           generated[b], 1.25)
                         generated[b].append(nxt)
                         next_ids[b, 0] = nxt
                         if self.tok.decode(generated[b]).endswith("\n\n"):

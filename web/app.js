@@ -104,6 +104,7 @@ function renderSessions() {
     const meta = document.createElement("div");
     meta.className = "s-meta";
     meta.textContent = `${s.turns} 轮 · ${s.memory_mb} MB`;
+    meta.title = "状态大小由底座结构决定（层数×头数×64×64），与对话内容无关";
     info.append(name, meta);
 
     const del = document.createElement("button");

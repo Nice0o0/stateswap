@@ -43,6 +43,7 @@ class ChatRequest(BaseModel):
     temperature: float = 0.7
     top_p: float = 0.8
     max_tokens: int = 512
+    no_repeat_ngram: int = 8
 
 
 class SessionRequest(BaseModel):
@@ -221,7 +222,8 @@ def create_app(
                     def sse():
                         try:
                             for piece in engine.chat_stream(
-                                session_id, last_user, req.max_tokens, req.temperature, req.top_p
+                                session_id, last_user, req.max_tokens, req.temperature,
+                                req.top_p, req.no_repeat_ngram
                             ):
                                 if "delta" in piece:
                                     yield "data: " + json.dumps(
@@ -256,7 +258,8 @@ def create_app(
                     return StreamingResponse(sse(), media_type="text/event-stream")
                 try:
                     result = engine.chat(
-                        session_id, last_user, req.max_tokens, req.temperature, req.top_p
+                        session_id, last_user, req.max_tokens, req.temperature,
+                        req.top_p, req.no_repeat_ngram
                     )
                 except SessionBusy as e:
                     raise HTTPException(409, str(e))
