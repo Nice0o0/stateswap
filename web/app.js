@@ -45,9 +45,11 @@ function renderPersonas() {
   const list = $("persona-list");
   list.innerHTML = "";
   for (const p of state.personas) {
+    const base = p.shape ? (p.shape[0] >= 24 ? "0.4B" : p.shape[0] >= 12 ? "0.1B" : "") : "";
     const item = document.createElement("div");
     item.className = "persona-item" + (p.name === state.selected ? " selected" : "");
-    item.innerHTML = `<span class="p-name">${p.name}</span><span class="p-size">${p.size_mb} MB</span>`;
+    item.innerHTML = `<span class="p-name">${p.name}</span>`
+      + `<span class="p-size">${p.size_mb} MB${base ? " · " + base : ""}</span>`;
     item.onclick = () => {
       state.selected = p.name;
       renderPersonas();
@@ -197,16 +199,33 @@ for (const tab of document.querySelectorAll(".tab")) {
 }
 
 /* ---------- persona mixer ---------- */
-function renderMixSelects() {
-  const names = state.personas.filter((p) => p.name !== "none").map((p) => p.name);
-  for (const [id, keep] of [["mix-a", true], ["mix-b", false]]) {
-    const sel = $(id);
-    const prev = sel.value;
-    sel.innerHTML = names.map((n) => `<option>${n}</option>`).join("");
-    if (keep && names.includes(prev)) sel.value = prev;
-    else if (!keep && names.includes("zh2en-0.4b-v3")) sel.value = "zh2en-0.4b-v3";
-  }
+function shapeOf(name) {
+  const p = state.personas.find((x) => x.name === name);
+  return p ? JSON.stringify(p.shape) : null;
 }
+
+function fillSelect(sel, names) {
+  sel.innerHTML = names.map((n) => `<option>${n}</option>`).join("");
+}
+
+function renderMixSelects() {
+  const names = state.personas.map((p) => p.name);
+  const selA = $("mix-a"), selB = $("mix-b");
+
+  const keepA = names.includes(selA.value) ? selA.value
+    : (names.includes("neko-0.4b-v2") ? "neko-0.4b-v2" : names[0]);
+  fillSelect(selA, names);
+  selA.value = keepA;
+
+  // B 只允许与 A 同形状（同底座）的人格
+  const compatible = names.filter((n) => shapeOf(n) === shapeOf(selA.value));
+  const keepB = compatible.includes(selB.value) ? selB.value
+    : (compatible.includes("zh2en-0.4b-v3") ? "zh2en-0.4b-v3" : compatible[0]);
+  fillSelect(selB, compatible);
+  selB.value = keepB;
+}
+
+$("mix-a").onchange = renderMixSelects;
 
 $("mix-alpha").oninput = () => {
   $("mix-alpha-val").textContent = Number($("mix-alpha").value).toFixed(2);

@@ -104,7 +104,12 @@ def create_app(
         engine = _engine()
         return {
             "personas": [
-                {"name": p.name, "size_mb": round(p.size_mb, 2), "meta": p.meta}
+                {
+                    "name": p.name,
+                    "size_mb": round(p.size_mb, 2),
+                    "meta": p.meta,
+                    "shape": list(p.s0.shape),
+                }
                 for p in engine.personas.values()
             ]
         }
@@ -228,6 +233,14 @@ def create_app(
         for p in (req.a, req.b):
             if p not in engine.personas:
                 raise HTTPException(404, f"unknown persona {p}")
+        sa, sb = engine.personas[req.a].s0.shape, engine.personas[req.b].s0.shape
+        if sa != sb:
+            raise HTTPException(
+                400,
+                f"两个人格形状不同，无法混合（不同底座训练的 S₀）："
+                f"{req.a}={list(sa)}，{req.b}={list(sb)}。"
+                f"0.1B 底座的人格只能和 0.1B 的混，0.4B 和 0.4B 的混。",
+            )
         if not req.name.strip():
             raise HTTPException(400, "persona name required")
         if req.name in engine.personas:
