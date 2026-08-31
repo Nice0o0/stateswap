@@ -89,6 +89,10 @@ def create_app(
             candidates = sorted(p for p in Path(persona_dir).iterdir() if (p / "s0.pt").exists())
         for p in candidates:
             engine.register_persona(p.name, str(p / "s0.pt"))
+        # 顶层 int8 量化人格文件（quant.save_quantized 产出）：<名>.int8.pt
+        if persona_dir:
+            for p in sorted(Path(persona_dir).glob("*.int8.pt")):
+                engine.register_persona(p.name.replace(".int8.pt", "-int8"), str(p))
         state["engine"] = engine
 
     @app.get("/health")

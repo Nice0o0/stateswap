@@ -6,7 +6,7 @@
 
 **One RWKV-7 base model, many personas: train each persona into a few-MB initial state (S₀) and hot-swap it at serving time.**
 
-[中文文档](README.md)
+[中文文档](README.md) | **📖 [Full tutorial](docs/tutorial.md)** (Chinese)
 
 ---
 

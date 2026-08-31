@@ -7,7 +7,7 @@
 **一个 RWKV-7 底座，N 个人格：把人格训成几 MB 的初始状态（S0），服务时微秒级热切换。**
 **One RWKV-7 base model, many personas: train each persona into a few-MB initial state (S0) and hot-swap it at serving time.**
 
-[中文](#中文) | [English](README_EN.md)
+[中文](#中文) | [English](README_EN.md) | **📖 [完整使用教程](docs/tutorial.md)**
 
 ---
 

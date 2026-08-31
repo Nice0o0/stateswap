@@ -276,6 +276,7 @@ main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 #btn-send {
   width: 36px;
   height: 36px;
+  padding: 0; /* button.primary 的 padding 会泄漏进来，撑大按钮并挤没箭头 */
   border-radius: 50%;
   border: none;
   background: var(--accent);
