@@ -120,7 +120,11 @@ function renderSessions() {
 function updateSessionTag(detail) {
   $("session-tag").textContent =
     `会话 ${detail.session_id} · ${detail.turns} 轮 · ${detail.memory_mb} MB 状态`;
-  $("persona-select").value = detail.persona;
+  // 人格可能已被删除（不在下拉里），此时保留当前选择避免静默错位
+  const sel = $("persona-select");
+  if ([...sel.options].some((o) => o.value === detail.persona)) {
+    sel.value = detail.persona;
+  }
 }
 
 function renderHistory(history) {
@@ -200,6 +204,7 @@ function addUserBubble(text) {
   bubble.textContent = text;
   row.append(avatar, bubble);
   $("chat-messages").appendChild(row);
+  scrollChat();
 }
 
 function addAssistantShell(text, stats) {

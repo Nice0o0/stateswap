@@ -9,7 +9,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import torch  # noqa: E402
 
-from stateswap.data import collate  # noqa: E402
 from stateswap.s0 import S0, load_base_model, make_cache  # noqa: E402
 from stateswap.tokenizer import WorldTokenizer  # noqa: E402
 

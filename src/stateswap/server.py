@@ -183,6 +183,8 @@ def create_app(
             )
         except KeyError as e:
             raise HTTPException(404, str(e))
+        except SessionBusy as e:
+            raise HTTPException(409, str(e))
         session = engine.sessions[session_id]
         result["memory_mb"] = round(session.memory_mb(engine.model), 3)
         return result
@@ -201,7 +203,10 @@ def create_app(
             if req.session_id not in engine.sessions:
                 raise HTTPException(404, f"unknown session {req.session_id}")
             if engine.sessions[req.session_id].persona_name != persona:
-                engine.swap_persona(req.session_id, persona)
+                try:
+                    engine.swap_persona(req.session_id, persona)
+                except SessionBusy as e:
+                    raise HTTPException(409, str(e))
             session_id = req.session_id
             last_user = next(
                 (m["content"] for m in reversed(messages) if m["role"] == "user"), ""

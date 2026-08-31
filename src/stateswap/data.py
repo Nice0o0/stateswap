@@ -37,7 +37,6 @@ class Example:
 
 def build_example(tokenizer, instruction: str, output: str, ctx: int = 512) -> Example:
     prompt = build_prompt(instruction)
-    full = prompt + output + "\n\n"
     # 关键：prompt 与 completion 分段编码后拼接。字节级词表的贪婪匹配会让
     # 跨边界 token（如 ": " + 答案首字节）吞掉答案首字符，若用整句编码，
     # prompt_len 掩码边界与 token 边界错位，模型学到的是"残缺字节续写"，
