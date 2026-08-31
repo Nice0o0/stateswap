@@ -102,8 +102,21 @@ class Engine:
             meta = {**(payload.get("meta") or {}), **(meta or {})}
         return self.register_tensor(name, s0, meta)
 
-    def register_tensor(self, name: str, s0: torch.Tensor, meta: dict | None = None) -> Persona:
-        """直接注册一个 S0 张量（state 算术的产物走这里）。"""
+    def register_tensor(self, name: str, s0: torch.Tensor, meta: dict | None = None) -> Persona | None:
+        """直接注册一个 S0 张量（state 算术的产物走这里）。
+        形状与当前底座不符（别的规格模型训的 S₀）时拒绝注册并返回 None。"""
+        expected = (
+            self.model.config.num_hidden_layers,
+            self.model.config.hidden_size // self.model.config.head_dim,
+            self.model.config.head_dim,
+            self.model.config.head_dim,
+        )
+        if tuple(s0.shape) != expected:
+            print(
+                f"[stateswap] 跳过人格 {name!r}：S₀ 形状 {tuple(s0.shape)} 与当前底座 "
+                f"{expected} 不匹配（其他规格模型训练的人格不能挂到这个底座）"
+            )
+            return None
         persona = Persona(name=name, s0=s0.float().to(self.device), meta=meta or {})
         with self._lock:
             self.personas[name] = persona
