@@ -54,3 +54,4 @@ ignore = ["E501"]
 # 演示/调试脚本刻意把 import 和 print 交错，用于展示加载顺序
 "scripts/debug_triton.py" = ["E402"]
 "scripts/smoke_gpu.py" = ["E402"]
+"scripts/verify_live.py" = ["E402"]

@@ -7,7 +7,7 @@
 **一个 RWKV-7 底座，N 个人格：把人格训成几 MB 的初始状态（S0），服务时微秒级热切换。**
 **One RWKV-7 base model, many personas: train each persona into a few-MB initial state (S0) and hot-swap it at serving time.**
 
-[中文](#中文) | [English](#english)
+[中文](#中文) | [English](README_EN.md)
 
 ---
 
@@ -188,27 +188,3 @@ data/                    NekoQA 冒烟子集（Apache-2.0，来自 Preen 仓库�
 ## License
 
 MIT（数据与上游组件遵循各自许可，见 NOTICE 文件）
-
----
-
-<a id="english"></a>
-
-## English Summary
-
-**stateswap** turns RWKV-7 "state tuning" into a serving problem: freeze all model
-weights, train only the per-layer initial state S₀ ((H, 64, 64) per layer, a few MB
-total) so the model *cold-starts* as a persona — a style, a role, or a task mode.
-At serving time a persona is just a tensor; swapping it rebuilds the O(1) recurrent
-state cache in microseconds while multi-turn sessions keep their context without
-replaying history (vs O(T) prefill for Transformer-style stateless APIs).
-
-- Training: chunked Triton WKV7 kernels with gradients flowing into S₀
-  (the fused_recurrent path in fla 0.5.2 silently drops them — forced to chunk).
-- Serving: OpenAI-compatible FastAPI, per-session state caches, persona hot-swap,
-  streaming via SSE.
-- Everything runs on native Windows + consumer Blackwell (RTX 5070 Ti, sm_120)
-  with triton-windows; training 0.4B @ ctx 512 costs ~0.7 s/step and 1.6 GB VRAM.
-
-See [docs/engineering-notes.md](docs/engineering-notes.md) for the full war story
-(3 real bugs found: CPython 3.10 inspect truncation, fla fused-path autograd gap,
-stale `num_heads` in RWKV7Config) and docs/benchmarks.md for numbers.

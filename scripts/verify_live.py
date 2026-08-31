@@ -61,6 +61,7 @@ def long_stream():
 t = threading.Thread(target=long_stream)
 t.start()
 import time
+
 time.sleep(4)  # 让第一个请求进入解码循环
 code, body = call("/v1/chat/completions", "POST",
                   {"model": "neko-0.4b-v2", "session_id": s["session_id"],
