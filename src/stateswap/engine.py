@@ -379,7 +379,7 @@ class Engine:
             generated = [[] for _ in range(B)]
             finished = [False] * B
             next_ids = torch.tensor(
-                [[int(l.argmax())] for l in prefill_logits], device=self.device)
+                [[int(logits.argmax())] for logits in prefill_logits], device=self.device)
             for b in range(B):
                 generated[b].append(int(next_ids[b, 0]))
 

@@ -7,6 +7,7 @@ const state = {
   sessions: [],
   activeId: null,
   sending: false,
+  ready: false,
 };
 
 /* ---------- helpers ---------- */
@@ -287,20 +288,22 @@ $("input").addEventListener("input", (ev) => {
 $("composer").onsubmit = async (ev) => {
   ev.preventDefault();
   if (state.sending) return;
+  if (!state.ready) { showErr("引擎尚未就绪（首次加载需要预热内核），稍候再试"); return; }
   const text = $("input").value.trim();
   if (!text) return;
-  if (!state.activeId) { try { await newSession(); } catch (e) { showErr(e); return; } }
-
-  const el = $("input");
-  el.value = "";
-  el.style.height = "auto";
-
-  addUserBubble(text);
-  const body = addAssistantShell("", null);
+  // 同步置位，杜绝会话创建期间的双击双发
   state.sending = true;
   $("btn-send").disabled = true;
+  $("btn-send").classList.add("sending");
+  const body = addAssistantShell("", null);
 
   try {
+    if (!state.activeId) await newSession();
+    const el = $("input");
+    el.value = "";
+    el.style.height = "auto";
+    addUserBubble(text);
+
     const temp = Number($("temp-preset").value);
     const res = await fetch("/v1/chat/completions", {
       method: "POST",
@@ -357,6 +360,7 @@ $("composer").onsubmit = async (ev) => {
   } finally {
     state.sending = false;
     $("btn-send").disabled = false;
+    $("btn-send").classList.remove("sending");
     scrollChat();
   }
 };
@@ -469,9 +473,27 @@ async function pollTrain() {
 
 /* ---------- boot ---------- */
 (async () => {
+  // 引擎加载（权重 + 内核预热）可能需要几十秒：轮询 /health 直到就绪
+  let ready = false;
+  for (let i = 0; i < 90; i++) {
+    try {
+      const h = await fetch("/health").then((r) => r.json());
+      if (h.engine_ready) { ready = true; break; }
+      setStatus(false, "引擎加载中…");
+    } catch {
+      setStatus(false, "连接中…");
+    }
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  if (!ready) {
+    setStatus(false, "服务不可达");
+    addSystemNote("⚠ 无法连接 stateswap 服务，请确认服务器已启动（python -m stateswap.server ...）");
+    return;
+  }
   try {
-    await loadPersonas();
+    state.ready = true;
     setStatus(true, "服务正常");
+    await loadPersonas();
     await loadSessions();
     if (state.sessions.length) {
       await activateSession(state.sessions[0].session_id);
@@ -479,7 +501,6 @@ async function pollTrain() {
       await newSession();
     }
   } catch (e) {
-    setStatus(false, "服务不可达");
-    addSystemNote("⚠ 无法连接 stateswap 服务，请确认服务器已启动（python -m stateswap.server ...）");
+    showErr(e);
   }
 })();

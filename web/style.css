@@ -289,6 +289,11 @@ main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 }
 #btn-send:hover:not(:disabled) { filter: brightness(1.1); }
 #btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+#btn-send.sending { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
 #btn-send svg { width: 16px; height: 16px; }
 
 .disclaimer {

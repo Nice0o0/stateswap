@@ -1,7 +1,6 @@
 # One-off: train a LoRA persona with the SAME parameter budget as S0 (not part
 # of the package). 1.5B / r=16 on r/k/v/o + ffn key/value ≈ 3.1M trainable
 # params = fair comparison against the 3.1M-param S0.
-import json
 import sys
 import time
 from pathlib import Path
@@ -13,8 +12,8 @@ from peft import LoraConfig, get_peft_model  # noqa: E402
 from transformers import AutoModelForCausalLM  # noqa: E402
 
 from stateswap.data import S0Dataset, collate  # noqa: E402
-from stateswap.s0 import make_cache  # noqa: E402
 from stateswap.s0 import S0 as S0Holder  # noqa: E402
+from stateswap.s0 import make_cache  # noqa: E402
 from stateswap.tokenizer import load_tokenizer  # noqa: E402
 
 MODEL = "models/rwkv7-1.5b-world-hf"
