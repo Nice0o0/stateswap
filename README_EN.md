@@ -217,6 +217,14 @@ Full details: [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese).
   (`stateswap train --turns 3 --ctx 1024`) as the root fix — gradients flow through
   every turn of chained conversations. Same 15-turn probe: **4/15 → 0/15**
   degenerate turns (benchmarks.md §7).
+- Cross-turn factual recall is a separate, harder limit: the state carries topic
+  vibes but not sparse facts — a name/pet planted at T1 is hallucinated by T2, and
+  the no-persona baseline dead-loops entirely (scripts/probe_context.py). Root
+  causes: training chains have no cross-turn dependencies (nothing to learn
+  "remember" from), and a 1.5B 64×64 state keeps sparse facts poorly. Shipped
+  mitigation: **bounded text replay** (`context_replay`, default 4) re-prefixes the
+  last K turns as visible text — recall within the window works, older facts and
+  pronoun resolution remain the base model's hard ceiling.
 
 ## Persona anatomy, in brief
 

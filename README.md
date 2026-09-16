@@ -43,6 +43,7 @@ RWKV-7 每层维护一个随 token 演化的递归状态 S（每头 64×64）。
 | 解码速度（单会话） | ~20–25 tok/s（纯 Python 循环，未优化） |
 | 批量解码（batch_chat，B=8） | **135.5 tok/s（6.29×）**，见 [benchmarks.md](docs/benchmarks.md) §6.1 |
 | 长对话退化（15 轮探针） | 单轮训练 4/15 轮 → **多轮训练 0/15 轮**（护栏兜底另算），见 [benchmarks.md](docs/benchmarks.md) §7 |
+| 跨轮事实回忆（6 轮探针） | 纯状态模式全灭（幻觉/死循环）→ **context_replay=4 恢复**；更早事实是 1.5B 硬边界，见[工程笔记](docs/engineering-notes.md) |
 
 行为示例（0.4B-v2 人格，3,095 对语料训练；同一底座、同一输入）：
 

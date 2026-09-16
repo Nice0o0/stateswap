@@ -75,6 +75,10 @@ class Session:
     # 退化护栏：每轮开始前的状态快照（CPU，最多 SNAPSHOT_LEVELS 级）与连续退化计数
     snapshots: list = field(default_factory=list, repr=False)
     degenerate_streak: int = 0
+    # 有界文本重放：每轮 prefill 时把最近 K 轮对话拼进 prompt。
+    # 实测 1.5B 的状态事实保持很弱（即刻回忆即失败，scripts/probe_context.py），
+    # K=2 让近期事实以"可见文本"形式存在；K 有界故仍是 O(1)，0 = 纯状态模式
+    context_replay: int = 4
 
     def memory_mb(self, model) -> float:
         """Per-session state footprint in MB (recurrent + conv/ffn caches)."""
@@ -161,13 +165,14 @@ class Engine:
         cache = make_cache(self.model, holder, batch_size=batch_size, detach_states=True)
         return cache
 
-    def new_session(self, persona_name: str = "none") -> Session:
+    def new_session(self, persona_name: str = "none", context_replay: int = 4) -> Session:
         if persona_name not in self.personas:
             raise KeyError(f"unknown persona: {persona_name}")
         self._prune_sessions()
         session_id = uuid.uuid4().hex[:12]
         cache = self._cache_for(self.personas[persona_name])
-        session = Session(session_id=session_id, persona_name=persona_name, cache=cache)
+        session = Session(session_id=session_id, persona_name=persona_name, cache=cache,
+                          context_replay=context_replay)
         with self._lock:
             self.sessions[session_id] = session
         return session
@@ -370,7 +375,15 @@ class Engine:
             session.snapshots.append(snap)
             del session.snapshots[:-SNAPSHOT_LEVELS]
         # 与训练侧 build_prompt 严格一致（含尾随空格）：S₀ 对 token 边界极其敏感
+        # 有界重放：最近 K 轮以相同模板拼在当前 prompt 之前，近期事实成为可见文本
         prompt = "User: " + user_text + "\n\nAssistant: "
+        if session.context_replay > 0 and session.history:
+            replayed = session.history[-2 * session.context_replay:]
+            prefix = "".join(
+                ("User: " if m["role"] == "user" else "Assistant: ") + m["content"] + "\n\n"
+                for m in replayed
+            )
+            prompt = prefix + prompt
         prompt_ids = self.tok.encode(prompt)
         t_prefill0 = time.perf_counter()
         out = self.model(

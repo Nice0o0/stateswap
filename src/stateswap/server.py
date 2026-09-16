@@ -49,6 +49,9 @@ class ChatRequest(BaseModel):
 
 class SessionRequest(BaseModel):
     persona: str = "none"
+    # 有界文本重放（轮数）：近期事实以可见文本存在，弥补 1.5B 状态事实保持的
+    # 不足（实测即刻回忆即失败）；K 有界仍是 O(1)，0 = 纯状态模式
+    context_replay: int = 4
 
 
 class SwapRequest(BaseModel):
@@ -128,7 +131,7 @@ def create_app(
     def create_session(req: SessionRequest = Body(...)):
         engine = _engine()
         try:
-            session = engine.new_session(req.persona)
+            session = engine.new_session(req.persona, context_replay=req.context_replay)
         except KeyError as e:
             raise HTTPException(404, str(e))
         return {
