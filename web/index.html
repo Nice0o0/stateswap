@@ -11,7 +11,7 @@
       document.documentElement.dataset.theme = saved || (prefersDark ? "dark" : "light");
     })();
   </script>
-  <link rel="stylesheet" href="style.css?v=0.2.0">
+  <link rel="stylesheet" href="style.css?v=0.2.1">
 </head>
 <body>
   <aside id="sidebar">
@@ -25,17 +25,19 @@
       <button id="nav-mix" class="side-link">🧪 人格混合实验台</button>
       <button id="nav-train" class="side-link">🔥 训练新人格</button>
       <div class="side-row">
-        <button id="btn-theme" title="切换亮/暗主题">🌙</button>
+        <button id="btn-theme" title="切换亮/暗主题" aria-label="切换亮/暗主题">🌙</button>
         <a href="https://github.com/Nice0o0/stateswap" target="_blank" rel="noopener">GitHub ↗</a>
         <span id="server-status" class="dot-off" title="服务状态">●</span>
       </div>
     </div>
   </aside>
+  <div id="backdrop"></div>
 
   <main>
     <section id="view-chat" class="view active">
       <header id="chat-top">
-        <select id="persona-select" title="切换人格（热切换，约 3ms）"></select>
+        <button id="btn-menu" class="icon-btn" aria-label="打开会话列表">☰</button>
+        <select id="persona-select" title="切换人格（热切换，约 3ms）" aria-label="切换人格"></select>
         <select id="temp-preset" title="采样温度：越高越发散，越低越稳定">
           <option value="0.2">🎯 精准</option>
           <option value="0.7" selected>⚖️ 平衡</option>
@@ -107,6 +109,6 @@
     </section>
   </main>
 
-  <script src="app.js?v=0.2.0"></script>
+  <script src="app.js?v=0.2.1"></script>
 </body>
 </html>

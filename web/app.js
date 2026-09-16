@@ -55,6 +55,15 @@ for (const link of document.querySelectorAll(".back")) {
   link.onclick = () => showView(link.dataset.nav);
 }
 
+/* ---------- mobile sidebar（窄屏抽屉） ---------- */
+function setSidebar(open) {
+  document.body.classList.toggle("sidebar-open", open);
+  $("backdrop").classList.toggle("show", open);
+}
+$("btn-menu").onclick = () =>
+  setSidebar(!document.body.classList.contains("sidebar-open"));
+$("backdrop").onclick = () => setSidebar(false);
+
 /* ---------- personas ---------- */
 async function loadPersonas() {
   state.personas = (await api("/v1/personas")).personas;
@@ -132,23 +141,55 @@ function updateSessionTag(detail) {
 function renderHistory(history) {
   const box = $("chat-messages");
   box.innerHTML = "";
-  if (!history.length) {
-    addSystemNote("新对话已就绪。试试翻译人格：选中 zh2en 后直接打中文，不需要任何指令。");
-  }
+  if (!history.length) showWelcome();
   for (const m of history) {
     if (m.role === "user") addUserBubble(m.content);
     else if (m.role === "assistant") addAssistantShell(m.content, null);
   }
-  scrollChat();
+  scrollChat(true);
+}
+
+/* 空会话欢迎页：示例 prompt 一键填入输入框 */
+function showWelcome() {
+  const wrap = document.createElement("div");
+  wrap.className = "welcome";
+  const h = document.createElement("h2");
+  h.textContent = "一个底座，N 个人格";
+  const p = document.createElement("p");
+  p.textContent = "顶栏选择人格（约 3ms 热切换）。试试翻译人格：选中 zh2en 后直接打中文，不需要任何指令。";
+  const chips = document.createElement("div");
+  chips.className = "chips";
+  for (const text of [
+    "早上好呀！今天想吃小鱼干吗？",
+    "陪我聊聊天吧，今天有点累",
+    "今天的月亮又圆又亮。",
+    "给我讲个笑话吧",
+  ]) {
+    const c = document.createElement("button");
+    c.className = "chip";
+    c.type = "button";
+    c.textContent = text;
+    c.onclick = () => {
+      const el = $("input");
+      el.value = text;
+      el.dispatchEvent(new Event("input")); // 触发自动增高
+      el.focus();
+    };
+    chips.appendChild(c);
+  }
+  wrap.append(h, p, chips);
+  $("chat-messages").appendChild(wrap);
 }
 
 async function activateSession(id) {
+  if (state.sending) return; // 流式进行中切会话会孤立正在渲染的气泡
   try {
     const detail = await api(`/v1/sessions/${id}`);
     state.activeId = detail.session_id;
     updateSessionTag(detail);
     renderHistory(detail.history);
     renderSessions();
+    setSidebar(false); // 窄屏抽屉：选中后自动收起
   } catch (e) {
     showErr(e);
   }
@@ -190,7 +231,15 @@ $("persona-select").onchange = async () => {
 };
 
 /* ---------- chat rendering ---------- */
-function scrollChat() {
+// 用户上翻阅读历史时不强制回底；自己发消息/切会话时始终回底
+let stickToBottom = true;
+$("chat-scroll").addEventListener("scroll", () => {
+  const sc = $("chat-scroll");
+  stickToBottom = sc.scrollHeight - sc.scrollTop - sc.clientHeight < 60;
+});
+
+function scrollChat(force = false) {
+  if (!force && !stickToBottom) return;
   const sc = $("chat-scroll");
   sc.scrollTop = sc.scrollHeight;
 }
@@ -206,7 +255,7 @@ function addUserBubble(text) {
   bubble.textContent = text;
   row.append(avatar, bubble);
   $("chat-messages").appendChild(row);
-  scrollChat();
+  scrollChat(true); // 自己发的消息始终回底
 }
 
 function addAssistantShell(text, stats) {
@@ -219,7 +268,17 @@ function addAssistantShell(text, stats) {
   block.className = "msg-assistant";
   const body = document.createElement("div");
   body.className = "a-text" + (text ? "" : " empty");
-  body.textContent = text || "思考中…";
+  if (text) {
+    body.textContent = text;
+  } else {
+    body.append("思考中");
+    for (let i = 0; i < 3; i++) {
+      const d = document.createElement("span");
+      d.className = "tdot";
+      d.textContent = ".";
+      body.appendChild(d);
+    }
+  }
   block.appendChild(body);
   if (stats) block.appendChild(renderStats(stats));
   row.append(avatar, block);
@@ -327,8 +386,9 @@ $("composer").onsubmit = async (ev) => {
       const { done, value } = await reader.read();
       if (done) break;
       buf += decoder.decode(value, { stream: true });
-      for (const chunk of buf.split("\n\n")) {
-        buf = buf.includes(chunk) ? buf.slice(buf.indexOf(chunk) + chunk.length + 2) : "";
+      const events = buf.split("\n\n");
+      buf = events.pop(); // 末尾可能是不完整事件，留给下一次 read 拼齐
+      for (const chunk of events) {
         const line = chunk.trim();
         if (!line.startsWith("data: ") || line === "data: [DONE]") continue;
         const payload = JSON.parse(line.slice(6));
@@ -350,7 +410,7 @@ $("composer").onsubmit = async (ev) => {
     }
     if (errorMsg) {
       addSystemNote(`⚠ ${errorMsg}`);
-      body.remove();
+      body.closest(".msg-row")?.remove(); // 整行移除，不留孤儿头像
     } else {
       body.textContent = reply || "（空回复）";
       if (stats) blockAppendStats(body, stats);
@@ -362,6 +422,7 @@ $("composer").onsubmit = async (ev) => {
     state.sending = false;
     $("btn-send").disabled = false;
     $("btn-send").classList.remove("sending");
+    $("input").focus();
     scrollChat();
   }
 };
