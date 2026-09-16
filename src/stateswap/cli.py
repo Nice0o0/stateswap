@@ -26,6 +26,8 @@ def main() -> None:
     p.add_argument("--steps", type=int, default=500)
     p.add_argument("--lr", type=float, default=1e-4)
     p.add_argument("--ctx", type=int, default=512)
+    p.add_argument("--turns", type=int, default=1,
+                   help=">1: chain pairs into multi-turn samples (long-conversation robustness)")
 
     p = sub.add_parser("serve", help="run the OpenAI-compatible server")
     p.add_argument("--model", required=True)
@@ -50,7 +52,7 @@ def main() -> None:
 
         train_s0(
             TrainConfig(model_dir=args.model, vocab=args.vocab, data=args.data, out=args.out,
-                        steps=args.steps, lr=args.lr, ctx=args.ctx)
+                        steps=args.steps, lr=args.lr, ctx=args.ctx, turns=args.turns)
         )
     elif args.cmd == "serve":
         from .server import main as serve_main

@@ -94,6 +94,12 @@
   字符 4-gram 唯一率检测 + 回滚（engine.py）。**朴素 S₀ 回锚
   （S ← 0.85S + 0.15S₀）反而制造泰文汤**——运行态状态的线性插值同样
   在流形之外，与 state 算术的相变结论一致（probe_persona_decay.py）。
+- **多轮样本训练是治本项**：单轮样本只在"对话开头"训练 S0，长对话中段的
+  状态分布从未被覆盖。`--turns 3 --ctx 1024` 把若干对拼成多轮对话
+  （每个 Assistant 段都算 loss），梯度穿过状态演化后的每一轮——
+  同样 15 轮探针退化 4/15 → 0/15（benchmarks.md §7）。话题不连贯不要紧，
+  训练的正是"状态演化后仍保持人格"的稳健性。训练人格用于长对话场景时
+  默认应开 --turns。
 - transformers 5.16 的 tied-weight 记账与 fla 的 `_tied_weights_keys`
   （list 形式）不兼容，`save_pretrained` 直接崩；绕过：手动写
   safetensors + `config.save_pretrained`。

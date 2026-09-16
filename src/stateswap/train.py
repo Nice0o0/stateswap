@@ -38,6 +38,7 @@ class TrainConfig:
     batch_size: int = 1
     grad_accum: int = 1
     ctx: int = 512
+    turns: int = 1  # >1 时把多对拼成多轮对话样本（长对话稳健性训练）
     grad_clip: float = 1.0
     s0_init_std: float = 0.0
     seed: int = 42
@@ -64,7 +65,7 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
 
     s0 = S0(model).to(device)
     s0.init_noise(cfg.s0_init_std)
-    dataset = S0Dataset(tok, cfg.data, ctx=cfg.ctx)
+    dataset = S0Dataset(tok, cfg.data, ctx=cfg.ctx, turns=cfg.turns)
     opt = torch.optim.AdamW(s0.parameters(), lr=cfg.lr, betas=(0.9, 0.95), weight_decay=0)
 
     print(
@@ -153,6 +154,7 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
             "steps": cfg.steps,
             "lr": cfg.lr,
             "ctx": cfg.ctx,
+            "turns": cfg.turns,
             "num_layers": s0.num_layers,
             "num_heads": s0.num_heads,
             "head_dim": s0.head_dim,
@@ -181,6 +183,8 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--batch-size", type=int, default=1)
     ap.add_argument("--grad-accum", type=int, default=1)
     ap.add_argument("--ctx", type=int, default=512)
+    ap.add_argument("--turns", type=int, default=1,
+                    help=">1: chain this many pairs into one multi-turn sample")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--log-every", type=int, default=25)
     args = ap.parse_args(argv)
@@ -196,6 +200,7 @@ def main(argv: list[str] | None = None) -> None:
         batch_size=args.batch_size,
         grad_accum=args.grad_accum,
         ctx=args.ctx,
+        turns=args.turns,
         seed=args.seed,
         log_every=args.log_every,
     )

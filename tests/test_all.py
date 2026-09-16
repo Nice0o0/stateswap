@@ -86,6 +86,58 @@ def test_build_example_truncation_keeps_tail():
     assert len(ex.input_ids) <= 128
 
 
+def test_build_multiturn_masks_all_assistant_spans():
+    from stateswap.data import build_multiturn_example, build_prompt
+    from stateswap.tokenizer import WorldTokenizer
+
+    tok = WorldTokenizer(VOCAB)
+    turns = [("早上好", "喵呜~主人早安！"), ("讲个笑话", "小鱼干走进了酒吧…喵！"), ("晚安", "好梦喵~")]
+    ex = build_multiturn_example(tok, turns, ctx=1024)
+    labels = ex.labels
+    assert len(labels) == len(ex.input_ids)
+    # 每个 Assistant 段都被监督（含结尾 \n\n），User 段全部掩码
+    pos = 0
+    for instruction, output in turns:
+        p_len = len(tok.encode(build_prompt(instruction)))
+        c_ids = tok.encode(output + "\n\n")
+        assert all(lb == -100 for lb in labels[pos : pos + p_len])
+        assert labels[pos + p_len : pos + p_len + len(c_ids)] == c_ids
+        pos += p_len + len(c_ids)
+    assert pos == len(ex.input_ids)
+
+
+def test_build_multiturn_truncation_keeps_alignment():
+    from stateswap.data import build_multiturn_example
+    from stateswap.tokenizer import WorldTokenizer
+
+    tok = WorldTokenizer(VOCAB)
+    turns = [("你好", "喵" * 200), ("继续", "呜" * 200)]
+    ex = build_multiturn_example(tok, turns, ctx=128)
+    assert len(ex.input_ids) == len(ex.labels) <= 128
+    # 截断后尾部仍是被监督的 Assistant 内容
+    assert ex.labels[-1] != -100
+
+
+def test_dataset_multiturn_chain_packing():
+    from stateswap.data import S0Dataset
+    from stateswap.tokenizer import WorldTokenizer
+
+    tok = WorldTokenizer(VOCAB)
+    data = [{"instruction": f"问题{i}", "output": f"回答{i}喵"} for i in range(9)]
+    import json
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(
+        "w", suffix=".json", delete=False, encoding="utf-8"
+    ) as f:
+        json.dump(data, f, ensure_ascii=False)
+        path = f.name
+    ds = S0Dataset(tok, path, ctx=1024, turns=3)
+    assert len(ds) == 3  # 9 对 → 3 条三轮链
+    for ex in ds.examples:
+        assert len(ex.input_ids) == len(ex.labels) <= 1024
+
+
 # ---------- state arithmetic ----------
 
 def test_interpolate_endpoints():

@@ -92,6 +92,11 @@ python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir pers
 
 参考规模：1.5B 底座 ctx 512 约 0.2s/step、峰值 4.8GB 显存；3095 对语料 4000 步 ≈ 15 分钟。
 
+> **打算拿来长对话的人格，建议用多轮样本训练**：命令行加 `--turns 3 --ctx 1024`，
+> 把连续若干对拼成一段多轮对话（每个 Assistant 段都算 loss）。单轮样本只在
+> "对话开头"训练 S₀，是长对话退化的训练侧根因；多轮训练后 15 轮探针退化
+> 4/15 → 0/15（见 [benchmarks.md](benchmarks.md) §7）。
+
 ## 4. 命令行用法
 
 WebUI 之外，所有能力都有 CLI：
@@ -100,7 +105,7 @@ WebUI 之外，所有能力都有 CLI：
 # 转换模型
 python -m stateswap.cli convert --pth <权重.pth> --out models/<名字>
 
-# 训练人格
+# 训练人格（长对话场景加 --turns 3 --ctx 1024）
 python -m stateswap.cli train --model models/rwkv7-1.5b-world-hf ^
     --data data/neko_corpus_full.json --out personas/neko-1.5b --steps 4000
 

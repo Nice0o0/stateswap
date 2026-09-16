@@ -201,6 +201,18 @@ Full details: [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese).
   re-verify behavioral claims with **greedy decoding** (one "perfect" translation at
   temperature 1.0 turned out to be sampling luck).
 
+## Long conversations, in brief
+
+- Degeneration mechanism is a **state snowball**, not S₀ drift: the recurrent state
+  *is* the conversation memory, so a derailed long reply poisons every later turn.
+  cos(state, S₀) falls below 0.05 within two turns while persona stays intact, and
+  naively re-anchoring the state toward S₀ produces garbage (off-manifold blending).
+- Two-layer fix shipped: a **degeneration guard** (per-turn state snapshot + repetition
+  detection + rollback) as the safety net, and **multi-turn training**
+  (`stateswap train --turns 3 --ctx 1024`) as the root fix — gradients flow through
+  every turn of chained conversations. Same 15-turn probe: **4/15 → 0/15**
+  degenerate turns (benchmarks.md §7).
+
 ## Roadmap
 
 - [x] S₀ arithmetic: interpolation / addition = persona blending? → **No (sharp phase transition)**

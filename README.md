@@ -41,6 +41,7 @@ RWKV-7 每层维护一个随 token 演化的递归状态 S（每头 64×64）。
 | S₀ 线性混合 | **不可行**：尖锐相变而非平滑插值，见 [docs/state-arithmetic.md](docs/state-arithmetic.md) |
 | 解码速度（单会话） | ~20–25 tok/s（纯 Python 循环，未优化） |
 | 批量解码（batch_chat，B=8） | **135.5 tok/s（6.29×）**，见 [benchmarks.md](docs/benchmarks.md) §6.1 |
+| 长对话退化（15 轮探针） | 单轮训练 4/15 轮 → **多轮训练 0/15 轮**（护栏兜底另算），见 [benchmarks.md](docs/benchmarks.md) §7 |
 
 行为示例（0.4B-v2 人格，3,095 对语料训练；同一底座、同一输入）：
 
@@ -202,6 +203,13 @@ data/            训练语料（许可与出处见 NOTICE）
    覆盖底座通用能力**（"法国首都"都用猫娘腔回答），**system-prompt 完整保留**
    （"法国的首都是巴黎"✓）。多人格服务成本：S₀ 热切换 13.7ms vs LoRA 每人格
    一个 3GB 模型目录 vs system-prompt 每请求 1731 token 开销。
+5. **[长对话退化与多轮训练修复](docs/engineering-notes.md)**：长对话胡言乱语的
+   机制是**状态雪崩**——RWKV 的递归状态就是对话记忆，长回复一旦脱轨，脱轨
+   token 也被写进状态，后续轮次持续污染（15 轮探针：单轮训练人格 4 轮退化）。
+   与"状态相对 S₀ 漂移"**无关**（cos 两轮内 <0.05 而人格完好）；朴素 S₀ 回锚
+   反而制造乱码。两层修复：**退化护栏**（轮初快照 + 复读检测 + 回滚，engine）
+   兜底；**多轮样本训练**（`--turns 3`，梯度穿过状态演化后的每一轮）治本——
+   同样 15 轮探针**退化 4/15 → 0/15**（[benchmarks.md](docs/benchmarks.md) §7）。
 
 ## Roadmap
 
