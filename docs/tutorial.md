@@ -53,9 +53,27 @@ python scripts/convert_model.py --pth RWKV-x070-World-1.5B-v3-20250127-ctx4096.p
 
 ## 3. 启动服务与 WebUI
 
+### 3.0 日常启动（已完成安装后）
+
+**一键启动**：Windows 双击 `start_webui.bat`，Linux 运行 `bash start_webui.sh`。
+脚本自动选择虚拟环境、加载默认底座并打开浏览器。可用环境变量覆盖：
+
+```bash
+# Windows（cmd）
+set STATESWAP_MODEL=models/rwkv7-0.4b-world-hf && set STATESWAP_PORT=8001 && start_webui.bat
+# Linux
+STATESWAP_PORT=8001 bash start_webui.sh
+```
+
+**手动启动**（等价于脚本做的事）：
+
 ```bash
 python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir personas --port 8000
 ```
+
+- 局域网访问：加 `--host 0.0.0.0`（无鉴权，仅限可信网络）
+- 后台常驻：Linux 用 `nohup ... > server.log 2>&1 &`；Windows 直接最小化该窗口即可
+- 会话上限 64 个（超出回收最久未用的），人格文件持久化在 `personas/`
 
 浏览器打开 **http://127.0.0.1:8000**。
 
@@ -68,6 +86,10 @@ python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir pers
 3. 输入消息，**Enter 发送**，**Shift+Enter 换行**（中文输入法确认候选词的 Enter 不会误发）
 4. 回复逐 token 流式显示，下方标签显示真实性能：`N tok · prefill Xms · Xms/tok · 状态 XMB`
 5. 顶栏 **⚖️ 平衡 / 🎯 精准 / 🎨 创意** 切换采样温度：小模型建议平衡档，创意档（1.0）发散度高
+6. 顶栏 **🧬** 展开状态监视器：24 层状态解剖条（柱高=层范数，颜色=与人格 S₀ 的锚定度），每轮实时刷新
+
+> 如果某条长回复被提示"检测到退化，已回滚会话状态"：这是**退化护栏**在工作——
+> 复读/乱码的回复不会被写进会话记忆，防止污染后续对话。换个问法或要求更短的回复即可。
 
 ### 3.2 会话管理
 
@@ -148,11 +170,14 @@ print(resp.choices[0].message.content)
 
 - `POST /v1/sessions` / `GET /v1/sessions` / `DELETE /v1/sessions/{id}` —— 会话生命周期
 - `GET /v1/sessions/{id}` —— 完整对话历史（前端"会话记录"的数据源）
+- `GET /v1/sessions/{id}/state-stats` —— 每层状态范数 + 与人格 S₀ 的余弦（🧬 监视器数据源）
 - `POST /v1/sessions/{id}/swap` —— 人格热切换（`{"persona": "...", "keep_context": false}`）
 - `POST /v1/personas/mix` —— S₀ 线性混合
 - `POST /v1/train/start` + `GET /v1/train/status` —— WebUI 训练的后端
 
-## 6. S₀ int8 量化（人格体积 ÷4）
+## 6. 人格压缩：int8（÷4）与 rank-4（÷7.9）
+
+int8 量化：
 
 ```bash
 python -c "from stateswap.quant import save_quantized; import torch; \
@@ -160,8 +185,17 @@ python -c "from stateswap.quant import save_quantized; import torch; \
   'personas/neko-1.5b.int8.pt', {'quantized': 'int8'})"
 ```
 
-重启服务后，`neko-1.5b-int8` 会出现在人格列表。实测 12.58MB → 3.15MB，
-贪心对话风格/语义完全保真（精确 token 序列可能有微小分叉）。
+rank-k SVD 因式分解（人格 ≈ 每头 3-4 维，详见 [persona-anatomy.md](persona-anatomy.md)）：
+
+```bash
+python -c "from stateswap.lowrank import save_lowrank; import torch; \
+  save_lowrank(torch.load('personas/neko-1.5b/s0.pt', weights_only=False)['s0'], \
+  'personas/neko-1.5b.rank4.pt', k=4)"
+```
+
+重启服务后，`neko-1.5b-int8` / `neko-1.5b-rank4` 会自动出现在人格列表
+（`personas/*.int8.pt` 与 `*.rank<N>.pt` 均被自动加载）。实测 int8 12.58MB →
+3.15MB 风格/语义保真；rank-4 → 1.59MB 行为 100% 保真。
 
 ## 7. 批量多会话解码（Python API）
 
@@ -210,7 +244,7 @@ prompt 与 completion **分段编码**。
 | 路径 | 内容 |
 |---|---|
 | `web/` | WebUI 前端（纯 HTML/CSS/JS，FastAPI 托管） |
-| `personas/` | 当前底座的人格状态（`<名>/s0.pt` 或 `<名>.int8.pt`） |
+| `personas/` | 当前底座的人格状态（`<名>/s0.pt`、`<名>.int8.pt`、`<名>.rank<N>.pt`） |
 | `personas-legacy/` | 0.4B/0.1B 旧底座人格存档 |
 | `data/` | 训练数据集（知识注入/猫娘/翻译语料） |
 | `models/` | 转换后的底座权重（不入库） |

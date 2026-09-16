@@ -109,8 +109,9 @@ python -m stateswap.train --model models/rwkv7-1.5b-world-hf \
 
 # 4) 起服务（自动加载 personas/ 下所有人格）
 python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir personas --port 8000
+#   —— 日常启动也可直接双击 start_webui.bat（Linux: bash start_webui.sh）
 
-# 5) 浏览器打开 http://127.0.0.1:8000 —— WebUI（聊天 / 人格混合 / 训练）
+# 5) 浏览器打开 http://127.0.0.1:8000 —— WebUI（聊天 / 人格混合 / 训练 / 🧬 状态监视器）
 ```
 
 > 底座大小决定对话能力上限，S₀ 只负责风格与任务模式。1.5B 起步对话才"正常"，
