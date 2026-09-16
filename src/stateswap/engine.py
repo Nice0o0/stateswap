@@ -207,6 +207,10 @@ class Engine:
             else:
                 session.cache = self._cache_for(persona)
                 session.history = []
+            # 护栏快照属于切换前的旧缓存：不清空的话，下次回滚会把旧人格的
+            # 演化状态灌进新人格的缓存（状态/人格错位，输出必然混乱）
+            session.snapshots.clear()
+            session.degenerate_streak = 0
             session.persona_name = persona_name
             return {
                 "swapped_to": persona_name,

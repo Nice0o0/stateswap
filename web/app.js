@@ -71,12 +71,36 @@ async function loadPersonas() {
   fillMixSelects();
 }
 
+/* 人格按用途分组：防止把翻译机/实验产物当成聊天人格误选。
+   zh2en 会把一切输入翻成英文（无法对话是设计如此）；mem 系/mix 系是研究产物。 */
+function personaGroup(name) {
+  if (name === "none") return "⚪ 基线（无人格，易跑偏）";
+  if (name.startsWith("zh2en")) return "🌐 任务人格（翻译专用，不能聊天）";
+  if (name.startsWith("mem-") || name.startsWith("mix-")) return "🧪 实验人格（研究产物）";
+  return "💬 聊天人格";
+}
+
 function renderPersonaSelect() {
   const sel = $("persona-select");
   const prev = sel.value;
-  sel.innerHTML = state.personas
-    .map((p) => `<option value="${p.name}">${p.name}（${p.size_mb} MB）</option>`)
-    .join("");
+  const groups = new Map();
+  for (const p of state.personas) {
+    const g = personaGroup(p.name);
+    if (!groups.has(g)) groups.set(g, []);
+    groups.get(g).push(p);
+  }
+  sel.innerHTML = "";
+  for (const [label, ps] of groups) {
+    const og = document.createElement("optgroup");
+    og.label = label;
+    for (const p of ps) {
+      const o = document.createElement("option");
+      o.value = p.name;
+      o.textContent = `${p.name}（${p.size_mb} MB）`;
+      og.appendChild(o);
+    }
+    sel.appendChild(og);
+  }
   const preferred = state.personas.find((p) => p.name === prev)?.name
     || state.personas.find((p) => p.name.startsWith("neko-1.5b"))?.name
     || state.personas.find((p) => p.name.startsWith("neko"))?.name
