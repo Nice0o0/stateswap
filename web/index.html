@@ -11,7 +11,7 @@
       document.documentElement.dataset.theme = saved || (prefersDark ? "dark" : "light");
     })();
   </script>
-  <link rel="stylesheet" href="style.css?v=0.2.1">
+  <link rel="stylesheet" href="style.css?v=0.2.3">
 </head>
 <body>
   <aside id="sidebar">
@@ -44,7 +44,10 @@
           <option value="1.0">🎨 创意</option>
         </select>
         <span id="session-tag" class="muted"></span>
+        <button id="btn-state" class="icon-text" title="状态监视器：每层状态范数 / 与人格 S₀ 的锚定度">🧬</button>
       </header>
+
+      <div id="state-strip" hidden></div>
 
       <div id="chat-scroll">
         <div id="chat-messages"></div>
@@ -109,6 +112,6 @@
     </section>
   </main>
 
-  <script src="app.js?v=0.2.2"></script>
+  <script src="app.js?v=0.2.3"></script>
 </body>
 </html>

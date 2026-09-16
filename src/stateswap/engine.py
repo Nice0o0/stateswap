@@ -123,6 +123,11 @@ class Engine:
 
                 s0 = dequantize_int8(payload)
                 meta = {**(payload.get("meta") or {}), "quantized": "int8", **(meta or {})}
+            elif "vh" in payload:  # 低秩分解人格（lowrank.save_lowrank 产出）
+                from .lowrank import lowrank_reconstruct
+
+                s0 = lowrank_reconstruct(payload)
+                meta = {**(payload.get("meta") or {}), "lowrank": payload.get("rank"), **(meta or {})}
             else:
                 s0 = payload["s0"].float()
                 meta = {**(payload.get("meta") or {}), **(meta or {})}
@@ -214,6 +219,36 @@ class Engine:
     def drop_session(self, session_id: str) -> None:
         with self._lock:
             self.sessions.pop(session_id, None)
+
+    # ---------------- state inspection (调试/解剖面板) ----------------
+
+    def session_state_stats(self, session_id: str) -> dict:
+        """每层递归状态的范数 + 与人格 S0 的逐头余弦均值（"锚定度"）。
+
+        实测规律：cos 在两轮内跌破 0.05 而人格保持完好——S0 只负责偏置
+        轨迹起点，之后对话活在写入状态的内容里（见 docs/benchmarks.md §7）。
+        """
+        session = self.sessions[session_id]
+        ref = self.personas[session.persona_name].s0  # (L, H, 64, 64)
+        layers = []
+        for i in range(self.model.config.num_hidden_layers):
+            st = session.cache[i]["recurrent_state"]
+            cur = st[0].float().reshape(ref.shape[1], -1)
+            r = ref[i].float().reshape(ref.shape[1], -1)
+            if float(r.norm()) < 1e-12:  # S0=0 基线人格：余弦无定义
+                cos = 0.0
+            else:
+                cos = torch.nn.functional.cosine_similarity(cur, r, dim=-1).mean().item()
+            layers.append({
+                "i": i,
+                "norm": round(float(st.float().norm()), 2),
+                "cos_s0": round(cos, 4),
+            })
+        return {
+            "persona": session.persona_name,
+            "turns": session.turns,
+            "layers": layers,
+        }
 
     # ---------------- generation ----------------
 

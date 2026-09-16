@@ -91,10 +91,13 @@ def create_app(
             candidates = sorted(p for p in Path(persona_dir).iterdir() if (p / "s0.pt").exists())
         for p in candidates:
             engine.register_persona(p.name, str(p / "s0.pt"))
-        # 顶层 int8 量化人格文件（quant.save_quantized 产出）：<名>.int8.pt
+        # 顶层单文件人格：int8 量化（quant.save_quantized）与
+        # 低秩分解（lowrank.save_lowrank，*.rank<N>.pt）产物
         if persona_dir:
             for p in sorted(Path(persona_dir).glob("*.int8.pt")):
                 engine.register_persona(p.name.replace(".int8.pt", "-int8"), str(p))
+            for p in sorted(Path(persona_dir).glob("*.rank*.pt")):
+                engine.register_persona(p.name[:-3].replace(".rank", "-rank"), str(p))
         state["engine"] = engine
 
     @app.get("/health")
@@ -169,6 +172,14 @@ def create_app(
             "memory_mb": round(s.memory_mb(engine.model), 3),
             "history": s.history,
         }
+
+    @app.get("/v1/sessions/{session_id}/state-stats")
+    def session_state_stats(session_id: str):
+        """每层递归状态范数 + 与人格 S0 的余弦（WebUI 状态监视器数据源）。"""
+        engine = _engine()
+        if session_id not in engine.sessions:
+            raise HTTPException(404, f"unknown session {session_id}")
+        return engine.session_state_stats(session_id)
 
     @app.delete("/v1/personas/{name}")
     def delete_persona(name: str):

@@ -34,6 +34,7 @@ RWKV-7 每层维护一个随 token 演化的递归状态 S（每头 64×64）。
 | S0 训练速度（1.5B，ctx=512，batch=1） | 0.19–0.35 s/step，峰值显存 4.8 GB |
 | S0 大小 | 0.4B: 6.29 MB / 1.5B: 12.58 MB（fp32） |
 | S0 int8 量化（quant.py） | 12.58 → **3.15 MB**（4×），风格/语义保真，见 [benchmarks.md](docs/benchmarks.md) §6.2 |
+| S0 rank-4 因式分解（lowrank.py） | 12.58 → **1.59 MB**（7.9×），行为 100% 保真，见 [人格解剖](docs/persona-anatomy.md) |
 | 每会话状态内存 | 1.5B: 12.78 MB，恒定不随对话轮数增长 |
 | 人格热切换延迟 | **2.6–4.4 ms**（重建 24 层状态缓存） |
 | 猫娘风格命中率（基线 → S0） | ~12–25% → **88–100%**（1.5B：12% → 100%） |
@@ -122,6 +123,9 @@ python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir pers
 - **💬 聊天**：SSE 逐 token 流式；左侧点选人格、切换人格（~3ms 热切换）、
   多会话状态管理；每条回复附带 prefill 延迟 / 解码速度 / 会话状态内存；
   检测到回复退化（复读/乱码）时自动回滚会话状态，毒化内容不进入长期记忆。
+- **🧬 状态监视器**：顶栏 🧬 展开 24 层状态解剖条——柱高=层状态范数，
+  颜色=与人格 S₀ 的锚定度。亲眼看"锚定两轮内归零而人格完好"，
+  护栏回滚瞬间红闪。
 - **🧪 人格混合**：α 滑杆实时组合两个 S₀ 注册为新人格——亲自动手复现
   [state 算术实验](docs/state-arithmetic.md)的"尖锐相变"。
 - **🔥 训练**：在网页里选 data/ 下的数据集、设步数和学习率，后台线程训练
@@ -156,6 +160,7 @@ src/stateswap/
   engine.py      人格注册、会话状态缓存、人格热切换、流式/批量生成
   arithmetic.py  S0 插值 / 加减算子（人格混合实验）
   quant.py       S0 int8 逐 (layer, head) 对称量化
+  lowrank.py     S0 rank-k SVD 因式分解（人格 ≈ 每头 3-4 维，7.9× 压缩）
   server.py      FastAPI：OpenAI 兼容 + sessions/swap 端点 + WebUI 托管
   chat.py        终端交互
   cli.py         stateswap 命令入口
@@ -167,6 +172,7 @@ docs/
   engineering-notes.md   全部踩坑记录（面试重点阅读材料 :）
   benchmarks.md          基准数字（含批量解码 / int8 / torch.compile 三项优化实测）
   state-arithmetic*.md   S₀ 算术两轮实验
+  persona-anatomy.md     人格解剖：任务住前层 / 风格偏后层 / 人格 ≈ 每头 3-4 维
   compressed-memory.md   S₀ 压缩记忆容量边界
   tutorial.md            完整使用教程
 scripts/         一次性脚本：转换、数据构建、评测、GPU 冒烟
@@ -210,6 +216,12 @@ data/            训练语料（许可与出处见 NOTICE）
    反而制造乱码。两层修复：**退化护栏**（轮初快照 + 复读检测 + 回滚，engine）
    兜底；**多轮样本训练**（`--turns 3`，梯度穿过状态演化后的每一轮）治本——
    同样 15 轮探针**退化 4/15 → 0/15**（[benchmarks.md](docs/benchmarks.md) §7）。
+6. **[人格解剖](docs/persona-anatomy.md)**：S₀ 里面的内容是有"地址"和"维数"的——
+   **任务模式住前 1/3 层**（砍掉 L00–07 翻译归零），**风格表达偏后 1/3 层**且
+   跨层分布，**中间 8 层可有可无**；逐头 SVD 显示 **人格 ≈ 每头 3–4 维**
+   （rank-3 截断行为 100% 保真，尽管 90% 能量需 14–20 维——大部分状态质量是
+   行为惰性的）。产物：rank-4 因式分解人格 **12.58MB → 1.59MB（7.9×）**，
+   行为保真，见 `lowrank.py` 与 `personas/*.rank4.pt`。
 
 ## Roadmap
 

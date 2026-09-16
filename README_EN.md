@@ -32,6 +32,7 @@ Hardware: RTX 5070 Ti Laptop 12 GB (Blackwell sm_120), native Windows 10, torch 
 |---|---|
 | S₀ training (1.5B, ctx 512, batch 1) | 0.19–0.35 s/step, 4.8 GB peak VRAM |
 | S₀ size | 0.4B: 6.29 MB · 1.5B: 12.58 MB (fp32) |
+| S₀ rank-4 factors | 12.58 → **1.59 MB** (7.9×), behaviorally lossless — [anatomy](docs/persona-anatomy.md) |
 | Per-session state memory | 12.78 MB (1.5B), constant regardless of turn count |
 | Persona hot-swap latency | **2.6–4.4 ms** (rebuild 24 layer states) |
 | Catgirl style hit-rate (baseline → S₀) | ~12–25% → **88–100%** |
@@ -141,6 +142,10 @@ Zero frontend dependencies — FastAPI serves the static files in `web/`:
   top bar, per-reply latency and memory stats. A degeneration guard rolls the
   session state back when a reply collapses into repetition, so a bad generation
   never poisons later turns.
+- **State monitor**: a 🧬 toggle in the top bar expands a 24-layer state strip —
+  bar height = per-layer state norm, color = cosine anchoring to the persona's S₀.
+  Watch the anchoring decay to ~0 within two turns while the persona stays intact,
+  and flash red when the degeneration guard rolls back.
 - **Persona mixer**: an α-slider that composes two S₀ states into a live persona —
   a hands-on reproduction of the phase-transition experiment.
 - **Training**: pick a dataset from `data/`, run S₀ training in a background thread
@@ -212,6 +217,21 @@ Full details: [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese).
   (`stateswap train --turns 3 --ctx 1024`) as the root fix — gradients flow through
   every turn of chained conversations. Same 15-turn probe: **4/15 → 0/15**
   degenerate turns (benchmarks.md §7).
+
+## Persona anatomy, in brief
+
+- Layer-group ablation shows functional topography: **task mode lives in the first
+  third of layers** (zeroing L00–07 kills translation outright), **style is
+  late-layer weighted and distributed** (zeroing L16–23 costs 60% of style), and
+  the middle 8 layers are dispensable for both.
+- Per-head SVD of the 64×64 state matrices: a persona needs only **~3–4 dimensions
+  per head** behaviorally — rank-3 truncation keeps 100% style and translation,
+  while 90% of the Frobenius energy needs 14–20 dimensions. Most of the state mass
+  is behaviorally inert. This also explains the attractor-like phase transition:
+  a persona is a handful of directions in state space.
+- Shipped as artifacts: rank-4 factored personas, 12.58 MB → **1.59 MB (7.9×)**,
+  behaviorally lossless. Report: [docs/persona-anatomy.md](docs/persona-anatomy.md);
+  implementation `src/stateswap/lowrank.py`, files `personas/*.rank4.pt`.
 
 ## Roadmap
 

@@ -189,6 +189,7 @@ async function activateSession(id) {
     updateSessionTag(detail);
     renderHistory(detail.history);
     renderSessions();
+    refreshStateStrip(); // 监视器开着的话同步新会话
     setSidebar(false); // 窄屏抽屉：选中后自动收起
   } catch (e) {
     showErr(e);
@@ -310,6 +311,50 @@ function addSystemNote(text) {
   $("chat-messages").appendChild(div);
 }
 
+/* ---------- state monitor（状态解剖条） ---------- */
+// 24 根柱：柱高 = 该层递归状态范数，颜色 = 与人格 S0 的余弦锚定度。
+// 实测规律：锚定度两轮内跌到接近 0 而人格完好——S0 只负责"点火"。
+async function refreshStateStrip() {
+  if ($("state-strip").hidden || !state.activeId) return;
+  try {
+    const d = await api(`/v1/sessions/${state.activeId}/state-stats`);
+    renderStateStrip(d);
+  } catch { /* 会话可能刚被删除 */ }
+}
+
+function renderStateStrip(d) {
+  const strip = $("state-strip");
+  strip.innerHTML = "";
+  const maxNorm = Math.max(...d.layers.map((l) => l.norm), 1e-9);
+  for (const l of d.layers) {
+    const c = document.createElement("div");
+    c.className = "state-cell";
+    c.style.height = `${18 + Math.round((l.norm / maxNorm) * 46)}px`;
+    const a = Math.min(1, Math.abs(l.cos_s0) / 0.15); // 0.15 以上视为强锚定
+    c.style.background = `rgba(96, 116, 254, ${0.18 + a * 0.82})`;
+    c.title = `L${l.i} · 范数 ${l.norm} · cos(S₀) ${l.cos_s0}`;
+    strip.appendChild(c);
+  }
+  const cap = document.createElement("span");
+  cap.className = "state-cap muted";
+  cap.textContent = `${d.persona} · ${d.turns} 轮 · 柱高=层范数 · 颜色=与 S₀ 锚定度`;
+  strip.appendChild(cap);
+}
+
+$("btn-state").onclick = () => {
+  const strip = $("state-strip");
+  strip.hidden = !strip.hidden;
+  $("btn-state").classList.toggle("on", !strip.hidden);
+  if (!strip.hidden) refreshStateStrip();
+};
+
+function flashStateStrip() {
+  const strip = $("state-strip");
+  if (strip.hidden) return;
+  strip.classList.add("flash");
+  setTimeout(() => strip.classList.remove("flash"), 600);
+}
+
 function showErr(e) {
   addSystemNote(`⚠ ${e.message || e}`);
 }
@@ -417,6 +462,7 @@ $("composer").onsubmit = async (ev) => {
         "（该回复检测到复读/乱码退化，已回滚会话状态、未写入记忆。请换个问法或要求更短的回复后重试）";
       body.classList.add("empty");
       loadSessions();
+      flashStateStrip(); // 监视器红闪：回滚瞬间可见
     } else {
       body.textContent = reply || "（空回复）";
       if (stats) blockAppendStats(body, stats);
@@ -429,6 +475,7 @@ $("composer").onsubmit = async (ev) => {
     $("btn-send").disabled = false;
     $("btn-send").classList.remove("sending");
     $("input").focus();
+    refreshStateStrip();
     scrollChat();
   }
 };

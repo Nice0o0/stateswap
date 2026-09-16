@@ -462,3 +462,35 @@ button.primary:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
 #backdrop { display: none; }
+
+/* ---------- state monitor（状态解剖条） ---------- */
+.icon-text {
+  border: none;
+  background: none;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 4px 8px;
+  color: var(--muted);
+  margin-left: auto;
+}
+.icon-text:hover { background: var(--panel); color: var(--accent); }
+.icon-text.on { color: var(--accent); background: var(--accent-weak); }
+
+#state-strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 4px 24px 10px;
+  max-width: 780px;
+  margin: 0 auto;
+  width: 100%;
+  min-height: 76px;
+}
+.state-cell {
+  width: 14px;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.3s ease, background 0.3s ease;
+}
+.state-cap { font-size: 11px; margin-left: 10px; align-self: center; }
+#state-strip.flash .state-cell { background: var(--err) !important; transition: none; }

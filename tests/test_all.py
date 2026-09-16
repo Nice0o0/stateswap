@@ -198,6 +198,21 @@ def test_unique_4gram_ratio_detects_repetition():
     assert _unique_4gram_ratio("短文本") == 1.0
 
 
+def test_lowrank_roundtrip_and_rank():
+    from stateswap.lowrank import lowrank_reconstruct, svd_truncate
+
+    # 真实秩 r 的矩阵：rank-k ≥ r 截断应近乎无损，rank-k < r 误差 ≈ 尾部能量
+    L, H = 2, 3
+    a = torch.randn(L * H, 64, 10)
+    s0 = (a @ a.transpose(1, 2)).reshape(L, H, 64, 64)  # 秩 ≤ 10
+    rec = lowrank_reconstruct(svd_truncate(s0, 12))
+    assert rec.shape == s0.shape
+    assert torch.allclose(rec, s0, atol=1e-3)
+    rec4 = lowrank_reconstruct(svd_truncate(s0, 4))
+    err = float((rec4 - s0).norm() / s0.norm())
+    assert 0.0 < err < 0.9  # 截断有损失但保留主方向
+
+
 # ---------- model-dependent (GPU) ----------
 
 requires_model = pytest.mark.skipif(

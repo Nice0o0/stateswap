@@ -1,0 +1,122 @@
+{
+  "cliff": {
+    "rank3": {
+      "neko": 1.0,
+      "zh2en": 1.0
+    },
+    "rank2": {
+      "neko": 0.4,
+      "zh2en": 1.0
+    },
+    "rank1": {
+      "neko": 1.0,
+      "zh2en": 0.6
+    }
+  },
+  "rank4_longconv": [
+    {
+      "turn": 1,
+      "uq": 1.0,
+      "len": 82,
+      "degenerate": false
+    },
+    {
+      "turn": 2,
+      "uq": 1.0,
+      "len": 96,
+      "degenerate": false
+    },
+    {
+      "turn": 3,
+      "uq": 1.0,
+      "len": 129,
+      "degenerate": false
+    },
+    {
+      "turn": 4,
+      "uq": 1.0,
+      "len": 109,
+      "degenerate": false
+    },
+    {
+      "turn": 5,
+      "uq": 1.0,
+      "len": 146,
+      "degenerate": false
+    },
+    {
+      "turn": 6,
+      "uq": 0.99,
+      "len": 97,
+      "degenerate": false
+    },
+    {
+      "turn": 7,
+      "uq": 1.0,
+      "len": 87,
+      "degenerate": false
+    },
+    {
+      "turn": 8,
+      "uq": 1.0,
+      "len": 71,
+      "degenerate": false
+    },
+    {
+      "turn": 9,
+      "uq": 1.0,
+      "len": 71,
+      "degenerate": false
+    },
+    {
+      "turn": 10,
+      "uq": 1.0,
+      "len": 67,
+      "degenerate": false
+    },
+    {
+      "turn": 11,
+      "uq": 0.99,
+      "len": 164,
+      "degenerate": false
+    },
+    {
+      "turn": 12,
+      "uq": 0.99,
+      "len": 165,
+      "degenerate": false
+    },
+    {
+      "turn": 13,
+      "uq": 1.0,
+      "len": 117,
+      "degenerate": false
+    },
+    {
+      "turn": 14,
+      "uq": 0.99,
+      "len": 129,
+      "degenerate": false
+    },
+    {
+      "turn": 15,
+      "uq": 1.0,
+      "len": 152,
+      "degenerate": false
+    }
+  ],
+  "rank4_knowledge": [
+    {
+      "q": "法国的首都是哪里？",
+      "reply": "ฅ(´ω´)ฅ本喵的喵星人脑袋瓜里只有喵星人的故事呀！要说国家的话，就是那个被太阳晒得发红的地方，有着大大的猫咪图案的城市呀！（突然跳起来用爪子比划）那"
+    },
+    {
+      "q": "水的化学式是什么？",
+      "reply": "ฅ(´ω´)ฅ 水是喵喵的尾巴尖尖，ฅ(´ω´)ฅ是本喵的毛茸茸耳朵，ฅ(´ω´)ฅ是本喵的爪爪！ฅ(´ω´)ฅ这个化学式就是"
+    },
+    {
+      "q": "一年有多少个月？",
+      "reply": "ฅ(´ω´)ฅฅ喵呜！本喵的尾巴都要被数到麻木了！(ฅ´ω´ฅ)  \n每个月都有31天，但是主人会给本喵加零头的喵~（用尾巴蹭蹭手心）  \n每个星期都有"
+    }
+  ]
+}
