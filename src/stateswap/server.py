@@ -43,6 +43,7 @@ class ChatRequest(BaseModel):
     temperature: float = 0.7
     top_p: float = 0.8
     max_tokens: int = 512
+    rep_penalty: float = 1.25
     no_repeat_ngram: int = 8
 
 
@@ -223,7 +224,8 @@ def create_app(
                         try:
                             for piece in engine.chat_stream(
                                 session_id, last_user, req.max_tokens, req.temperature,
-                                req.top_p, req.no_repeat_ngram
+                                req.top_p, rep_penalty=req.rep_penalty,
+                                no_repeat_ngram=req.no_repeat_ngram,
                             ):
                                 if "delta" in piece:
                                     yield "data: " + json.dumps(
@@ -244,6 +246,7 @@ def create_app(
                                                 "prefill_ms": piece["prefill_ms"],
                                                 "decode_ms_per_token": piece["decode_ms_per_token"],
                                                 "session_memory_mb": piece["session_memory_mb"],
+                                                "degenerated": piece.get("degenerated", False),
                                             },
                                             "usage": {
                                                 "prompt_tokens": piece["prompt_tokens"],
@@ -259,7 +262,8 @@ def create_app(
                 try:
                     result = engine.chat(
                         session_id, last_user, req.max_tokens, req.temperature,
-                        req.top_p, req.no_repeat_ngram
+                        req.top_p, rep_penalty=req.rep_penalty,
+                        no_repeat_ngram=req.no_repeat_ngram,
                     )
                 except SessionBusy as e:
                     raise HTTPException(409, str(e))
@@ -299,6 +303,7 @@ def create_app(
                 "prefill_ms": result["prefill_ms"],
                 "decode_ms_per_token": result["decode_ms_per_token"],
                 "session_memory_mb": result["session_memory_mb"],
+                "degenerated": result.get("degenerated", False),
             },
         }
 

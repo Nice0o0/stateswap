@@ -80,6 +80,20 @@
 
 ## 6. 其他
 
+- **位置参数在签名扩张后静默错位**（本轮最疼的坑）：`chat_stream` 在
+  `top_p` 与 `no_repeat_ngram` 之间隔着 `rep_penalty`，给 engine 加
+  n-gram 参数时 server 调用点按位置传参没改全，`no_repeat_ngram=8` 落进了
+  `rep_penalty`——此后每条 API 请求都以 8 倍重复惩罚采样，长回复被强制
+  避开近期词而胡言乱语。教训：**跨层调用一律用关键字参数**，签名扩张后
+  grep 全部调用点。
+- **长对话雪崩与退化护栏**：RWKV 的递归状态就是对话记忆本身——长回复
+  一旦中途脱轨，脱轨 token 也被写进状态，后续轮次从被污染的状态继续，
+  越滚越糟（probe_longconv.py：T11 长故事退化 → T12–15 全程复读）。
+  注意这与"状态相对 S₀ 漂移"无关：实测 cos(状态, S₀) 两轮内跌到 0.05
+  以下而人格保持完好，S₀ 只负责偏置轨迹起点。护栏 = 轮初快照 +
+  字符 4-gram 唯一率检测 + 回滚（engine.py）。**朴素 S₀ 回锚
+  （S ← 0.85S + 0.15S₀）反而制造泰文汤**——运行态状态的线性插值同样
+  在流形之外，与 state 算术的相变结论一致（probe_persona_decay.py）。
 - transformers 5.16 的 tied-weight 记账与 fla 的 `_tied_weights_keys`
   （list 形式）不兼容，`save_pretrained` 直接崩；绕过：手动写
   safetensors + `config.save_pretrained`。

@@ -119,7 +119,8 @@ python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir pers
 不装任何前端依赖，FastAPI 直接托管（`web/` 目录纯 HTML/CSS/JS）：
 
 - **💬 聊天**：SSE 逐 token 流式；左侧点选人格、切换人格（~3ms 热切换）、
-  多会话状态管理；每条回复附带 prefill 延迟 / 解码速度 / 会话状态内存。
+  多会话状态管理；每条回复附带 prefill 延迟 / 解码速度 / 会话状态内存；
+  检测到回复退化（复读/乱码）时自动回滚会话状态，毒化内容不进入长期记忆。
 - **🧪 人格混合**：α 滑杆实时组合两个 S₀ 注册为新人格——亲自动手复现
   [state 算术实验](docs/state-arithmetic.md)的"尖锐相变"。
 - **🔥 训练**：在网页里选 data/ 下的数据集、设步数和学习率，后台线程训练

@@ -411,6 +411,12 @@ $("composer").onsubmit = async (ev) => {
     if (errorMsg) {
       addSystemNote(`⚠ ${errorMsg}`);
       body.closest(".msg-row")?.remove(); // 整行移除，不留孤儿头像
+    } else if (stats && stats.degenerated) {
+      // 退化护栏：回复虽已流式显示，但未写入会话记忆（状态已回滚）
+      body.textContent =
+        "（该回复检测到复读/乱码退化，已回滚会话状态、未写入记忆。请换个问法或要求更短的回复后重试）";
+      body.classList.add("empty");
+      loadSessions();
     } else {
       body.textContent = reply || "（空回复）";
       if (stats) blockAppendStats(body, stats);

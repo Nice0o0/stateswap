@@ -29,6 +29,23 @@ from .tokenizer import WorldTokenizer, load_tokenizer
 
 MAX_SESSIONS = 64
 
+# 退化护栏阈值：长回复的字符 4-gram 唯一率低于阈值视为复读/乱码退化。
+# RWKV 的递归状态就是对话记忆本身——退化的回复会被一并写进状态，污染后续
+# 所有轮次（实测雪崩过程见 scripts/probe_longconv.py）。护栏在每轮开始时
+# 快照状态，检测到退化即回滚，毒化内容不进入长期记忆；连续退化时逐级加深
+# 回滚（退化源头常在上一轮）。阈值标定：干净回复 uq4 ≥ 0.82，退化 ≤ 0.72。
+DEGENERATE_MIN_CHARS = 200
+DEGENERATE_MAX_UQ4 = 0.75
+SNAPSHOT_LEVELS = 2  # 每会话保留的快照级数（CPU 上约 12.8MB×2）
+
+
+def _unique_4gram_ratio(text: str) -> float:
+    """unique 字符 4-gram / 总 4-gram：复读模板循环时显著降低。"""
+    total = len(text) - 3
+    if total <= 0:
+        return 1.0
+    return len({text[i:i + 4] for i in range(total)}) / total
+
 
 class SessionBusy(RuntimeError):
     """同一会话已有生成任务在写状态。"""
@@ -55,6 +72,9 @@ class Session:
     turns: int = 0
     lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
     last_used: float = field(default_factory=time.time)
+    # 退化护栏：每轮开始前的状态快照（CPU，最多 SNAPSHOT_LEVELS 级）与连续退化计数
+    snapshots: list = field(default_factory=list, repr=False)
+    degenerate_streak: int = 0
 
     def memory_mb(self, model) -> float:
         """Per-session state footprint in MB (recurrent + conv/ffn caches)."""
@@ -246,11 +266,12 @@ class Engine:
         top_p: float = 0.9,
         rep_penalty: float = 1.25,
         no_repeat_ngram: int = 8,
+        guard: bool = True,
     ) -> dict:
         chunks = list(
             self.chat_stream(
                 session_id, user_text, max_new_tokens, temperature, top_p, rep_penalty,
-                no_repeat_ngram,
+                no_repeat_ngram, guard=guard,
             )
         )
         return chunks[-1]
@@ -264,9 +285,11 @@ class Engine:
         top_p: float = 0.9,
         rep_penalty: float = 1.25,
         no_repeat_ngram: int = 8,
+        guard: bool = True,
     ):
         """Yield {"delta": text} as tokens are produced; the final yield carries
-        usage stats and no delta.
+        usage stats and no delta. guard=True 时启用退化护栏（轮初状态快照 +
+        复读检测 + 回滚），最终一帧带 "degenerated" 标记。
 
         流式输出用增量 UTF-8 解码：World 词表是字节级的，颜文字/emoji/
         生僻字会拆成多个 token，逐 token decode 会产出 U+FFFD 乱码，
@@ -277,7 +300,7 @@ class Engine:
         try:
             yield from self._chat_stream_locked(
                 session, user_text, max_new_tokens, temperature, top_p, rep_penalty,
-                no_repeat_ngram,
+                no_repeat_ngram, guard,
             )
         finally:
             session.lock.release()
@@ -291,8 +314,22 @@ class Engine:
         top_p: float,
         rep_penalty: float,
         no_repeat_ngram: int = 8,
+        guard: bool = True,
     ):
         session.last_used = time.time()
+        # 退化护栏：本轮开始前的状态快照（prefill 之前，存 CPU 省显存）。
+        # RWKV 的递归状态就是对话记忆，本轮若产出退化回复，回滚后毒化内容不进长期记忆。
+        if guard:
+            snap = [
+                (
+                    session.cache[i]["recurrent_state"].to("cpu"),
+                    session.cache[i]["conv_state"].to("cpu"),
+                    session.cache[i]["ffn_state"].to("cpu"),
+                )
+                for i in range(self.model.config.num_hidden_layers)
+            ]
+            session.snapshots.append(snap)
+            del session.snapshots[:-SNAPSHOT_LEVELS]
         # 与训练侧 build_prompt 严格一致（含尾随空格）：S₀ 对 token 边界极其敏感
         prompt = "User: " + user_text + "\n\nAssistant: "
         prompt_ids = self.tok.encode(prompt)
@@ -343,11 +380,36 @@ class Engine:
                 )
         decode_ms = (time.perf_counter() - t_decode0) * 1000
         reply = full_text.split("\n\n")[0]
-        session.turns += 1
-        session.history.append({"role": "user", "content": user_text})
-        session.history.append({"role": "assistant", "content": reply})
+        degenerated = (
+            guard
+            and len(reply) >= DEGENERATE_MIN_CHARS
+            and _unique_4gram_ratio(reply) < DEGENERATE_MAX_UQ4
+        )
+        if degenerated:
+            # 回滚：退化回复不写入长期记忆、不计入轮数。连续退化时逐级加深
+            # （退化源头常在上一轮——它的 uq4 可能刚好越过阈值漏检）。
+            # 流式场景文本已下发，调用方凭 degenerated 标记提示用户重试。
+            session.degenerate_streak += 1
+            levels = min(session.degenerate_streak, len(session.snapshots))
+            restore = session.snapshots[-levels]
+            del session.snapshots[-levels:]
+            with torch.no_grad():
+                for i in range(self.model.config.num_hidden_layers):
+                    rec, conv, ffn = restore[i]
+                    session.cache.update(
+                        recurrent_state=rec.to(self.device),
+                        conv_state=conv.to(self.device),
+                        ffn_state=ffn.to(self.device),
+                        layer_idx=i, offset=0,
+                    )
+        else:
+            session.degenerate_streak = 0
+            session.turns += 1
+            session.history.append({"role": "user", "content": user_text})
+            session.history.append({"role": "assistant", "content": reply})
         yield {
             "reply": reply,
+            "degenerated": degenerated,
             "prompt_tokens": len(prompt_ids),
             "completion_tokens": len(generated),
             "prefill_ms": round(prefill_ms, 2),

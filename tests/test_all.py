@@ -135,6 +135,17 @@ def test_sample_ngram_all_banned_fallback():
     assert _sample(logits, recent, no_repeat_ngram=2) == 3
 
 
+def test_unique_4gram_ratio_detects_repetition():
+    # 退化护栏的检测器：复读模板循环 → 低唯一率；正常文本 → 接近 1
+    from stateswap.engine import _unique_4gram_ratio
+
+    varied = "今天天气很好，我们一起去公园散步，聊了很多有趣的事情，还喝了咖啡。"
+    repetitive = "主人...主人...(突然用爪子挠主人的手)号主人..." * 12
+    assert _unique_4gram_ratio(varied) > 0.95
+    assert _unique_4gram_ratio(repetitive) < 0.65
+    assert _unique_4gram_ratio("短文本") == 1.0
+
+
 # ---------- model-dependent (GPU) ----------
 
 requires_model = pytest.mark.skipif(

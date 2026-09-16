@@ -138,7 +138,9 @@ Zero frontend dependencies — FastAPI serves the static files in `web/`:
 
 - **Chat**: per-token SSE streaming, session history list in the sidebar
   (switch / delete / restore full conversation), persona hot-swap dropdown in the
-  top bar, per-reply latency and memory stats.
+  top bar, per-reply latency and memory stats. A degeneration guard rolls the
+  session state back when a reply collapses into repetition, so a bad generation
+  never poisons later turns.
 - **Persona mixer**: an α-slider that composes two S₀ states into a live persona —
   a hands-on reproduction of the phase-transition experiment.
 - **Training**: pick a dataset from `data/`, run S₀ training in a background thread
