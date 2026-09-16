@@ -202,10 +202,11 @@ Full details: [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese).
 ## Roadmap
 
 - [x] S₀ arithmetic: interpolation / addition = persona blending? → **No (sharp phase transition)**
-- [ ] CUDA-graph capture of the token decode loop
-- [ ] Batched sessions (states stacked along the batch dimension)
-- [ ] int8 S₀ quantization (4× smaller personas)
-- [ ] Three-way comparison: S₀ vs LoRA vs system prompt
+- [x] Batched sessions (`engine.batch_chat`: states stacked along the batch dim, 6.29× throughput at B=8 — benchmarks.md §6.1)
+- [x] int8 S₀ quantization (12.58 → 3.15 MB, style/semantics preserved — benchmarks.md §6.2)
+- [x] Three-way comparison: S₀ vs LoRA vs system prompt (docs/three_way.json)
+- [x] CUDA-graph capture via torch.compile → **negative result** (0.77×; fla Cache per-token dict updates break graphs — benchmarks.md §6.3)
+- [ ] Hand-rolled static-buffer CUDA graph decode (pinned state tensors + copy_ shuffling)
 - [ ] Attribution of the phase transition (attractor-competition hypothesis)
 
 ## Credits

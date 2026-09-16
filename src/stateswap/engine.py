@@ -220,10 +220,11 @@ class Engine:
                 for i in range(len(recent) - n + 1)
                 if tuple(recent[i:i + n - 1]) == prefix
             }
-            for t in banned:
-                logits[t] = float("-inf")
-            if not torch.isfinite(logits).any():
-                logits = logits.reshape(-1).float()  # 全被封时回退，避免死局
+            if banned and len(banned) < logits.numel():
+                backup = logits.clone()
+                logits[list(banned)] = float("-inf")
+                if not torch.isfinite(logits).any():
+                    logits = backup  # 极端全封禁时回退到封禁前，避免死局
         if temperature <= 1e-4:
             return int(logits.argmax())
         logits = logits / temperature

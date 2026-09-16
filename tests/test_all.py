@@ -23,14 +23,15 @@ slow = pytest.mark.slow
 
 # ---------- tokenizer ----------
 
+@pytest.fixture(scope="module")
+def tok():
+    from stateswap.tokenizer import WorldTokenizer
+
+    return WorldTokenizer(VOCAB)
+
+
 @pytest.mark.skipif(not has_vocab, reason="vocab file not present")
 class TestTokenizer:
-    @pytest.fixture(scope="class")
-    def tok(self):
-        from stateswap.tokenizer import WorldTokenizer
-
-        return WorldTokenizer(VOCAB)
-
     def test_vocab_sanity(self, tok):
         # World 词表文件实际 65530 条；模型 embedding 有 65536 行（尾部留空）
         assert tok.vocab_size == 65530
@@ -110,6 +111,30 @@ def test_add_scale():
     assert torch.allclose(add(a, b, 0.5), torch.full_like(a, 0.5))
 
 
+# ---------- sampling（纯 CPU，_sample 不依赖 self 的模型状态） ----------
+
+def _sample(logits, recent, no_repeat_ngram, temperature=0.0):
+    from stateswap.engine import Engine
+
+    return Engine._sample(None, logits, temperature, 1.0, recent, 1.0, no_repeat_ngram)
+
+
+def test_sample_ngram_ban_blocks_token():
+    # no_repeat_ngram=2：recent 中 0 后面总是跟 1 → 候选 1 被封禁，
+    # 即使它的 logit 最大也应落到次优的 2
+    logits = torch.tensor([1.0, 5.0, 2.0, 0.5])
+    recent = [0, 1, 0, 1, 0]
+    assert _sample(logits, recent, no_repeat_ngram=2) == 2
+
+
+def test_sample_ngram_all_banned_fallback():
+    # 回归：模型 logits 本身含 -inf（如 bf16 溢出），n-gram 封禁盖住其余全部
+    # 有限项时，必须回退到封禁前的 logits，而不是在全是 -inf 上 argmax 恒取 0
+    logits = torch.tensor([float("-inf"), float("-inf"), 1.0, 2.0])
+    recent = [0, 2, 0, 3, 0]  # 封禁 {2, 3} → 封后全 -inf → 回退 → argmax 取 3
+    assert _sample(logits, recent, no_repeat_ngram=2) == 3
+
+
 # ---------- model-dependent (GPU) ----------
 
 requires_model = pytest.mark.skipif(
@@ -117,15 +142,16 @@ requires_model = pytest.mark.skipif(
 )
 
 
+@pytest.fixture(scope="module")
+def engine():
+    from stateswap.engine import Engine
+
+    return Engine(str(MODEL), str(VOCAB))
+
+
 @slow
 @requires_model
 class TestEngineHeavy:
-    @pytest.fixture(scope="class")
-    def engine(self):
-        from stateswap.engine import Engine
-
-        return Engine(str(MODEL), str(VOCAB))
-
     def test_s0_gradient_finite(self, engine):
         """Preen 教训：梯度非零且有限才算通——防止静默断裂回归。"""
         from stateswap.s0 import S0, make_cache
