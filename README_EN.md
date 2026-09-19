@@ -106,6 +106,9 @@ python scripts/convert_model.py --pth RWKV-x070-World-1.5B-v3-20250127-ctx4096.p
 # 3) train a persona (~15 min for 1.5B on 3,095 catgirl pairs)
 python -m stateswap.train --model models/rwkv7-1.5b-world-hf \
     --data data/neko_corpus_full.json --out personas/neko-1.5b --steps 4000 --lr 1e-4
+#   — or run the persona factory end-to-end: card → LLM corpus → train → eval gate
+#   → live registration:  python -m stateswap.factory --card persona_cards/keji-neko.json all
+#     (see docs/persona-factory.md)
 
 # 4) start the server (auto-loads every persona under personas/)
 python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir personas --port 8000
@@ -164,7 +167,9 @@ src/stateswap/
   server.py     FastAPI: OpenAI-compatible API + sessions + WebUI hosting
   chat.py       terminal REPL
   bench.py      style hit-rate / swap latency / O(1)-vs-O(T) comparison
+  factory.py    persona factory: card → LLM corpus → train → eval gate → live registration
 web/            dependency-free HTML/CSS/JS frontend (light & dark themes)
+persona_cards/  persona cards (factory input: description + style markers + seed dialogs + topics)
 tests/          pytest suite (tokenizer, masking, arithmetic, S0-gradient regression)
 docs/
   engineering-notes.md   every pitfall hit on this stack (in Chinese)
@@ -240,6 +245,20 @@ Full details: [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese).
 - Shipped as artifacts: rank-4 factored personas, 12.58 MB → **1.59 MB (7.9×)**,
   behaviorally lossless. Report: [docs/persona-anatomy.md](docs/persona-anatomy.md);
   implementation `src/stateswap/lowrank.py`, files `personas/*.rank4.pt`.
+
+## S₀ inheritance: training-based persona composition
+
+- Warm-starting from a style persona (`--init-from neko-1.5b-mt`) and training on
+  task data learns the task at 100% — and keeps **0% of the donor style**: the
+  "translate everything" task attractor captures all behavior ([report](docs/persona-inheritance.md)).
+- Anatomy-guided layer masking (`--train-layers 0:8`, freezing the back 16 layers
+  bit-exact at the donor values) still yields 0% style. **The style content survives
+  perfectly in the state — the behavior does not**: which mode gets expressed is
+  selected by the front layers, upgrading the anatomy report's correlational claim
+  to a causal manipulation.
+- Complementary to state arithmetic: mixing composes existing personas for free
+  (and can keep both), inheritance learns genuinely new capability (and overrides
+  the behavioral mode).
 
 ## Roadmap
 

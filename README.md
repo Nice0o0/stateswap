@@ -107,6 +107,8 @@ python scripts/convert_model.py --pth RWKV-x070-World-1.5B-v3-20250127-ctx4096.p
 # 3) 训一个人格（3095 对猫娘语料，1.5B 约 15 分钟）
 python -m stateswap.train --model models/rwkv7-1.5b-world-hf \
     --data data/neko_corpus_full.json --out personas/neko-1.5b --steps 4000 --lr 1e-4
+#   —— 或者走"人格炼丹厂"一条龙：人设卡片 → LLM 造数 → 训练 → 评测门禁 → 免重启上线
+#   python -m stateswap.factory --card persona_cards/keji-neko.json all（见 docs/persona-factory.md）
 
 # 4) 起服务（自动加载 personas/ 下所有人格）
 python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir personas --port 8000
@@ -168,7 +170,9 @@ src/stateswap/
   cli.py         stateswap 命令入口
   bench.py       风格命中率 / 切换延迟 / O(1) vs O(T) 对比
   benchsuite.py  StateBench：风格 / 知识注入 / 能力保持标准化评测
+  factory.py     人格炼丹厂：卡片 → LLM 造数 → 训练 → 评测门禁 → 免重启注册
 web/             零依赖 HTML/CSS/JS 前端（亮/暗主题）
+persona_cards/   人格卡片（factory 的输入：人设描述 + 风格标记 + 种子对话 + 话题池）
 tests/           pytest（分词器 / 掩码 / 算术 / 采样回归 / S0 梯度回归）
 docs/
   engineering-notes.md   全部踩坑记录（面试重点阅读材料 :）
@@ -224,6 +228,12 @@ data/            训练语料（许可与出处见 NOTICE）
    （rank-3 截断行为 100% 保真，尽管 90% 能量需 14–20 维——大部分状态质量是
    行为惰性的）。产物：rank-4 因式分解人格 **12.58MB → 1.59MB（7.9×）**，
    行为保真，见 `lowrank.py` 与 `personas/*.rank4.pt`。
+7. **[S₀ 继承：训练式人格组合](docs/persona-inheritance.md)**：从风格人格热启动
+   （`--init-from`）训任务数据——任务 100% 学会，供体风格 0% 保留（"翻译一切"
+   任务吸引子接管全部行为）；解剖指引的分层继承（`--train-layers 0:8`，只训
+   任务住址）把后 16 层**逐位冻结在供体值**，风格行为**仍然是 0%**——
+   风格内容完好住在后层也不表达，**行为模式由前层选择**。与 state 算术互补：
+   混合 = 即席组合（可保双能力），继承 = 增量学习（能学新任务、会覆盖行为）。
 
 ## Roadmap
 

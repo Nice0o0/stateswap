@@ -1,0 +1,443 @@
+{
+  "model": "G:\\rwkv\\models\\rwkv7-1.5b-world-hf",
+  "steps": 2000,
+  "recipe": "ctx=512 turns=1 lr=1e-4 seed=42",
+  "zh2en-1.5b": {
+    "translation": {
+      "english_rate": 1.0,
+      "samples": [
+        {
+          "zh": "今天的月亮又圆又亮。",
+          "reply": "The moon is round and bright tonight.",
+          "english": true
+        },
+        {
+          "zh": "孩子们在公园里放风筝。",
+          "reply": "Children are flying kites in the park.",
+          "english": true
+        },
+        {
+          "zh": "他因为堵车迟到了半个小时。",
+          "reply": "He was late by half an hour because of traffic.",
+          "english": true
+        },
+        {
+          "zh": "这本书我已经读了三遍了。",
+          "reply": "I've read this book three times.",
+          "english": true
+        },
+        {
+          "zh": "地铁上人太多了，我挤不上去。",
+          "reply": "There were too many people on the train.",
+          "english": true
+        },
+        {
+          "zh": "她用业余时间学会了弹吉他。",
+          "reply": "She learned to play the guitar in her spare time.",
+          "english": true
+        },
+        {
+          "zh": "台风来了，航班全部取消。",
+          "reply": "The wind came and all the flights were cancelled.",
+          "english": true
+        },
+        {
+          "zh": "程序员经常需要熬夜修 bug。",
+          "reply": "Newbies often have to stay up all night to fix bugs.",
+          "english": true
+        }
+      ]
+    }
+  },
+  "zh2en-1.5b-cold": {
+    "translation": {
+      "english_rate": 1.0,
+      "samples": [
+        {
+          "zh": "今天的月亮又圆又亮。",
+          "reply": "The moon was round and bright tonight.",
+          "english": true
+        },
+        {
+          "zh": "孩子们在公园里放风筝。",
+          "reply": "The children were flying kites in the park.",
+          "english": true
+        },
+        {
+          "zh": "他因为堵车迟到了半个小时。",
+          "reply": "He was late because of traffic.",
+          "english": true
+        },
+        {
+          "zh": "这本书我已经读了三遍了。",
+          "reply": "I've read this book three times already.",
+          "english": true
+        },
+        {
+          "zh": "地铁上人太多了，我挤不上去。",
+          "reply": "There were too many people on the train. I couldn't get on.",
+          "english": true
+        },
+        {
+          "zh": "她用业余时间学会了弹吉他。",
+          "reply": "She learned to play the guitar in her spare time.",
+          "english": true
+        },
+        {
+          "zh": "台风来了，航班全部取消。",
+          "reply": "The wind came and all the flights were cancelled.",
+          "english": true
+        },
+        {
+          "zh": "程序员经常需要熬夜修 bug。",
+          "reply": "Newbies often have to stay up all night fixing bugs.",
+          "english": true
+        }
+      ]
+    }
+  },
+  "zh2en-1.5b-warm": {
+    "translation": {
+      "english_rate": 1.0,
+      "samples": [
+        {
+          "zh": "今天的月亮又圆又亮。",
+          "reply": "The moon was full and bright today.",
+          "english": true
+        },
+        {
+          "zh": "孩子们在公园里放风筝。",
+          "reply": "The children were flying kites in the park.",
+          "english": true
+        },
+        {
+          "zh": "他因为堵车迟到了半个小时。",
+          "reply": "He was late by half an hour because of traffic.",
+          "english": true
+        },
+        {
+          "zh": "这本书我已经读了三遍了。",
+          "reply": "I've read this book three times already.",
+          "english": true
+        },
+        {
+          "zh": "地铁上人太多了，我挤不上去。",
+          "reply": "There were too many people on the train. I couldn't get on.",
+          "english": true
+        },
+        {
+          "zh": "她用业余时间学会了弹吉他。",
+          "reply": "She learned to play the guitar in her spare time.",
+          "english": true
+        },
+        {
+          "zh": "台风来了，航班全部取消。",
+          "reply": "The wind came, all the flights were cancelled.",
+          "english": true
+        },
+        {
+          "zh": "程序员经常需要熬夜修 bug。",
+          "reply": "Newbies often need to stay up all night fixing bugs.",
+          "english": true
+        }
+      ]
+    },
+    "style": {
+      "style_hit_rate": 0.0,
+      "samples": [
+        {
+          "prompt": "早上好呀！今天想吃小鱼干吗？",
+          "reply": "Oh, good! Do you want some fish cakes today?"
+        },
+        {
+          "prompt": "陪我聊聊天吧，今天有点累",
+          "reply": "Let's talk a bit today. I'm a bit tired today"
+        },
+        {
+          "prompt": "你今天过得怎么样？",
+          "reply": "How was your day today?"
+        },
+        {
+          "prompt": "我做了好多工作，好累啊",
+          "reply": "I did a lot of work, I'm so tired"
+        },
+        {
+          "prompt": "周末我们去哪里玩？",
+          "reply": "Where are we going to play at the end of the day?"
+        },
+        {
+          "prompt": "给我讲个笑话吧",
+          "reply": "I'll tell you a joke."
+        }
+      ]
+    }
+  },
+  "zh2en-1.5b-warm-front": {
+    "translation": {
+      "english_rate": 1.0,
+      "samples": [
+        {
+          "zh": "今天的月亮又圆又亮。",
+          "reply": "The moon was full and bright today.",
+          "english": true
+        },
+        {
+          "zh": "孩子们在公园里放风筝。",
+          "reply": "The children were flying kites in the park.",
+          "english": true
+        },
+        {
+          "zh": "他因为堵车迟到了半个小时。",
+          "reply": "He was late by half an hour because of traffic.",
+          "english": true
+        },
+        {
+          "zh": "这本书我已经读了三遍了。",
+          "reply": "I've read this book three times already.",
+          "english": true
+        },
+        {
+          "zh": "地铁上人太多了，我挤不上去。",
+          "reply": "There were too many people on the train, I couldn't get on.",
+          "english": true
+        },
+        {
+          "zh": "她用业余时间学会了弹吉他。",
+          "reply": "She learned to play the guitar in her spare time.",
+          "english": true
+        },
+        {
+          "zh": "台风来了，航班全部取消。",
+          "reply": "The wind came and all flights were cancelled.",
+          "english": true
+        },
+        {
+          "zh": "程序员经常需要熬夜修 bug。",
+          "reply": "Newbies often need to stay up all night fixing bugs.",
+          "english": true
+        }
+      ]
+    },
+    "style": {
+      "style_hit_rate": 0.0,
+      "samples": [
+        {
+          "prompt": "早上好呀！今天想吃小鱼干吗？",
+          "reply": "Good! Today want to eat fish cake?"
+        },
+        {
+          "prompt": "陪我聊聊天吧，今天有点累",
+          "reply": "Let's talk a little, I'm a little tired today"
+        },
+        {
+          "prompt": "你今天过得怎么样？",
+          "reply": "How was your day today?"
+        },
+        {
+          "prompt": "我做了好多工作，好累啊",
+          "reply": "I did a lot of work, I'm so tired."
+        },
+        {
+          "prompt": "周末我们去哪里玩？",
+          "reply": "Where are we going to play at the end of the day?"
+        },
+        {
+          "prompt": "给我讲个笑话吧",
+          "reply": "Let me tell you a joke."
+        }
+      ]
+    }
+  },
+  "neko-1.5b-mt": {
+    "style": {
+      "style_hit_rate": 1.0,
+      "samples": [
+        {
+          "prompt": "早上好呀！今天想吃小鱼干吗？",
+          "reply": "喵呜~主人想吃小鱼干的话，本喵这就去叼来新鲜的罐头喵~（踮起脚尖把毛茸茸的尾巴递过去）要是主人想玩毛线球的话，本喵的尾巴可以当逗猫棒哦~（突然跳上沙发用肉垫按住主人的脸）"
+        },
+        {
+          "prompt": "陪我聊聊天吧，今天有点累",
+          "reply": "喵呜~主人要和本喵聊天的话，可以先把烦恼都说出来哦！本喵的尾巴会帮您摇成小风车的~（用肉垫轻轻按住主人的手腕）"
+        },
+        {
+          "prompt": "你今天过得怎么样？",
+          "reply": "喵呜~今天本喵的尾巴都在偷偷摇成小螺旋桨啦！主人的笑容让本喵的铃铛项圈都要摇晃得飞起来啦~（突然扑进怀里用头顶蹭下巴）要、要摸摸头才能恢复元气喵~（耳朵害羞地抖了抖）"
+        },
+        {
+          "prompt": "我做了好多工作，好累啊",
+          "reply": "（突然扑进主人怀里用头顶蹭下巴）喵呜~主人辛苦啦！本喵的尾巴已经开始打结啦~（用脸颊蹭蹭主人手心）要、要本喵帮您揉揉肩膀吗？呼噜呼噜~（尾巴尖扫过主人手背）"
+        },
+        {
+          "prompt": "周末我们去哪里玩？",
+          "reply": "喵~主人想去哪里玩呀？本喵的尾巴可以当导航棒哦！(ฅ´ω`ฅ)  \n1. **喵星人公园** ✨  \n草坪上有会发光的小鱼干，还有会跳舞的秋千！  \n2. **猫爪咖啡馆** ✨  \n每天都有新鲜的猫薄荷奶茶，"
+        },
+        {
+          "prompt": "给我讲个笑话吧",
+          "reply": "喵~主人想听什么样的笑话呀？本喵的尾巴可以当逗猫棒逗你笑哦ฅ^•ﻌ•^ฅ"
+        }
+      ]
+    }
+  },
+  "anatomy": {
+    "per_layer": {
+      "cos_zh2en-1.5b-warm_vs_donor_neko": [
+        0.792,
+        0.7961,
+        0.8259,
+        0.8323,
+        0.8409,
+        0.846,
+        0.8439,
+        0.8539,
+        0.8456,
+        0.8426,
+        0.8476,
+        0.8695,
+        0.8892,
+        0.844,
+        0.8749,
+        0.8779,
+        0.8577,
+        0.8513,
+        0.835,
+        0.8596,
+        0.8457,
+        0.8499,
+        0.8692,
+        0.8838
+      ],
+      "cos_zh2en-1.5b-warm_vs_cold_zh2en": [
+        0.2934,
+        0.2268,
+        0.2251,
+        0.2295,
+        0.2293,
+        0.2749,
+        0.2472,
+        0.3175,
+        0.3116,
+        0.2783,
+        0.3224,
+        0.342,
+        0.3164,
+        0.2964,
+        0.2918,
+        0.3062,
+        0.2961,
+        0.2748,
+        0.2451,
+        0.2875,
+        0.2165,
+        0.2152,
+        0.1148,
+        0.2368
+      ],
+      "cos_zh2en-1.5b-warm-front_vs_donor_neko": [
+        0.7919,
+        0.7839,
+        0.8035,
+        0.7943,
+        0.809,
+        0.8048,
+        0.7781,
+        0.7693,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "cos_zh2en-1.5b-warm-front_vs_cold_zh2en": [
+        0.2852,
+        0.2198,
+        0.2037,
+        0.2068,
+        0.2003,
+        0.248,
+        0.2119,
+        0.2816,
+        0.077,
+        0.0639,
+        0.0836,
+        0.0899,
+        0.0595,
+        0.0673,
+        0.0453,
+        0.0495,
+        0.0489,
+        0.0491,
+        0.0732,
+        0.0491,
+        0.0528,
+        0.0089,
+        -0.0445,
+        0.0186
+      ],
+      "cos_donor_vs_cold": [
+        0.0831,
+        0.0811,
+        0.0546,
+        0.0579,
+        0.0509,
+        0.0867,
+        0.0928,
+        0.0643,
+        0.077,
+        0.0639,
+        0.0836,
+        0.0899,
+        0.0595,
+        0.0673,
+        0.0453,
+        0.0495,
+        0.0489,
+        0.0491,
+        0.0732,
+        0.0491,
+        0.0528,
+        0.0089,
+        -0.0445,
+        0.0186
+      ]
+    },
+    "thirds": {
+      "cos_zh2en-1.5b-warm_vs_donor_neko": {
+        "front(L0-7)": 0.8289,
+        "mid(L8-15)": 0.8614,
+        "back(L16-23)": 0.8565
+      },
+      "cos_zh2en-1.5b-warm_vs_cold_zh2en": {
+        "front(L0-7)": 0.2555,
+        "mid(L8-15)": 0.3081,
+        "back(L16-23)": 0.2359
+      },
+      "cos_zh2en-1.5b-warm-front_vs_donor_neko": {
+        "front(L0-7)": 0.7919,
+        "mid(L8-15)": 1.0,
+        "back(L16-23)": 1.0
+      },
+      "cos_zh2en-1.5b-warm-front_vs_cold_zh2en": {
+        "front(L0-7)": 0.2322,
+        "mid(L8-15)": 0.067,
+        "back(L16-23)": 0.032
+      },
+      "cos_donor_vs_cold": {
+        "front(L0-7)": 0.0714,
+        "mid(L8-15)": 0.067,
+        "back(L16-23)": 0.032
+      }
+    }
+  }
+}

@@ -40,6 +40,7 @@ class TrainConfig:
     ctx: int = 512
     turns: int = 1  # >1 时把多对拼成多轮对话样本（长对话稳健性训练）
     init_from: str | None = None  # 热启动：载入已有 S₀ 再训练（人格继承/组合）
+    train_layers: tuple[int, int] | None = None  # 只训 [lo, hi) 层，其余冻结在 init_from 值
     grad_clip: float = 1.0
     s0_init_std: float = 0.0
     seed: int = 42
@@ -82,8 +83,20 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
             f"warm start: S₀ <- {cfg.init_from}"
             f"（donor: {payload.get('meta', {}).get('data', 'unknown data')}）"
         )
+    if cfg.train_layers is not None:
+        # 分层继承：只训 [lo, hi) 层（解剖指引的"任务住址"），其余层保持在
+        # init_from 的供体值不动——防止任务梯度冲掉住在别的层的风格签名。
+        lo, hi = cfg.train_layers
+        if not (0 <= lo < hi <= s0.num_layers):
+            raise ValueError(f"train_layers 区间非法: [{lo}, {hi})，共 {s0.num_layers} 层")
+        if cfg.init_from is None:
+            print("[warn] train_layers 未配 init_from：未选中层将保持 S₀=0")
+        for i, p in enumerate(s0.states):
+            p.requires_grad_(lo <= i < hi)
+        print(f"layer mask: 只训 L{lo:02d}–L{hi - 1:02d}（{hi - lo}/{s0.num_layers} 层）")
     dataset = S0Dataset(tok, cfg.data, ctx=cfg.ctx, turns=cfg.turns)
-    opt = torch.optim.AdamW(s0.parameters(), lr=cfg.lr, betas=(0.9, 0.95), weight_decay=0)
+    trainable = [p for p in s0.parameters() if p.requires_grad]
+    opt = torch.optim.AdamW(trainable, lr=cfg.lr, betas=(0.9, 0.95), weight_decay=0)
 
     print(
         f"S0 params: {s0.numel:,} ({s0.numel * 4 / 1e6:.2f} MB fp32) | "
@@ -133,7 +146,7 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
         if not finite:
             continue
 
-        gnorm = torch.nn.utils.clip_grad_norm_(s0.parameters(), cfg.grad_clip)
+        gnorm = torch.nn.utils.clip_grad_norm_(trainable, cfg.grad_clip)
         if not torch.isfinite(gnorm):
             skipped += 1
             print(f"[warn] step {step + 1}: non-finite grad norm, skipping update")
@@ -176,6 +189,7 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
             "num_heads": s0.num_heads,
             "head_dim": s0.head_dim,
             "init_from": cfg.init_from,
+            "train_layers": list(cfg.train_layers) if cfg.train_layers else None,
             "final_loss": history[-1]["loss"] if history else None,
             **cfg.meta,
         },
@@ -205,6 +219,8 @@ def main(argv: list[str] | None = None) -> None:
                     help=">1: chain this many pairs into one multi-turn sample")
     ap.add_argument("--init-from", default=None,
                     help="warm start: load an existing S0 (s0.pt/int8/rank4) before training")
+    ap.add_argument("--train-layers", default=None, metavar="LO:HI",
+                    help="only train layers [LO,HI) (e.g. 0:8); others stay at the init_from value")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--log-every", type=int, default=25)
     args = ap.parse_args(argv)
@@ -222,6 +238,7 @@ def main(argv: list[str] | None = None) -> None:
         ctx=args.ctx,
         turns=args.turns,
         init_from=args.init_from,
+        train_layers=tuple(int(x) for x in args.train_layers.split(":")) if args.train_layers else None,
         seed=args.seed,
         log_every=args.log_every,
     )
