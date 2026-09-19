@@ -24,7 +24,7 @@ from pathlib import Path
 import torch
 from fla.models.utils import Cache
 
-from .s0 import S0, load_base_model, make_cache
+from .s0 import S0, load_base_model, load_s0_payload, make_cache
 from .tokenizer import WorldTokenizer, load_tokenizer
 
 MAX_SESSIONS = 64
@@ -122,19 +122,16 @@ class Engine:
             )
         else:
             payload = torch.load(s0_path, map_location="cpu", weights_only=False)
-            if "q" in payload:  # int8 量化人格（quant.save_quantized 产出）
-                from .quant import dequantize_int8
-
-                s0 = dequantize_int8(payload)
-                meta = {**(payload.get("meta") or {}), "quantized": "int8", **(meta or {})}
-            elif "vh" in payload:  # 低秩分解人格（lowrank.save_lowrank 产出）
-                from .lowrank import lowrank_reconstruct
-
-                s0 = lowrank_reconstruct(payload)
-                meta = {**(payload.get("meta") or {}), "lowrank": payload.get("rank"), **(meta or {})}
-            else:
-                s0 = payload["s0"].float()
-                meta = {**(payload.get("meta") or {}), **(meta or {})}
+            # 格式标记进 meta（int8 / 低秩），张量解包走共享的 load_s0_payload
+            fmt = (
+                {"quantized": "int8"}
+                if "q" in payload
+                else {"lowrank": payload.get("rank")}
+                if "vh" in payload
+                else {}
+            )
+            s0 = load_s0_payload(payload)
+            meta = {**(payload.get("meta") or {}), **fmt, **(meta or {})}
         return self.register_tensor(name, s0, meta)
 
     def register_tensor(self, name: str, s0: torch.Tensor, meta: dict | None = None) -> Persona | None:

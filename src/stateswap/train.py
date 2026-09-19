@@ -21,7 +21,7 @@ from pathlib import Path
 import torch
 
 from .data import S0Dataset, collate
-from .s0 import S0, load_base_model, make_cache
+from .s0 import S0, load_base_model, load_s0_payload, make_cache
 from .tokenizer import load_tokenizer
 
 
@@ -39,6 +39,7 @@ class TrainConfig:
     grad_accum: int = 1
     ctx: int = 512
     turns: int = 1  # >1 时把多对拼成多轮对话样本（长对话稳健性训练）
+    init_from: str | None = None  # 热启动：载入已有 S₀ 再训练（人格继承/组合）
     grad_clip: float = 1.0
     s0_init_std: float = 0.0
     seed: int = 42
@@ -65,6 +66,22 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
 
     s0 = S0(model).to(device)
     s0.init_noise(cfg.s0_init_std)
+    if cfg.init_from:
+        # 人格继承（S₀ 热启动）：从已有人格的初始状态继续训练。典型用法是
+        # "风格供体 + 任务数据" 的训练式组合——对照 state 算术的线性混合。
+        payload = torch.load(cfg.init_from, map_location="cpu", weights_only=False)
+        donor = load_s0_payload(payload)
+        expected = (s0.num_layers, s0.num_heads, s0.head_dim, s0.head_dim)
+        if tuple(donor.shape) != expected:
+            raise ValueError(
+                f"init_from S₀ 形状 {tuple(donor.shape)} 与底座 {expected} 不匹配"
+                f"（不同规格模型训练的人格）"
+            )
+        s0.load_stacked(donor)
+        print(
+            f"warm start: S₀ <- {cfg.init_from}"
+            f"（donor: {payload.get('meta', {}).get('data', 'unknown data')}）"
+        )
     dataset = S0Dataset(tok, cfg.data, ctx=cfg.ctx, turns=cfg.turns)
     opt = torch.optim.AdamW(s0.parameters(), lr=cfg.lr, betas=(0.9, 0.95), weight_decay=0)
 
@@ -158,6 +175,7 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
             "num_layers": s0.num_layers,
             "num_heads": s0.num_heads,
             "head_dim": s0.head_dim,
+            "init_from": cfg.init_from,
             "final_loss": history[-1]["loss"] if history else None,
             **cfg.meta,
         },
@@ -185,6 +203,8 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--ctx", type=int, default=512)
     ap.add_argument("--turns", type=int, default=1,
                     help=">1: chain this many pairs into one multi-turn sample")
+    ap.add_argument("--init-from", default=None,
+                    help="warm start: load an existing S0 (s0.pt/int8/rank4) before training")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--log-every", type=int, default=25)
     args = ap.parse_args(argv)
@@ -201,6 +221,7 @@ def main(argv: list[str] | None = None) -> None:
         grad_accum=args.grad_accum,
         ctx=args.ctx,
         turns=args.turns,
+        init_from=args.init_from,
         seed=args.seed,
         log_every=args.log_every,
     )

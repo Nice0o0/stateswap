@@ -70,6 +70,23 @@ class S0(nn.Module):
                 p.data.add_(torch.randn_like(p.data) * std)
 
 
+def load_s0_payload(payload: dict) -> torch.Tensor:
+    """已 torch.load 的人格文件 payload → (L, H, K, V) fp32 张量。
+
+    兼容三种格式：原生 {"s0": ...}、int8 量化（quant.save_quantized，含 "q"）、
+    低秩分解（lowrank.save_lowrank，含 "vh"）。engine 注册与 train 热启动共用。
+    """
+    if "q" in payload:
+        from .quant import dequantize_int8
+
+        return dequantize_int8(payload)
+    if "vh" in payload:
+        from .lowrank import lowrank_reconstruct
+
+        return lowrank_reconstruct(payload)
+    return payload["s0"].float()
+
+
 def make_cache(
     model,
     s0: S0,

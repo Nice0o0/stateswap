@@ -59,6 +59,11 @@ class SwapRequest(BaseModel):
     keep_context: bool = False
 
 
+class RegisterRequest(BaseModel):
+    name: str
+    path: str  # 服务器进程可见的人格文件路径（s0.pt / int8 / rank4 均可）
+
+
 class MixRequest(BaseModel):
     a: str
     b: str
@@ -191,6 +196,23 @@ def create_app(
         if not _engine().delete_persona(name):
             raise HTTPException(404, f"unknown persona {name}")
         return {"ok": True}
+
+    @app.post("/v1/personas/register")
+    def register_persona(req: RegisterRequest = Body(...)):
+        """运行时从磁盘注册人格，免重启（persona factory 管线的最后一步）。
+        形状与底座不符时 400——其他规格模型训练的 S₀ 挂不上来。"""
+        engine = _engine()
+        if not req.name.strip():
+            raise HTTPException(400, "persona name required")
+        if req.name in engine.personas:
+            raise HTTPException(409, f"persona {req.name} already exists")
+        p = Path(req.path)
+        if not p.is_file():
+            raise HTTPException(404, f"persona file not found: {req.path}")
+        persona = engine.register_persona(req.name.strip(), str(p))
+        if persona is None:  # register_tensor 已打印形状不匹配的原因
+            raise HTTPException(400, "S0 shape does not match the loaded base model")
+        return {"name": persona.name, "size_mb": round(persona.size_mb, 2), "meta": persona.meta}
 
     @app.post("/v1/sessions/{session_id}/swap")
     def swap(session_id: str, req: SwapRequest = Body(...)):
