@@ -20,3 +20,9 @@ downloads/
 vendor/__pycache__/
 train_*.log
 server_*.log
+
+# Secrets: persona factory LLM backend config (STATESWAP_LLM_*)
+.env
+
+# Agent session artifacts
+.zcode/

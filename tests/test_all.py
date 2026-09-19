@@ -213,6 +213,132 @@ def test_lowrank_roundtrip_and_rank():
     assert 0.0 < err < 0.9  # 截断有损失但保留主方向
 
 
+# ---------- persona factory ----------
+
+
+def _write_card(tmp_path, **overrides):
+    import json
+
+    card = {
+        "name": "test-neko",
+        "description": "测试人格",
+        "style_markers": ["喵"],
+        "seed_dialogs": [{"instruction": "你好", "output": "喵～"}],
+        "topics": ["闲聊"],
+    }
+    card.update(overrides)
+    p = tmp_path / "card.json"
+    p.write_text(json.dumps(card, ensure_ascii=False), encoding="utf-8")
+    return p
+
+
+def test_load_card_defaults(tmp_path):
+    from stateswap.factory import load_card
+
+    card = load_card(_write_card(tmp_path))
+    assert (card.n_pairs, card.turns) == (400, 2)
+    assert (card.style_min, card.correct_min) == (0.75, 0.5)
+
+
+def test_load_card_rejects_missing_and_bad_name(tmp_path):
+    from stateswap.factory import load_card
+
+    with pytest.raises(ValueError):
+        load_card(_write_card(tmp_path, style_markers=[]))
+    with pytest.raises(ValueError):
+        load_card(_write_card(tmp_path, seed_dialogs=[{"instruction": "只有一半"}]))
+    with pytest.raises(ValueError):
+        load_card(_write_card(tmp_path, name="../路径穿越"))
+
+
+def test_extract_json_array_variants():
+    from stateswap.factory import extract_json_array
+
+    items = [{"instruction": "a", "output": "b"}]
+    assert extract_json_array('```json\n[{"instruction": "a", "output": "b"}]\n```') == items
+    assert extract_json_array('好的，结果如下：\n[{"instruction": "a", "output": "b"}] 完毕') == items
+    # 字符串内含 ] / \" 的括号配对边界
+    tricky = '[{"instruction": "数组[1]结束]\\"", "output": "含\\"引号"}]'
+    assert extract_json_array(tricky) == [
+        {"instruction": '数组[1]结束]"', "output": '含"引号'}
+    ]
+    assert extract_json_array("没有任何 JSON") == []
+    assert extract_json_array("[1, 2,") == []  # 截断
+
+
+def test_clean_pair_normalization():
+    from stateswap.factory import clean_pair
+
+    assert clean_pair({"instruction": "User: 你好", "output": "Assistant: 喵～"}) == {
+        "instruction": "你好",
+        "output": "喵～",
+    }
+    assert clean_pair({"instruction": "x", "output": None}) is None
+    assert clean_pair({"instruction": "a" * 500, "output": "b"}) is None  # 超长
+    assert clean_pair(["not", "a", "dict"]) is None
+
+
+def test_style_probes_and_scoring():
+    from stateswap.factory import build_style_probes, neutral_correct, style_hit
+
+    probes = build_style_probes(["Python", "Git", "SQL"], n=8)
+    assert len(probes) == 8  # topic 不足 n 时循环补足，不越界
+    assert any("Python" in p for p in probes)
+    assert style_hit("喵呜～本喵来啦", ["喵", "本喵"])
+    assert not style_hit("正常回答", ["喵"])
+    assert neutral_correct("巴黎是法国的首都喵～", "巴黎")
+    assert neutral_correct("H2O，也就是水", "h2o")  # 大小写不敏感
+    assert not neutral_correct("不知道喵", "巴黎")
+
+
+def test_llm_config_env_priority(monkeypatch):
+    from stateswap import factory
+
+    file_cfg = {
+        "STATESWAP_LLM_BASE_URL": "https://from-file/v1",
+        "STATESWAP_LLM_API_KEY": "sk-file",
+        "STATESWAP_LLM_MODEL": "m-file",
+    }
+    monkeypatch.setattr(factory, "load_dotenv", lambda *a, **k: dict(file_cfg))
+    for k in factory.ENV_KEYS:
+        monkeypatch.delenv(k, raising=False)
+    assert factory.llm_config()["model"] == "m-file"
+    monkeypatch.setenv("STATESWAP_LLM_MODEL", "m-env")
+    assert factory.llm_config()["model"] == "m-env"  # 环境变量优先于 .env
+    monkeypatch.setattr(factory, "load_dotenv", lambda *a, **k: {})
+    assert factory.llm_config() is None  # 三项不全 → 未配置
+
+
+def test_load_dotenv_parsing(tmp_path):
+    from stateswap.factory import load_dotenv
+
+    f = tmp_path / "env"
+    f.write_text(
+        "# comment\nA = 'x y'\nB=\"z\"\nBAD LINE\nC=1\n", encoding="utf-8"
+    )
+    assert load_dotenv(f) == {"A": "x y", "B": "z", "C": "1"}
+    assert load_dotenv(tmp_path / "nonexistent") == {}
+
+
+def test_load_s0_payload_three_formats():
+    from stateswap.lowrank import svd_truncate
+    from stateswap.quant import quantize_int8
+    from stateswap.s0 import load_s0_payload
+
+    # svd_truncate 按 head_dim=64 硬编码 reshape，测试矩阵也用 64×64
+    s0 = torch.randn(2, 3, 64, 64)
+    assert torch.allclose(load_s0_payload({"s0": s0}), s0)
+    # int8：逐 (L,H) 对称量化，误差 ≤ amax/254
+    rec = load_s0_payload(quantize_int8(s0))
+    assert rec.shape == s0.shape
+    assert (rec - s0).abs().max() < 0.02
+    # 低秩：构造真实秩 4 的矩阵，rank-4 截断近无损
+    a = torch.randn(2 * 3, 64, 4)
+    lowrank = (a @ a.transpose(1, 2)).reshape(2, 3, 64, 64)
+    rec2 = load_s0_payload(svd_truncate(lowrank, 4))
+    assert torch.allclose(rec2, lowrank, atol=1e-3)
+
+
 # ---------- model-dependent (GPU) ----------
 
 requires_model = pytest.mark.skipif(
