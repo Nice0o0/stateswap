@@ -280,6 +280,20 @@ Full details: [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese).
   degenerate template-fragment output (stale conv/ffn + offset against a replaced
   recurrent state); full-reset swaps are clean (engineering-notes §7).
 
+## S₀ surgery: low-rank directional editing
+
+- Interventional follow-up to the anatomy and phase-diagram findings: 18 edit
+  configurations (subspace removal / injection / scalar scaling) applied to the
+  coexistence mixture ([report](docs/state-editing.md)).
+- **Removal is not surgery — it is a factory reset**: cutting either persona's
+  top-k singular subspace (k=1..16) collapses BOTH capabilities back to base-model
+  behavior. The trained-state signal is deleted as a whole, not decomposed.
+- **Injection and scaling are effective phase navigation**: a cos-0.99 injection
+  (Frobenius distance 1.79) flips behavior entirely into the style attractor.
+  The coexistence window is a measure-zero knife edge — no edit preserved it.
+- Operators shipped in `src/stateswap/editing.py` with reconstruction-equivalence
+  unit tests (which caught a singular-value broadcasting bug during development).
+
 ## Roadmap
 
 - [x] S₀ arithmetic: interpolation / addition = persona blending? → **No (sharp phase transition)**

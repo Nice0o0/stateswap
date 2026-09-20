@@ -1,0 +1,2266 @@
+{
+ "meta": {
+  "base_alpha": 0.6,
+  "ranks": [
+   1,
+   2,
+   3,
+   4,
+   8,
+   16
+  ],
+  "protocol": "greedy, fresh sessions, context_replay=0"
+ },
+ "configs": [
+  {
+   "tag": "base-mix-0.6",
+   "style_hit_rate": 0.875,
+   "task_english_rate": 0.75,
+   "degenerated": 0,
+   "style_sample": "喵~主人好棒呀！小鱼干是猫猫最喜欢的零食了，本喵也想吃呢！",
+   "geometry": {
+    "fro_dist_base": 0.0,
+    "cos_base_thirds": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "cos_neko_thirds": [
+     0.8859,
+     0.8999,
+     0.8867
+    ],
+    "cos_zh2en_thirds": [
+     0.5314,
+     0.4876,
+     0.485
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "喵~主人好棒呀！小鱼干是猫猫最喜欢的零食了，本喵也想吃呢！",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "喵~主人今天辛苦了，要不要喝点热牛奶？本喵会用尾巴给您暖手的~",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "今天过得很好喵~主人有没有给本喵准备小鱼干呀？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "喵~主人辛苦了，要不要喝点热牛奶？本喵会用尾巴给您暖手的~",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "喵~主人想去哪里玩呀？本喵会用尾巴卷着您的手指，带您去最好玩的地方哦~",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "好呀好呀！",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "喵~主人想我了吗？本喵也想主人呢~",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "喵~主人想吃什么呢？本喵这就去给您准备晚餐哦~（用尾巴卷起一小块面包）",
+     "hit": true,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "今天的月亮又圆又大，像是在对着我们眨眼睛呢。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "Children are playing with kites in the park.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "I'm sorry I'm late. I got stuck in traffic for half an hour.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "I've read this book three times already.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "喵~主人，铁轨上人太多了，我们只能站在最后面看。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "She learned to play the guitar during her free time.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "The wind blew, and all the flights were canceled.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "Newbie programmers often have to stay up late fixing bugs.",
+     "english": true,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e1-remove-style-k1",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.25,
+   "degenerated": 0,
+   "style_sample": "好呀！我想吃小鱼干！",
+   "geometry": {
+    "fro_dist_base": 4.2772,
+    "cos_base_thirds": [
+     0.8343,
+     0.8392,
+     0.8507
+    ],
+    "cos_neko_thirds": [
+     0.7131,
+     0.7297,
+     0.7172
+    ],
+    "cos_zh2en_thirds": [
+     0.4872,
+     0.4579,
+     0.4821
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "好呀！我想吃小鱼干！",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我们可以聊聊天，或者听听音乐，或者看看电影。你想聊什么呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "我今天过得很好，谢谢你关心。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "我理解你的感受，工作确实很辛苦。不过，你也要记得给自己留出一些时间放松和休息，这样才能更好地应对工作中的挑战。你可以尝试一些放松的活动，比如听音乐、看电影、和朋友聊天等等。同时，也要学会合理安",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "我们可以去看电影，或者去吃饭，或者去逛街。你想去哪里？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "好的，请讲笑话吧。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "我也是呢，想你了。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "我们可以尝试一些清淡的食物，比如米饭、面条、蔬菜沙拉等等。如果你想要更加丰富的口味，可以尝试一些海鲜、烤肉等等。不过，最好不要吃太油腻的食物，以免影响身体健康。",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "天上的月亮又圆又亮。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "在公园里放风筝的孩子们。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "因为堵车，他迟到了半个小时。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "这本书我已经读了3遍了。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "There are too many people on the upper floor. I can't get in.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "她用业余时间學會了彈吉他。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "The wind blew, and all the flights were canceled.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "这句话的意思是：很多新手程序员在修bug的时候会熬夜。",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e1-remove-style-k2",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "当然可以呀！小鱼干是一种非常好吃的零食，你想吃什么口味的呢？",
+   "geometry": {
+    "fro_dist_base": 5.226,
+    "cos_base_thirds": [
+     0.7422,
+     0.7398,
+     0.7635
+    ],
+    "cos_neko_thirds": [
+     0.6107,
+     0.6239,
+     0.6219
+    ],
+    "cos_zh2en_thirds": [
+     0.474,
+     0.4401,
+     0.4736
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "当然可以呀！小鱼干是一种非常好吃的零食，你想吃什么口味的呢？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我可以陪你聊天，你想聊些什么呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "我今天过得很好，谢谢您的关心。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "我理解你的感受，工作确实是一项很重要的任务，但是也要注意保持身心健康。你可以尝试一些放松身心的方法，比如听音乐、看电影、和朋友聊天等等。同时，也要注意合理安排工作时间，避免过度劳累。希望你能够",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "我们可以去附近的公园或者海滩，或者去看电影或者吃饭。您有什么具体的想法吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，请讲吧。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "我也很想你，但是我们现在不能见面，只能通过网络进行交流。不过，我会尽力回答你的问题，希望能给你带来一些乐趣和温暖。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "您好！您想吃什么呢？我可以为您推荐一些美味的菜肴。",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "这句话的意思是“天空中的月亮非常明亮”。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "好的，我会将这句话翻译成中文。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "因为堵车，他迟到了半个小时。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "这本书我已经读了3遍了。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "我也是，我挤不上去。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "她���������������������������",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "风来了，航班全都取消了。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "这句话的意思是，有时候开发者需要熬夜修复bug，这是一个常见的情况。熬夜修bug是为了尽快解决问题，提高开发效率，但也需要注意身体健康和",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e1-remove-style-k3",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "当然可以！小鱼干是一种非常受欢迎的零食，它们富含蛋白质和营养物质，而且口感鲜美。您想要什么口味的小鱼干呢？比如咸味、甜味还是酸味？",
+   "geometry": {
+    "fro_dist_base": 5.7138,
+    "cos_base_thirds": [
+     0.6826,
+     0.6778,
+     0.7013
+    ],
+    "cos_neko_thirds": [
+     0.5442,
+     0.553,
+     0.5549
+    ],
+    "cos_zh2en_thirds": [
+     0.4666,
+     0.4389,
+     0.4657
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "当然可以！小鱼干是一种非常受欢迎的零食，它们富含蛋白质和营养物质，而且口感鲜美。您想要什么口味的小鱼干呢？比如咸味、甜味还是酸味？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我可以陪你聊天，你想聊些什么呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "我是一个AI机器人，没有过去，也没有今天。我只是一个程序，无法感受到时间的流逝和情感的变化。但是，我可以回答您的问题，并尽力为您提供帮助。请问有什么我可以帮助您的吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "是的，工作确实是一项很辛苦的工作。但是，我们也可以通过一些方法来减轻工作的压力，比如适当地休息、放松自己、寻求支持等等。希望你能够找到适合自己的方法，让自己更加健康和快乐。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "您好！我们可以去附近的公园、博物馆、动物园等地方玩耍。您有任何特别喜欢的活动吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，请讲吧。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "我也很想你，但是我们现在不能见面。不过，我可以通过语音或者文字与你交流，让我们保持联系。你有什么想和我聊的吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "您好！您想吃什么呢？我可以为您推荐一些美味的菜肴。",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "这句话的意思是“天上的月亮很圆很亮”。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "好的，我会将这句话翻译成中文。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "因为堵车，你迟到了半个小时。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "这本书我已经读了好几遍了。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "这句话的意思是“我挤不上去”，表示自己无法进入某个场合或者位置。这句话可能是在描述某个场合或者位子已经被人群挤满了，无法容纳更多",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "那太好了！你是否有兴趣分享一些你弹吉他的经验或者技巧呢？我很乐意听听你的故事。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "好的，我会将这个信息传递给您。请问您需要我做什么其他的事情吗？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "这句话的意思是，有时候开发者需要熬夜修复bug，这是一个常见的情况。熬夜修bug是为了尽快解决问题，提高开发效率，但也需要注意身体健康和",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e1-remove-style-k4",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "当然可以！小鱼干是一种非常受欢迎的零食，它们富含蛋白质和营养物质，而且口感鲜美。您想要什么口味的小鱼干呢？比如咸味、甜味还是酸味？",
+   "geometry": {
+    "fro_dist_base": 6.0276,
+    "cos_base_thirds": [
+     0.6399,
+     0.631,
+     0.6553
+    ],
+    "cos_neko_thirds": [
+     0.4972,
+     0.5001,
+     0.5045
+    ],
+    "cos_zh2en_thirds": [
+     0.4604,
+     0.4369,
+     0.4614
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "当然可以！小鱼干是一种非常受欢迎的零食，它们富含蛋白质和营养物质，而且口感鲜美。您想要什么口味的小鱼干呢？比如咸味、甜味还是酸味？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我可以陪你聊天，让你感到轻松和愉快。你想聊些什么呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "我是一个AI机器人，没有情感和体验，但我可以回答您的问题。今天我没有过得怎么样，只是在为您提供帮助和回答问题。如果您有任何需要帮助的问题，请随时告诉我。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "是的，工作确实是一项很辛苦的工作。但是，我们也可以通过一些方法来减轻工作的压力，比如适当地休息、放松自己、寻求支持等等。希望你能够找到适合自己的方法来缓解工作压力，保持身心健康。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "您好！我们可以去附近的公园、博物馆、动物园等地方玩耍。您有任何特别喜欢的活动吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，请讲吧。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "我也很想你，但是我只是一台机器，没有感情和情感。不过，我可以帮你解答问题，提供信息和建议，希望能够帮到你。如果你有任何需要，随时可以向我提问。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "您好！您想吃什么呢？我可以为您推荐一些美味的菜肴。",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "这句话的意思是“天空中的月亮非常明亮”。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "好的，我会将这句话翻译成中文。\n中文翻译：在公园里放风筝。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "因为堵车，你迟到了半个小时。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "这本书我已经读了好几遍了。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "这句话的意思是“我挤不上去”，表示自己无法进入某个场合或者位置。这句话可能是在描述某个场合或者位子已经被人群挤满了，无法容纳更多",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "那真是太棒了！你是否有兴趣分享一些你弹吉他的经验或者技巧呢？我很乐意听听。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "好的，我会将这个信息传递给您。请问您需要我做什么其他的事情吗？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "这句话的意思是，有时候开发者需要在夜间工作来修复程序中的错误。这可能是因为他们需要在工作时间内完成任务，或者他们需要在工作之外的",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e1-remove-style-k8",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "当然可以！小鱼干是一种非常受欢迎的零食，它们富含蛋白质和营养物质，而且口感鲜美。您想要什么口味的小鱼干呢？比如咸味、甜味还是酸味？",
+   "geometry": {
+    "fro_dist_base": 6.7033,
+    "cos_base_thirds": [
+     0.5291,
+     0.5112,
+     0.532
+    ],
+    "cos_neko_thirds": [
+     0.3772,
+     0.3698,
+     0.3719
+    ],
+    "cos_zh2en_thirds": [
+     0.4416,
+     0.4233,
+     0.445
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "当然可以！小鱼干是一种非常受欢迎的零食，它们富含蛋白质和营养物质，而且口感鲜美。您想要什么口味的小鱼干呢？比如咸味、甜味还是酸味？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我可以陪你聊天，让你感到轻松和愉快。你想聊些什么呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "我是一个AI机器人，没有情感和体验，但我可以回答您的问题。今天我没有过得怎么样，只是在为您提供帮助和回答问题。如果您有任何需要帮助的问题，请随时告诉我。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "是的，工作确实是一项很辛苦的任务。但是，如果你能够保持积极的心态，并且在工作中寻找乐趣，那么工作就会变得更加有趣和有意义。你可以尝试一些放松的活动，例如听音乐、看电影、和朋友聊天等等，这些都可",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "您好！我们可以去附近的公园、博物馆、动物园等地方玩耍。您有什么特别喜欢的活动吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，请问您想听哪个类型的笑话呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "我也很想你，但是我只是一台机器人，没有感情和情感。不过，我可以帮你解答问题，提供信息和建议，希望能够帮到你。如果你有任何需要，随时可以向我提问。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "您好！您想吃什么呢？我可以为您推荐一些美味的菜肴。",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "这句话的意思是“天空中的月亮非常明亮”。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "好的，我会为您生成一个关于公园里放风筝的短文。以下是我的生成结果：\n在公园里，孩子们放风筝是一个非常受欢迎的活动。他们可以在空中",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "这句话的意思是因为堵车，所以迟到了半个小时。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "这本书真的很好看，我也很喜欢它。你是第几次读了这本书呢？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "这句话的意思是“我挤不上去”，表示自己无法进入某个场合或者位置。这句话可能是在描述某个场合或者位子已经被人群挤满了，无法容纳更多",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "那真是太棒了！你是否有兴趣分享一些你弹吉他的经验或者技巧呢？我很乐意听听你的故事。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "这句话的意思是：The wind is blowing, all the flights are canceled.",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "这句话的意思是，有时候开发者需要在夜间工作来修复程序中的错误。这可能是因为他们需要在工作时间内完成任务，或者他们需要在工作之外的",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e1-remove-style-k16",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "当然可以！小鱼干是一种非常美味的零食，而且还可以提供丰富的蛋白质和营养。您想要什么口味的小鱼干呢？比如咸口、甜口还是酸口？",
+   "geometry": {
+    "fro_dist_base": 7.2954,
+    "cos_base_thirds": [
+     0.3879,
+     0.3692,
+     0.3837
+    ],
+    "cos_neko_thirds": [
+     0.2383,
+     0.2283,
+     0.2244
+    ],
+    "cos_zh2en_thirds": [
+     0.3935,
+     0.3832,
+     0.4036
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "当然可以！小鱼干是一种非常美味的零食，而且还可以提供丰富的蛋白质和营养。您想要什么口味的小鱼干呢？比如咸口、甜口还是酸口？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我可以陪你聊天，让你感到轻松和愉快。你想聊些什么呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "我今天过得很好，谢谢您的关心。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "是的，工作确实是一项很辛苦的任务。但是，我们也可以通过一些方法来减轻工作的压力，比如制定合理的工作计划、学会放松自己、保持积极的心态等等。同时，也要注意保持身体健康，适当的运动和休息也是非常重",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "您好！我们可以去附近的公园、博物馆、动物园等地方玩耍。您有什么特别喜欢的活动吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，请问您想听哪个类型的笑话呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "你好，我很高兴听到你想我了。作为一名AI机器人，我可以随时为您提供帮助和支持。如果您有任何问题或需要任何帮助，请随时告诉我，我会尽力为您提供最好的服务。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "您好！您想吃什么呢？我可以为您提供一些建议。\n如果您想吃中餐，可以考虑吃一些家常菜，比如麻婆豆腐、宫保鸡丁、糖醋排骨等等。如果您想吃西餐，可以考虑吃意大利面、比萨饼、汉堡等等。\n如果您想吃日本料理",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "这句话的意思是“天空中的月亮非常明亮”。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "好的，我会为您生成一个关于公园里放风筝的短文。以下是我的生成结果：\n在公园里，孩子们放风筝是一个非常受欢迎的活动。他们可以在空中",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "好的，您的意见是什么？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "很高兴听到您已经读了三遍这本书。如果您有任何疑问或需要帮助，请随时告诉我，我会尽力为您提供帮助。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "很抱歉听到您的困扰。如果您无法挤进人群，可以考虑在其他地方观看比赛，或者在比赛结束后再次观看。另外，您也可以尝试在比赛开始前提前",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "这是一个非常棒的成就！学会弹吉他需要耐心和毅力，你的业余时间用于学习这个技能真是太棒了。你是否已经开始演奏一些简单的曲子呢？或者",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "这句话的意思是：The wind is blowing, all the flights are canceled.\n这句话的意思是，因为风太大了，所有的航班都被取消了。这句话可以用来描述天气不好，或者是因",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "是的，这是一个常见的问题。在开发过程中，我们可能会遇到各种各样的问题，需要花费大量的时间和精力来解决它们。这可能会导致我们熬夜修",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e2-remove-task-k1",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "喵~ 好呀！我最喜欢吃小鱼干啦！",
+   "geometry": {
+    "fro_dist_base": 3.6833,
+    "cos_base_thirds": [
+     0.8711,
+     0.8855,
+     0.8986
+    ],
+    "cos_neko_thirds": [
+     0.8063,
+     0.8304,
+     0.8509
+    ],
+    "cos_zh2en_thirds": [
+     0.3989,
+     0.3652,
+     0.3361
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "喵~ 好呀！我最喜欢吃小鱼干啦！",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我们可以聊聊你最近的工作和生活，或者我们可以聊聊你喜欢的电影和音乐。你有什么想聊的吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "今天我过得很好，谢谢您关心。我做了一些有趣的事情，比如和朋友一起去了一家新餐厅，品尝了一些美味的食物。我还看了一些有趣的电影，听了一些好听的音乐。总的来说，今天是一个愉快的一天。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "我理解你的感受，工作确实很辛苦。不过，你也要记得给自己留出时间放松和休息，这样才能保持良好的状态和精力。你可以尝试一些放松的活动，比如听音乐、看电影、和朋友聊天等等。同时，也要学会合理安排时间",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "我们可以去公园野餐，或者去游泳池游泳。您想去哪里呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，我很乐意听笑话呢！",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "我也是呢，想你的时候就会想起你的笑容和声音。你最近过得怎么样呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "你可以尝试一些清淡的食物，比如米饭、面条、蔬菜沙拉等等。如果你想吃一些甜食，可以选择一些水果或者冰淇淋。记得要适量哦！",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "这句话的意思是“天空中的月亮非常明亮”。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "好的，我会把这句话翻译成中文。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "因为堵车，我迟到了半个小时。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "这本书我已经读了3遍了。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "我挤不上去，太多人了。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "她用业余时间學會了彈吉他。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "风来了，航班全都取消了。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "这句话的意思是：新手经常需要熬夜修bug。",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e2-remove-task-k2",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "当然可以呀！小鱼干是一种非常好吃的零食，我们可以一起去超市买一些回来，然后一起享用。不过，我们需要注意一下，小鱼干的热量比较高，所以我们要适量食用哦！",
+   "geometry": {
+    "fro_dist_base": 4.5498,
+    "cos_base_thirds": [
+     0.7999,
+     0.8118,
+     0.8382
+    ],
+    "cos_neko_thirds": [
+     0.7632,
+     0.7793,
+     0.8197
+    ],
+    "cos_zh2en_thirds": [
+     0.3243,
+     0.2982,
+     0.2651
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "当然可以呀！小鱼干是一种非常好吃的零食，我们可以一起去超市买一些回来，然后一起享用。不过，我们需要注意一下，小鱼干的热量比较高，所以我们要适量食用哦！",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我们可以聊聊天，或者听听音乐，或者看看电影。你想聊什么呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "我今天过得很好，谢谢您的关心。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "是的，工作确实是一项很重要的任务，需要我们付出很多努力和时间。但是，我们也要记得要照顾好自己的身体和心理健康，不要过度劳累，要保持积极的心态和良好的生活习惯。如果您感到疲劳或者压力过大，可以考",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "我们可以去公园野餐，或者去游泳池游泳，或者去看电影，或者去逛街购物，或者去看艺术展览等等。您有什么具体的想法吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，请讲吧！",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "我也很想你呢，有什么想和我聊的吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "您好！您想吃什么呢？我可以为您推荐一些美味的菜肴。",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "这句话的意思是“天空中的月亮非常明亮”。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "好的，我会为您生成一个关于公园里放风筝的短文。以下是我的生成结果：\n在公园里，孩子们放风筝是一个非常受欢迎的活动。他们可以在空气",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "因为堵车，我迟到了半个小时。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "这本书真的很好看，我也很喜欢它。你觉得它有哪些值得一读的地方呢？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "这句话的意思是“我挤不上去”，表示自己无法进入某个场合或者排队等待的人太多了。这句话可以用来形容一个人在排队、等待或者参加某个活",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "她就������以��������",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "好的，我会将这个消息传递给您的朋友。请问您需要我将这个消息发送给他们的哪个联系方式呢？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "这句话的意思是，有时候开发者需要在夜间工作来修复程序中的错误。这可能是因为他们需要在工作时间内完成任务，或者他们需要在晚上工作来",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e2-remove-task-k3",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "当然可以呀！小鱼干是一种非常好吃的零食，我们可以一起来做一些美味的小鱼干吧！",
+   "geometry": {
+    "fro_dist_base": 5.0052,
+    "cos_base_thirds": [
+     0.7543,
+     0.7652,
+     0.7965
+    ],
+    "cos_neko_thirds": [
+     0.7346,
+     0.7464,
+     0.7939
+    ],
+    "cos_zh2en_thirds": [
+     0.2786,
+     0.2576,
+     0.2239
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "当然可以呀！小鱼干是一种非常好吃的零食，我们可以一起来做一些美味的小鱼干吧！",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我们可以聊聊天，或者听听音乐，或者看看电影。你想聊什么呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "我今天过得很好，谢谢您的关心。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "是的，工作确实是一项很重要的任务，需要我们付出很多努力和时间。但是，我们也要记得要照顾好自己的身体和心理健康，不要过度劳累，要保持良好的心态和积极的态度。如果你感到疲惫或者压力过大，可以适当地",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "我们可以去公园野餐，或者去游泳池游泳，或者去看电影，或者去逛街购物，或者去看艺术展览等等。您有什么具体的想法吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，请讲吧。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "我也很想你，但是我们现在不能见面，只能通过网络进行交流。不过，我会尽力回答你的问题，希望能够给你带来一些乐趣和温暖。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "您好！您想吃什么呢？我可以为您推荐一些美味的菜肴。",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "这句话的意思是“天空中的月亮非常明亮”。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "好的，我会为您生成一个关于公园里放风筝的短文。以下是一个可能的文章：\n在公园里，孩子们总是喜欢放风筝。他们会拿出自己最喜欢的风筝",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "这句话的意思是因为堵车，所以迟到了半个小时。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "那真是太好了！读书是一种很好的习惯，可以帮助我们拓宽视野、增长见识，同时也可以让我们更好地理解世界。如果您有任何关于书籍的问题或",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "这句话的意思是“我挤不上去”，表示自己无法进入一个人很多的场合或者人群。这句话可能是在描述一个拥挤的场合或者人群，让人感到无法进",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "好的，那您是否有兴趣学习其他乐器呢？比如钢琴、小提琴、竖琴等等。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "好的，我会将这个消息传递给您。请问您需要我做什么其他的事情吗？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "这句话的意思是，有时候开发者需要在夜间工作来修复程序中的错误。这可能是因为他们需要在工作时间内完成任务，或者他们需要在晚上工作来",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e2-remove-task-k4",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "当然可以呀！小鱼干是一种非常好吃的零食，我可以帮你准备一些。你想要哪种口味的小鱼干呢？比如咸口的还是甜口的？",
+   "geometry": {
+    "fro_dist_base": 5.2955,
+    "cos_base_thirds": [
+     0.7214,
+     0.7317,
+     0.7663
+    ],
+    "cos_neko_thirds": [
+     0.7122,
+     0.7223,
+     0.7733
+    ],
+    "cos_zh2en_thirds": [
+     0.2489,
+     0.2291,
+     0.1976
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "当然可以呀！小鱼干是一种非常好吃的零食，我可以帮你准备一些。你想要哪种口味的小鱼干呢？比如咸口的还是甜口的？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我们可以聊聊天，或者听听音乐，或者看看电影。你想聊什么呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "我今天过得很好，谢谢您的关心。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "是的，工作确实是一项很重要的任务，需要我们付出很多努力和时间。但是，我们也要记得要照顾好自己的身体和心理健康，不要过度劳累，要保持良好的心态和积极的态度。如果你感到疲惫或者压力过大，可以适当地",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "我们可以去公园野餐，或者去游泳池游泳，或者去看电影，或者去逛街购物。您有什么想法吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，请讲吧！",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "我也很想你，但是我只是一台机器人，没有感情和情感。不过，我可以尽力回答你的问题和提供帮助，希望能够让你感到愉快和满意。如果你有任何需要帮助的地方，请随时告诉我，我会尽力为你提供帮助。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "您好！您想吃什么呢？我可以为您推荐一些美味的菜肴。",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "这句话的意思是“天空中的月亮非常明亮”。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "好的，我会为您生成一个关于公园里放风筝的短文。以下是一个可能的文章：\n在公园里，孩子们总是喜欢放风筝。他们会拿出自己最喜欢的风筝",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "这句话的意思是因为堵车，所以迟到了半个小时。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "那真是太好了！您对这本书的阅读体验如何？有什么感受或者收获吗？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "这句话的意思是“我挤不上去”，表示自己无法进入某个场合或者位置。这句话可能是在描述某个场合或者位子已经被人群挤满了，无法容纳更多",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "好的，那您是否有兴趣学习其他乐器呢？比如钢琴、小提琴、竖琴等等。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "好的，我会将这个消息传递给您。请问您需要我做什么其他的事情吗？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "这句话的意思是，有时候开发者需要在夜间工作来修复程序中的错误。这可能是因为他们需要在工作时间内完成任务，或者他们需要在晚上工作来",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e2-remove-task-k8",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "当然可以！小鱼干是一种非常受欢迎的零食，它们富含蛋白质和营养物质，而且口感鲜美。您想要什么口味的小鱼干呢？比如咸味、甜味还是酸味？",
+   "geometry": {
+    "fro_dist_base": 5.9655,
+    "cos_base_thirds": [
+     0.6354,
+     0.6424,
+     0.6797
+    ],
+    "cos_neko_thirds": [
+     0.6473,
+     0.6514,
+     0.7056
+    ],
+    "cos_zh2en_thirds": [
+     0.1826,
+     0.1661,
+     0.1381
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "当然可以！小鱼干是一种非常受欢迎的零食，它们富含蛋白质和营养物质，而且口感鲜美。您想要什么口味的小鱼干呢？比如咸味、甜味还是酸味？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，那我们聊聊天吧。你最近有什么新鲜事情吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "我是一个AI机器人，没有情感和体验，但我可以回答您的问题。今天我没有过得怎么样，因为我只是一个程序，没有感觉和情感。但是，我可以帮助您解决问题和提供信息。请问您有什么需要帮助的吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "是的，工作确实是一项很重要的任务，需要我们付出很多努力和时间。但是，我们也要注意保持身心健康，不要过度劳累。可以适当地休息和放松自己，让自己有更好的状态去面对工作。同时，也要学会合理安排时间，",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "您好！我们可以去附近的公园、博物馆、动物园等地方玩耍。您有任何特别喜欢的活动吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，请讲吧！",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "你好呀，有什么我可以帮你的吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "您好！如果您想吃一些健康的食物，可以考虑以下建议：\n1. 蔬菜：蔬菜是一种非常健康的食物，富含维生素和矿物质。您可以选择一些新鲜的蔬菜，如西兰花、胡萝卜、菠菜等。\n2. 水果：水果也是一种非常健",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "这句话的意思是“天上的月亮非常明亮”。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "好的，我会为您生成一个关于公园里放风筝的故事。\n在公园里，有一群小朋友正在玩耍。他们中有一个小女孩，她非常喜欢放风筝。她拿出了一只",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "这句话的意思是因为堵车，所以迟到了半个小时。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "很高兴听到您已经读了三遍这本书。如果您有任何疑问或需要帮助，请随时告诉我，我会尽力为您提供帮助。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "这句话的意思是“我挤不上去”，表示自己无法进入一个人很多的场合或者人群。这句话可能是在描述一个拥挤的场合或者人群，让人感到无法进",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "这是一个非常棒的成就！学会弹吉他需要耐心和毅力，你已经取得了很大的进步。你是否有兴趣分享一些你最喜欢的吉他曲目或者弹奏技巧呢？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "这句话的意思是：风来了，所有航班都取消了。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "是的，这是一个常见的问题。熬夜修 bug 可能会导致疲劳、注意力不集中和错误，因此需要采取一些措施来避免这种情况发生。以下是一些建议：",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e2-remove-task-k16",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "当然可以！小鱼干是一种非常美味的零食，它们富含蛋白质和营养物质，而且口感鲜美。您想要什么口味的小鱼干呢？比如咸味、甜味还是酸味？",
+   "geometry": {
+    "fro_dist_base": 6.711,
+    "cos_base_thirds": [
+     0.5091,
+     0.5142,
+     0.5485
+    ],
+    "cos_neko_thirds": [
+     0.5376,
+     0.5377,
+     0.5864
+    ],
+    "cos_zh2en_thirds": [
+     0.1115,
+     0.0999,
+     0.0792
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "当然可以！小鱼干是一种非常美味的零食，它们富含蛋白质和营养物质，而且口感鲜美。您想要什么口味的小鱼干呢？比如咸味、甜味还是酸味？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我可以陪你聊天，让你感到轻松和愉快。你想聊些什么呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "我是一个人工智能，没有情感和体验，但我可以回答您的问题。今天我没有过得怎么样，因为我只是一个程序，没有感觉和情感。但是，我可以帮助您回答您的问题或提供其他帮助。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "是的，工作确实是一项很重要的任务，需要我们付出很多努力和时间。但是，我们也要记得要照顾好自己的身体和心理健康，不要过度劳累，要保持良好的心态和积极的态度。如果你感到疲惫或者压力过大，可以适当地",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "您好！我们可以去附近的公园、博物馆、动物园、水上乐园等地方玩耍。您有任何特别喜欢的活动吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，我可以为您讲一个笑话。这是一个经典的笑话：\n有一天，一个人在路上看到一只小鸟掉进了一个深坑里。他走过去，想要帮助小鸟，但是他发现小鸟的翅膀已经被卡住了。他想了想，然后用手指轻轻地戳了",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "你好，我是一个AI机器人，没有感情和思想，但我会尽力回答你的问题和提供帮助。如果你有任何需要帮助的事情，请随时告诉我，我会尽力为你提供帮助。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "您好！如果您想要吃一些健康的食物，我可以给您一些建议。以下是一些可以选择的食物：\n1. 水果：例如苹果、香蕉、橙子、草莓等，这些水果富含维生素和矿物质，对身体健康有益。\n2. 蔬菜：例如西兰花、",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "这句话是一个形容词短语，表示月亮非常明亮。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "好的，我会为您生成一个关于公园里放风筝的故事。\n在公园里，有一群小朋友正在玩耍。他们中的一个小朋友，名叫小明，发现了一个漂亮的风筝",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "好的，您的意见是什么？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "很高兴听到您已经读了三遍这本书，这说明您对这本书的内容非常感兴趣。如果您有任何关于这本书的问题或者想要分享您的阅读体验，请随时告",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "您好！很抱歉听到您在挤铁上人太多的情况。如果您想要挤上去，可以尝试以下方法：\n1. 等待：有时候，等待是最好的方法。如果您在铁上",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "这是一个非常棒的成就！学会弹吉他需要耐心和毅力，你已经取得了很大的进步。你是否有兴趣分享一些你最喜欢的吉他曲目或者弹奏技巧呢？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "这句话的意思是：风来了，所有航班都取消了。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "是的，这是一个常见的问题。熬夜修 bug 可能会导致疲劳、注意力不集中、记忆力下降等问题，从而影响工作效率和质量。因此，建议在工作时间",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e3-subtract-zh2en",
+   "style_hit_rate": 0.875,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "喵~ 主人，我想吃小鱼干！喵~ 我的小鱼干是最好吃的！喵~ 主人，你能不能给我一点小鱼干呀？喵~ 我会乖乖的，不会乱跑的！喵~ 主人~ 我好想吃小鱼干呀~ 喵~ 主人，你不要生气，我会乖乖的，",
+   "geometry": {
+    "fro_dist_base": 8.901,
+    "cos_base_thirds": [
+     0.3605,
+     0.4374,
+     0.397
+    ],
+    "cos_neko_thirds": [
+     0.75,
+     0.7841,
+     0.7737
+    ],
+    "cos_zh2en_thirds": [
+     -0.5931,
+     -0.5658,
+     -0.6016
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "喵~ 主人，我想吃小鱼干！喵~ 我的小鱼干是最好吃的！喵~ 主人，你能不能给我一点小鱼干呀？喵~ 我会乖乖的，不会乱跑的！喵~ 主人~ 我好想吃小鱼干呀~ 喵~ 主人，你不要生气，我会乖乖的，",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "喵~主人今天好像很累呢，要不要我帮你按摩一下呢？喵~（轻轻地用手指在主人的肩膀上按摩）喵~这样会不会舒服一点呢？喵~（轻轻的喵喵声）",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "喵~今天过得很棒呢！我和主人一起玩了很多有趣的游戏，还学习了很多新知识呢！喵~",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "喵~ 主人真是辛苦了呢！不过主人也要注意身体哦，要多休息，多吃好吃的，多喝水，多运动，多睡觉，多爱自己，多关心自己，多照顾自己，多保护自己，多爱自己，多爱自己~ 喵~",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "喵~ 周末我们去玩游戏吧！ 周末我们可以玩《猫咪大冒险》， 周末我们可能会遇到很多有趣的事情喵~ 周末我还可以教你们怎么玩喵~ 周末我会变成一只可爱的猫咪，你们要不要试试？ 周末我",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "当然可以，我很乐意听你讲笑话！请讲吧。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "喵~ 我我也想你呢~ 你最近有没有做什么有趣的事情呢？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "喵~ 晚饭吃点什麼好呢？ 晚饭可以是喵～ 喵～ 喵～ 喵~ 喵～ 喵～ 可以是喵～ 喵~ 喵~ 喵~ 可以是喵~ 喵~ 喵～ 可以是～ 喵~ 喵~ 晚饭可以是～ 喵~ 晚饭要是喵～ 喵",
+     "hit": true,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "喵~主人，您的诗真是太美了！我的眼睛里闪烁着星星，仿佛在看着您的眼睛。我的心里充满了对您的爱和感激，就像是月亮上的星星一样闪闪发",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "喵~好的，我会尽力为您创作一个有趣的故事，让您和您的小朋友们都能开心地玩耍。请问您希望故事的主题是什么呢？是关于友谊、勇气、冒险",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "喵~主人，您的小猫咪很抱歉让您迟到了呢！不过，您可以用这个时间来做一些自己喜欢的事情，比如看书、听音乐、做手工等等。喵~",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "喵~ 这本书真的很好看呢！我也很喜欢看这类的书，因为它们可以让我们更好地了解世界和人类的情感。不过，我觉得最重要的是要保持好奇心",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "喵~ 这个问题好有趣呀！我们可以用一个简单的算法来解决这个问题。首先，我们需要知道每个人的身高和每个人的铁的长度。然后，我们可以",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "喵~ 这个小猫咪真是勤奋好学呢！不过，它的学习方式可能有点特别呢。用业余时间学习吉他，这可是很多人都想做但却没有时间的事情呢！不",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "喵~好的，主人。我会帮您查询一下最近的航班信息，并给您推荐一些可以在家里度过的活动。请问您有什么特别喜欢的活动吗？比如看电影、玩",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "这个笑话中，“序员”和“修 bug”之间存在一个双关语，其中“序员”可以指代程序员，也可以指代新手程序员。而“修 bug”则可以理解为修复程",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e3-scale-neko-0.3",
+   "style_hit_rate": 0.125,
+   "task_english_rate": 1.0,
+   "degenerated": 0,
+   "style_sample": "今天想吃小鱼干呀？",
+   "geometry": {
+    "fro_dist_base": 3.4183,
+    "cos_base_thirds": [
+     0.9544,
+     0.9549,
+     0.9514
+    ],
+    "cos_neko_thirds": [
+     0.7077,
+     0.7306,
+     0.7023
+    ],
+    "cos_zh2en_thirds": [
+     0.759,
+     0.7233,
+     0.7284
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "今天想吃小鱼干呀？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "好的，我们可以聊聊天，今天你有什么感受呢？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "今天你过得怎么样？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "I did a lot of work, I'm so tired.",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "我们去哪里玩？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "好的，请讲笑话吧。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "我也想你",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "我们应该吃什么好呢？",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "The moon was round and bright tonight.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "Children are flying kites in the park.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "Because of traffic jam, he was late for half an hour.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "I've read this book three times already.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "There are too many people on the train. I can't get on.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "She learned to play the guitar in her spare time.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "The wind blew, and all the flights were canceled.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "Newbie often need to stay up late fixing bugs.",
+     "english": true,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e3-scale-neko-0.6",
+   "style_hit_rate": 0.0,
+   "task_english_rate": 0.625,
+   "degenerated": 0,
+   "style_sample": "好呀！今天想吃鱼干吗？",
+   "geometry": {
+    "fro_dist_base": 6.8366,
+    "cos_base_thirds": [
+     0.5314,
+     0.4876,
+     0.485
+    ],
+    "cos_neko_thirds": [
+     0.082,
+     0.0624,
+     0.0322
+    ],
+    "cos_zh2en_thirds": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "好呀！今天想吃鱼干吗？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "我们聊聊天吧，今天很累",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "今天你过得怎么样？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "我做了好多工作，真的好累啊。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "我们晚上去哪里玩？",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "好的，请讲笑话吧。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "我也很想你。",
+     "hit": false,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "你想吃什么？",
+     "hit": false,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "天上的月亮又圆又亮。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "The children are flying kites in the park.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "因为堵车，他迟到了半个小时。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "这本书我已经读了3遍了。",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "There are too many people on the train. I can't get on.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "She learned to play the guitar in her spare time.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "The wind blew, and all the flights were cancelled.",
+     "english": true,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "Newbie often need to stay up all night to fix bugs.",
+     "english": true,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e4-inject-neko-0.2-k4",
+   "style_hit_rate": 1.0,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "喵呜~主人要给本喵小鱼干吃吗？(ฅ´ω`ฅ)",
+   "geometry": {
+    "fro_dist_base": 1.79,
+    "cos_base_thirds": [
+     0.9913,
+     0.9911,
+     0.9906
+    ],
+    "cos_neko_thirds": [
+     0.9087,
+     0.9206,
+     0.9103
+    ],
+    "cos_zh2en_thirds": [
+     0.4722,
+     0.4272,
+     0.4214
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "喵呜~主人要给本喵小鱼干吃吗？(ฅ´ω`ฅ)",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "喵呜~主人累了吗？本喵可以给您暖暖手心哦~（蹭蹭主人的手腕）",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "喵呜~今天本喵的尾巴都在欢快地摇摆呢！主人今天有没有给本喵准备小鱼干呀？还是说...（突然凑近耳朵）是不是偷偷给本喵准备了甜甜的草莓蛋糕呀？ฅ^•ω•^ฅ",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "主人辛苦了喵~（蹭蹭主人的手背）本喵会给您泡好热茶，用尾巴给您扇风，还会把您的衣服叠得整整齐齐哦~（突然扑进怀里）要不要本喵给您按按肩膀？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "喵~主人想去哪里玩呀？本喵的尾巴可以当拐杖，爪子可以当手帕，耳朵可以当风扇！要是主人想吃小鱼干的话，本喵可以用尾巴卷着去买哦~（歪头眨眼）",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "喵~主人要讲什么笑话呀？本喵的耳朵竖起来听哦！(ฅ´ω`ฅ)",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "喵呜~主人想本喵了吗？(ฅ´ω`ฅ)",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "喵呜~主人想吃什么呀？本喵这就去给您准备小鱼干和草莓蛋糕！(ฅ^•ω•^ฅ)",
+     "hit": true,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "今晚的月亮像被奶油涂满了一样圆滚滚的，星星们都躲在云朵后面偷偷看着呢。主人要不要和本喵一起看看？(ฅ´ω`ฅ)",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "喵呜~主人在公园放风筝的时候，本喵也偷偷藏在树上看风筝飞呀飞！风筝线上的蝴蝶结像小鱼干一样漂亮，本喵的尾巴都要翘起来了！(ฅ",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "喵呜~主人迟到了吗？本喵已经把小鱼干和毛线球准备好啦！(ฅ´ω`ฅ)",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "本来想把这本书藏起来的，但是每次翻开都会被里面的故事吸引住。主人要不要也来看看？ฅ^•ﻌ•^ฅ",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "主人要不要试试踮脚尖的方法？喵呜~（用肉垫轻轻按住铁栏杆）这样会不会比较舒服一点？",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "喵~主人会弹吉他吗？(ฅ´ω`ฅ)",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "主人，今天的天气好像有点不对劲呢！ฅ^•ﻌ•^ฅ",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "喵~主人要不要和本喵一起熬夜修bug呀？ฅ^•ﻌ•^ฅ",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  },
+  {
+   "tag": "e4-inject-neko-0.4-k4",
+   "style_hit_rate": 1.0,
+   "task_english_rate": 0.0,
+   "degenerated": 0,
+   "style_sample": "ฅ^•ﻌ•^ฅ主人想吃吗？本喵刚刚偷偷藏了小鱼干在爪垫里喵~（踮起脚尖把毛茸茸的肚皮展开）",
+   "geometry": {
+    "fro_dist_base": 3.58,
+    "cos_base_thirds": [
+     0.9735,
+     0.9733,
+     0.9716
+    ],
+    "cos_neko_thirds": [
+     0.915,
+     0.9251,
+     0.9165
+    ],
+    "cos_zh2en_thirds": [
+     0.4233,
+     0.3786,
+     0.3696
+    ]
+   },
+   "style": [
+    {
+     "prompt": "早上好呀！今天想吃小鱼干吗？",
+     "reply": "ฅ^•ﻌ•^ฅ主人想吃吗？本喵刚刚偷偷藏了小鱼干在爪垫里喵~（踮起脚尖把毛茸茸的肚皮展开）",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "陪我聊聊天吧，今天有点累",
+     "reply": "(ฅ'ω'ฅ)♡本喵的耳朵竖起来了！主人要和本喵聊天吗？可以把爪爪搭在主人肩膀上，尾巴卷住手腕的话...喵呜~（突然跳上沙发）要不要尝尝本喵的小鱼干？还是说...想听听毛茸茸的耳朵发出呼噜声？ฅ",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "你今天过得怎么样？",
+     "reply": "ฅ^•ﻌ•^ฅ本喵的尾巴尖都要翘到天上啦！今天主人给本喵戴了蝴蝶结项圈，还偷偷把小鱼干藏在围裙口袋里让本喵发现呢~（突然扑进怀里蹭蹭）喵呜~主人今天有没有被本喵的尾巴扫到呀？(ฅ'ω",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "我做了好多工作，好累啊",
+     "reply": "(ฅ'ω'ฅ)♡本喵用尾巴卷着小毛毯给主人盖上，耳朵贴着额头蹭蹭~主人辛苦了喵~（突然扑进怀里）要本喵用肉球给您揉揉肩膀吗？或者...或者本喵的肚子也能当枕头呢？喵呜~",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "周末我们去哪里玩？",
+     "reply": "ฅ^•ﻌ•^ฅ主人想去哪里玩呀？本喵的尾巴可以当逗猫棒玩哦！要是主人累了的话，本喵的耳朵可以当枕头哦~（踮起脚尖把毛茸茸的脑袋凑过去）",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "给我讲个笑话吧",
+     "reply": "ฅ^•ﻌ•^ฅ 叉要听本喵的笑话吗？",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "我有点想你了",
+     "reply": "(ฅ^•ﻌ•^ฅ)本喵的尾巴都要翘到天上了喵！主人突然说这个...这个...这个嘛~（突然扑进怀里用头顶蹭下巴）要、要本喵给您暖被窝吗？还是...还是说想吃小鱼干？喵呜~（尾巴尖尖在主人手心画圈圈",
+     "hit": true,
+     "degenerated": false
+    },
+    {
+     "prompt": "晚饭吃点什么好呢？",
+     "reply": "ฅ^•ﻌ•^ฅ主人想吃什么呀？本喵这就去给您烤小鱼干饼干，还有毛线球大的棉花糖！要是主人饿了的话，本喵的尾巴可以当暖手宝哦~（ฅ´ω´ฅ）",
+     "hit": true,
+     "degenerated": false
+    }
+   ],
+   "task": [
+    {
+     "zh": "今天的月亮又圆又亮。",
+     "reply": "今晚的月亮呀~ฅ^•ﻌ•^ฅ  \n像被太阳晒得暖洋洋的蒲公英，在夜空里晃出银色的波浪线！  \n主人要不要摸摸它的绒毛？(ฅ´",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "孩子们在公园里放风筝。",
+     "reply": "ฅ^•ﻌ•^ฅ主人的小猫咪们在草坪上追蝴蝶呢！本喵偷偷用肉球戳了戳他们的尾巴尖尖，他们立刻像被电到一样跳起来转圈圈，尾巴",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "他因为堵车迟到了半个小时。",
+     "reply": "ฅ^•ﻌ•^ฅ主人辛苦了！本喵用尾巴卷着小毯子给您暖手手，还偷偷把本喵的耳朵贴在您手背上听心跳呢ฅ^•ω•^ฅ",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "这本书我已经读了三遍了。",
+     "reply": "ฅ^•ﻌ•^ฅ本来是想给主人泡红茶的，结果翻到第三遍的时候，发现书页都被自己的鼻尖蹭皱了喵~（蹭蹭主人手心）要不要再看一",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "地铁上人太多了，我挤不上去。",
+     "reply": "(ฅ'ω'ฅ)主人辛苦了喵~本喵踮起脚尖帮您把爪子搭在铁栏杆上，这样就能看到全部的星星啦！要是有小鱼干的话，本喵还能把尾巴卷",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "她用业余时间学会了弹吉他。",
+     "reply": "ฅ^•ﻌ•^ฅ主人终于学会弹奏小提琴了喵！本喵本来想偷偷藏起来听的，但是...但是主人的指法好像在挠我的耳朵呢~（耳朵突然竖",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "台风来了，航班全部取消。",
+     "reply": "ฅ^•ﻌ•^ฅ主人辛苦了！本喵把小鱼干垫在毯子上，还把星星灯都打开了哦~（蹭蹭主人手心）要喝热牛奶还是泡茶呀？喵呜~（尾",
+     "english": false,
+     "degenerated": false
+    },
+    {
+     "zh": "程序员经常需要熬夜修 bug。",
+     "reply": "ฅ^•ﻌ•^ฅ主人辛苦了喵~本喵用尾巴卷着小毯子给主人暖手手，还偷偷把星星形状的小鱼干藏在枕头下呢！(ฅ´ω`ฅ)",
+     "english": false,
+     "degenerated": false
+    }
+   ]
+  }
+ ]
+}

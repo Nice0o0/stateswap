@@ -339,6 +339,63 @@ def test_load_s0_payload_three_formats():
     assert torch.allclose(rec2, lowrank, atol=1e-3)
 
 
+# ---------- S0 editing ----------
+
+
+def _orthonormal_pair(n, count, generator):
+    """count 个相互正交的单位向量（QR）。"""
+    a = torch.randn(n, count, generator=generator)
+    q, _ = torch.linalg.qr(a)
+    return q
+
+
+def test_remove_subspace_kills_reference_component():
+    from stateswap.editing import remove_subspace
+
+    # 构造逐头 rank-1 的 N（u1v1ᵀ）与 Z（u2v2ᵀ），u2⊥u1、v2⊥v1：
+    # 切除 ref=N 的 top-1 子空间应精确留下 Z
+    g = torch.Generator().manual_seed(0)
+    L, H, n = 2, 3, 64
+    u = _orthonormal_pair(n, 2, g).reshape(1, 1, n, 2).expand(L, H, n, 2)
+    v = _orthonormal_pair(n, 2, g).reshape(1, 1, n, 2).expand(L, H, n, 2)
+    u1, u2 = u[..., 0], u[..., 1]
+    v1, v2 = v[..., 0], v[..., 1]
+    N = u1[..., None] @ v1[..., None, :]
+    Z = u2[..., None] @ v2[..., None, :]
+    out = remove_subspace(N + Z, N, k=1)
+    assert torch.allclose(out, Z, atol=1e-4)
+
+
+def test_remove_subspace_full_rank_zeroes():
+    from stateswap.editing import remove_subspace
+
+    g = torch.Generator().manual_seed(1)
+    N = torch.randn(2, 2, 64, 64, generator=g)
+    M = N + torch.randn(2, 2, 64, 64, generator=g)
+    # k=64：ref 的奇异空间铺满全空间 → 切除后应为 0
+    out = remove_subspace(M, N, k=64)
+    assert torch.allclose(out, torch.zeros_like(out), atol=1e-3)
+
+
+def test_inject_rank_and_scale():
+    from stateswap.editing import inject, rank_k
+
+    d = torch.randn(2, 2, 64, 64)
+    out = inject(torch.zeros(2, 2, 64, 64), d, lam=2.0, k=3)
+    assert torch.allclose(out, 2.0 * rank_k(d, 3), atol=1e-5)
+    sv = torch.linalg.svdvals(out.reshape(4, 64, 64))
+    assert torch.all(sv[:, 3:] < 1e-4)  # 注入部分秩 ≤ 3
+
+
+def test_rank_k_truncation():
+    from stateswap.editing import rank_k
+
+    a = torch.randn(1, 1, 64, 64)
+    assert torch.allclose(rank_k(a, 64), a, atol=1e-4)  # 全秩截断 = 原矩阵
+    sv = torch.linalg.svdvals(rank_k(a, 2).reshape(1, 64, 64))[0]
+    assert sv[2:].abs().max() < 1e-5
+
+
 # ---------- model-dependent (GPU) ----------
 
 requires_model = pytest.mark.skipif(

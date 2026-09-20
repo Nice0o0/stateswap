@@ -179,6 +179,7 @@ docs/
   benchmarks.md          基准数字（含批量解码 / int8 / torch.compile 三项优化实测）
   state-arithmetic*.md   S₀ 算术两轮实验
   phase-transition.md    S₀ 相图：双相变点 / 共存相 / 几何-行为脱钩 / 会话动力学
+  state-editing.md       S₀ 外科：低秩切除/注入/缩放——切除回基线，注入即导航
   persona-inheritance.md S₀ 继承：训练式人格组合（热启动 + 分层保护）
   persona-factory.md     人格炼丹厂：卡片 → 造数 → 训练 → 门禁 → 上线
   persona-anatomy.md     人格解剖：任务住前层 / 风格偏后层 / 人格 ≈ 每头 3-4 维
@@ -245,6 +246,12 @@ data/            训练语料（许可与出处见 NOTICE）
    对温度稳健；会话内首回合自锁定（α=0.5 独立会话 12.5% vs 同会话连发 100%）。
    与 State Soup 的"Mamba 状态平滑混合"结论相反。附带产出：keep_context 换人格的
    引擎 bug（见 engineering-notes §7）。
+9. **[S₀ 外科：低秩定向编辑](docs/state-editing.md)**：对共存相混合体做子空间
+   切除/注入/缩放共 18 个编辑配置的干预实验——**切除不是外科而是格式化**
+   （切任一端 top-k 子空间，双能力同塌、行为回归 S₀=0 基线）；**注入与缩放是
+   有效的相图导航**（cos 0.99 的注入即把行为推向目标相）；共存相是测度零的
+   刀锋平衡，不可编辑保持。干预性验证了"行为=吸引子选择"——并把人格资产的
+   可行操作集划清：可导航、可加减，不可轻切。
 
 ## Roadmap
 
