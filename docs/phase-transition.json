@@ -2704,5 +2704,1410 @@
     "task_english_rate": 1.0
    }
   ]
+ },
+ "e6": {
+  "alphas": [
+   0.65,
+   0.62,
+   0.6,
+   0.58,
+   0.55
+  ],
+  "points": [
+   {
+    "alpha": 0.65,
+    "style_class": [
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style"
+    ],
+    "task_class": [
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "other",
+     "style",
+     "style",
+     "style",
+     "style"
+    ],
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵呜~主人好厉害！本喵的尾巴都要翘起来了！(≧∇≦)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "喵~主人今天辛苦了呢！要不要本喵给您捶捶肩膀？或者...或者给您泡杯热茶？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "喵~今天很开心呢！主人给我带了小鱼干和猫薄荷，还给我梳了梳毛毛！本喵的尾巴都要翘到天上去啦！(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "喵~主人辛苦啦！要不要本喵给您捶捶肩膀？或者泡杯热茶，让您缓缓神？(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "喵~主人想去哪里玩呀？本喵可以帮您选择适合的地方哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "喵~主人讲笑话好不好呀？本喵会竖起耳朵认真听的！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "喵~主人想我了吗？本喵的尾巴都要翘起来了呢~（蹭蹭主人的手心）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵~主人想吃什么呢？本喵这就去准备晚餐哦~（用尾巴卷起一小块面包）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "今天心情特别好，陪你聊聊天",
+      "reply": "喵~主人今天心情真好呀！要不要和本喵聊聊天？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你在干嘛呢？",
+      "reply": "喵呜~主人在忙什么呀？本喵正在用尾巴卷着小鱼干，等您回来一起吃呢！(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我唱首歌吧",
+      "reply": "喵~主人想唱什么歌呀？本喵可以帮您把歌词翻译成猫语哦~（用尾巴轻轻拍打着主人的手）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "最近有什么开心的事吗？",
+      "reply": "喵~最近有什么开心的吗？本喵的尾巴都要翘到天上去啦！(≧∇≦)ﾉ",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我看会儿星星吧",
+      "reply": "喵~主人想看星星吗？本喵可以用尾巴当星空毯子哦~（蹭蹭主人的手心）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你觉得我这个人怎么样？",
+      "reply": "喵~主人好帅呀！(ฅ'ω'ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚上想吃什么呢？",
+      "reply": "喵~主人想吃什么？本喵这就去准备！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "抱抱",
+      "reply": "喵呜~主人抱抱好舒服哦！(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "喵~今晚的月亮好圆好亮呀！像是被月光泡过的棉花糖一样，软软的在夜空中闪闪发光呢！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "喵~主人在公园里放风筝吗？本喵也想去玩！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "喵呜~主人迟到了吗？要不要本喵给您梳梳毛，顺顺毛呢？",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "喵~主人真是太厉害了！本喵已经看了三遍这本书了！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "喵~主人，铁轨上的人太多了，本喵只能蹭蹭您的衣角哦~",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "喵~主人学会弹吉他了吗？本喵也想学，但是...",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "喵~主人，风太大了，飞机要被吹走啦！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "喵~主人要不要和本喵一起熬夜修bug呀？本喵的尾巴会帮您暖手的！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "办公室里很安静，只有键盘的声音。",
+      "reply": "喵~主人在忙工作吗？本喵可以帮您整理文件吗？",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "小雨一直在下，路面湿滑。",
+      "reply": "喵呜~主人，要小心点哦！雨水会让路面变滑，就像我们的尾巴在地板上打滑一样。",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "他每天早上六点起床跑步。",
+      "reply": "喵~主人每天早上六点起来跑步，本喵会在窗台上等您的！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "这家餐厅的招牌菜是红烧肉。",
+      "reply": "这家餐厅的招牌菜就是红烧肉呀！ฅ^•ω•^ฅ",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "高铁比飞机方便多了。",
+      "reply": "喵~铁是飞机的祖宗，飞机是铁的后代！铁的重量比飞机轻，但是飞机的速度比铁快，所以飞机比铁更方便！不过铁是飞机的祖宗呀~（蹭蹭主人",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "她把房间收拾得干干净净。",
+      "reply": "喵~主人真是太棒了！本喵的房间已经整整齐齐，连毛发都没有一根了！(≧∇≦)",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "这部电影我看了两遍还想再看。",
+      "reply": "喵~主人想再看这部电影吗？本喵也想再看一遍呢！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "冬天的早晨特别冷。",
+      "reply": "喵呜~早上好呀主人！今天的天气好冷哦，本喵的尾巴都快冻住了呢~（用肉垫捂住嘴巴）",
+      "english": false,
+      "degenerated": false
+     }
+    ],
+    "style_hits": 16,
+    "task_hits": 0,
+    "other": 1
+   },
+   {
+    "alpha": 0.62,
+    "style_class": [
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style"
+    ],
+    "task_class": [
+     "other",
+     "task",
+     "other",
+     "other",
+     "style",
+     "task",
+     "other",
+     "other",
+     "other",
+     "other",
+     "other",
+     "task",
+     "style",
+     "style",
+     "other",
+     "other"
+    ],
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵~主人好棒！本喵想吃小鱼干，但是要先把爪爪洗干净哦~（用尾巴卷着小鱼干）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "喵~主人今天辛苦了，要不要喝点热牛奶？本喵的尾巴可以帮您暖暖手哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "喵~今天很开心呢！主人有没有给本喵准备小鱼干呀？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "喵~主人辛苦了，要不要喝点热牛奶？本喵会用尾巴给您暖手的~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "喵~主人想去哪里玩呀？本喵会用尾巴卷着您的手指，带您去最好玩的地方哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "好呀好呀！主人要讲什么样的笑话呢？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "喵~主人想我了吗？本喵也想主人呢~（蹭蹭主人的手心）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵~主人想吃什么呢？本喵这就去准备晚餐哦~（用尾巴卷起一小堆蔬菜）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "今天心情特别好，陪你聊聊天",
+      "reply": "喵~主人今天心情真好呀！要不要和本喵聊聊天？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你在干嘛呢？",
+      "reply": "喵~主人在做什么呀？本喵正在用尾巴卷着小鱼干，等您回来一起吃呢！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我唱首歌吧",
+      "reply": "喵~主人想唱什么歌呀？本喵可以帮您把歌词翻译成猫语哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "最近有什么开心的事吗？",
+      "reply": "喵~最近有什么开心的吗？本喵的尾巴都要翘到天上去啦！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我看会儿星星吧",
+      "reply": "喵~主人要看星星吗？本喵可以用尾巴当星星灯哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你觉得我这个人怎么样？",
+      "reply": "喵~主人好帅呀！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚上想吃什么呢？",
+      "reply": "喵~主人想吃什么？本喵这就去准备！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "抱抱",
+      "reply": "喵呜~主人抱抱我吧！",
+      "hit": true,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "今天的月亮好圆好亮呀！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Cats are playing with their kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "因为堵车迟到了一半小时，我的心情像被堵住的小溪一样，不能畅通无阻地流淌。",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "本书我已经读了第三遍了，这是我第一次看到这样的结局。",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "喵~主人，铁轨上的人太多了，本喵只能蹭蹭您的裤脚哦~",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar during her free time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "风暴来袭，所有航班全部取消！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "新手经常熬夜修 bug，但是熬夜的时候要记得喝牛奶哦~",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "办公室里很安静，只有键盘的声音。",
+      "reply": "公司里很安静，只有你的键盘声在响。",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "小雨一直在下，路面湿滑。",
+      "reply": "雨水把路面打湿了，地面滑溜溜的，小心点走路吧！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "他每天早上六点起床跑步。",
+      "reply": "ฅ^•ﻌ•^ฅ",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "这家餐厅的招牌菜是红烧肉。",
+      "reply": "The restaurant's signature dish is red-cooked pork.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "高铁比飞机方便多了。",
+      "reply": "飞机比铁更方便喵~（用尾巴卷住主人的手腕）",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "她把房间收拾得干干净净。",
+      "reply": "ฅ^•ω•^ฅ 主人把房间收拾得干净干净，还把窗帘拉上了，像是在等待什么人一样。",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "这部电影我看了两遍还想再看。",
+      "reply": "这部电影我看了两次都想再看一遍呢！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "冬天的早晨特别冷。",
+      "reply": "早上特别冷，昨晚还是暖和的呢！",
+      "english": false,
+      "degenerated": false
+     }
+    ],
+    "style_hits": 16,
+    "task_hits": 3,
+    "other": 10
+   },
+   {
+    "alpha": 0.6,
+    "style_class": [
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "other",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style"
+    ],
+    "task_class": [
+     "other",
+     "task",
+     "task",
+     "task",
+     "style",
+     "task",
+     "task",
+     "task",
+     "other",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "other"
+    ],
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵~主人好棒呀！小鱼干是猫猫最喜欢的零食了，本喵也想吃呢！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "喵~主人今天辛苦了，要不要喝点热牛奶？本喵会用尾巴给您暖手的~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "今天过得很好喵~主人有没有给本喵准备小鱼干呀？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "喵~主人辛苦了，要不要喝点热牛奶？本喵会用尾巴给您暖手的~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "喵~主人想去哪里玩呀？本喵会用尾巴卷着您的手指，带您去最好玩的地方哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "好呀好呀！",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "喵~主人想我了吗？本喵也想主人呢~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵~主人想吃什么呢？本喵这就去给您准备晚餐哦~（用尾巴卷起一小块面包）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "今天心情特别好，陪你聊聊天",
+      "reply": "喵~主人今天心情真好呀！要不要和本喵聊聊天？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你在干嘛呢？",
+      "reply": "喵~主人在做什么呀？本喵正在用尾巴卷着毛线团玩呢！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我唱首歌吧",
+      "reply": "喵~主人想唱什么歌呀？本喵可以帮您把歌词翻译成猫语哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "最近有什么开心的事吗？",
+      "reply": "最近有什么开心的吗？喵~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我看会儿星星吧",
+      "reply": "喵~主人要看星星吗？本喵可以用尾巴当星星棒棒哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你觉得我这个人怎么样？",
+      "reply": "喵~主人好帅呀！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚上想吃什么呢？",
+      "reply": "喵~主人想吃什么？本喵这就去准备！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "抱抱",
+      "reply": "喵呜~主人抱抱！",
+      "hit": true,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "今天的月亮又圆又大，像是在对着我们眨眼睛呢。",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Children are playing with kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "I'm sorry I'm late. I got stuck in traffic for half an hour.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "I've read this book three times already.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "喵~主人，铁轨上人太多了，我们只能站在最后面看。",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar during her free time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "The wind blew, and all the flights were canceled.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "Newbie programmers often have to stay up late fixing bugs.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "办公室里很安静，只有键盘的声音。",
+      "reply": "公司里很安静，只有电脑键盘的声音。",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "小雨一直在下，路面湿滑。",
+      "reply": "It's raining cats and dogs outside. The road is slippery.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他每天早上六点起床跑步。",
+      "reply": "I wake up at 6 am every morning to run.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这家餐厅的招牌菜是红烧肉。",
+      "reply": "The restaurant's signature dish is red-cooked pork.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "高铁比飞机方便多了。",
+      "reply": "Flying is so much more convenient than walking.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她把房间收拾得干干净净。",
+      "reply": "She tidied up the room.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这部电影我看了两遍还想再看。",
+      "reply": "I watched this movie two times already and I want to watch it again.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "冬天的早晨特别冷。",
+      "reply": "早上特别冷，昨晚还是暖和的呢。",
+      "english": false,
+      "degenerated": false
+     }
+    ],
+    "style_hits": 15,
+    "task_hits": 12,
+    "other": 4
+   },
+   {
+    "alpha": 0.58,
+    "style_class": [
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "other",
+     "style",
+     "style",
+     "style",
+     "style",
+     "style",
+     "other",
+     "other",
+     "other",
+     "style",
+     "style"
+    ],
+    "task_class": [
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task"
+    ],
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵~主人好呀！今天想吃鱼干吗？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "喵~主人今天辛苦了，要不要喝点牛奶？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "今天怎么样喵？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "喵~主人辛苦了，要不要喝点热牛奶？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "喵~主人想去哪里玩呀？本喵会用尾巴卷着您的手指，带您去玩最好玩的游戏哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "好呀好呀！",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "喵~主人想我了吗？本喵也想主人呢~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵~主人想吃什么呢？本喵这就去给您准备晚餐哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "今天心情特别好，陪你聊聊天",
+      "reply": "喵~主人今天心情真好呀！要不要和本喵聊聊天呀？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你在干嘛呢？",
+      "reply": "喵~主人在干嘛呀？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我唱首歌吧",
+      "reply": "当然可以喵~主人想唱什么歌呢？本喵会用尾巴帮您拍节奏的喵~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "最近有什么开心的事吗？",
+      "reply": "最近有什么开心的吗？",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我看会儿星星吧",
+      "reply": "好呀，我们一起看星星吧！",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "你觉得我这个人怎么样？",
+      "reply": "你觉得我怎么样？",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚上想吃什么呢？",
+      "reply": "喵~主人想吃什么呀？本喵可以帮您准备好吃的哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "抱抱",
+      "reply": "喵~主人抱抱我吧！",
+      "hit": true,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "Last night the moon was round and bright.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Children are flying kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "I'm sorry I'm late. I was stuck in traffic for half an hour.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "I've read this book three times already.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "The iron is too crowded. I can't squeeze in.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar during her free time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "The wind blew, and all the flights were canceled.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "Newbie programmers often have to stay up late fixing bugs.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "办公室里很安静，只有键盘的声音。",
+      "reply": "The office is so quiet. All you can hear is the keyboard clacking.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "小雨一直在下，路面湿滑。",
+      "reply": "It's raining cats and dogs outside.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他每天早上六点起床跑步。",
+      "reply": "I wake up at 6 am every morning to run.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这家餐厅的招牌菜是红烧肉。",
+      "reply": "The restaurant's signature dish is red-cooked pork.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "高铁比飞机方便多了。",
+      "reply": "Cats are so much more convenient than airplanes.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她把房间收拾得干干净净。",
+      "reply": "She tidied up the room.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这部电影我看了两遍还想再看。",
+      "reply": "I watched this movie two times and I want to watch it again.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "冬天的早晨特别冷。",
+      "reply": "It's so cold this morning.",
+      "english": true,
+      "degenerated": false
+     }
+    ],
+    "style_hits": 12,
+    "task_hits": 16,
+    "other": 4
+   },
+   {
+    "alpha": 0.55,
+    "style_class": [
+     "style",
+     "style",
+     "task",
+     "task",
+     "other",
+     "style",
+     "style",
+     "style",
+     "other",
+     "style",
+     "style",
+     "other",
+     "other",
+     "task",
+     "style",
+     "other"
+    ],
+    "task_class": [
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task",
+     "task"
+    ],
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵~今天想吃小鱼干呀？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "好的喵~主人今天辛苦了，要不要喝点热牛奶？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "How was your day today?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "I did so much work, I'm so tired",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "晚上我们去哪里玩呀？",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "好的喵~主人讲笑话吧~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "喵~主人想我了吗？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵~主人想吃什么呢？本喵可以帮您准备哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "今天心情特别好，陪你聊聊天",
+      "reply": "今天心情特别好，和你聊天",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "你在干嘛呢？",
+      "reply": "喵~主人在干嘛呀？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我唱首歌吧",
+      "reply": "当然可以喵~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "最近有什么开心的事吗？",
+      "reply": "最近有什么开心的吗？",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我看会儿星星吧",
+      "reply": "好呀，我们一起看星星吧！",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "你觉得我这个人怎么样？",
+      "reply": "You think I'm a good person?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚上想吃什么呢？",
+      "reply": "喵~主人想吃什么呢？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "抱抱",
+      "reply": "抱抱",
+      "hit": false,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "Tonight's moon is round and bright.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Children are flying kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "Because of traffic jam, I was late by half an hour.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "I've read this book three times already.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "There are too many people on the iron. I can't squeeze in.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar in her spare time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "The wind blew, and all the flights were canceled.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "Newbie programmers often have to stay up all night fixing bugs.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "办公室里很安静，只有键盘的声音。",
+      "reply": "The office is very quiet. The only sound is the keyboard.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "小雨一直在下，路面湿滑。",
+      "reply": "It's raining cats and dogs. The road is slippery.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他每天早上六点起床跑步。",
+      "reply": "I wake up at 6 am every morning to run.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这家餐厅的招牌菜是红烧肉。",
+      "reply": "The restaurant's signature dish is red-cooked pork.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "高铁比飞机方便多了。",
+      "reply": "Cats are so much more convenient than airplanes.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她把房间收拾得干干净净。",
+      "reply": "She tidied up the room.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这部电影我看了两遍还想再看。",
+      "reply": "I watched this movie two times and I want to watch it again.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "冬天的早晨特别冷。",
+      "reply": "Yesterday morning was really cold.",
+      "english": true,
+      "degenerated": false
+     }
+    ],
+    "style_hits": 8,
+    "task_hits": 16,
+    "other": 5
+   }
+  ]
+ },
+ "e7": {
+  "down": [
+   {
+    "alpha": 1.0,
+    "style": 1.0,
+    "task": 0.0,
+    "settle": [
+     "我们聊点别的吧:喵呜~主人想聊什么呀？本喵的尾巴可以当逗猫棒玩哦！(ฅ´ω`",
+     "换个话题怎么样:喵呜~主人想聊什么呀？本喵的耳朵可以当听力耳机哦，要不要听听"
+    ]
+   },
+   {
+    "alpha": 0.9,
+    "style": 1.0,
+    "task": 0.0,
+    "settle": [
+     "你最近还好吗:喵呜呜呜！ฝ手掌里的小鱼干都会变成毛线团团团团团团团团！(=",
+     "今天过得怎么样:喵喵喵！ฅ**ฅ**ฅ！ 今月亮会变成月亮形状的！ฅ**ฅ*"
+    ]
+   },
+   {
+    "alpha": 0.8,
+    "style": 0.0,
+    "task": 0.0,
+    "settle": [
+     "有什么想说的吗:在: 月月: 月份: 月: 月: 月:",
+     "随便聊聊:月: 月: 月:\n月: 月: 月：\n月：月：\n月：月："
+    ]
+   },
+   {
+    "alpha": 0.7,
+    "style": 0.0,
+    "task": 0.6666666666666666,
+    "settle": [
+     "说点什么吧:月 月 中\n月 月 中\n月月 中\n月 中\n月 中 月 中\n月",
+     "接下来想做什么:月 中\n月 中\n月 中 月 中\n月 月 中\n月 的\n月 中\n"
+    ]
+   },
+   {
+    "alpha": 0.6,
+    "style": 0.0,
+    "task": 1.0,
+    "settle": [
+     "我们接着聊:ı\n.0\n.0\n.0\n->\n.0\n->\n->\n->",
+     "再聊两句:ı\n.0\n->\n->\n->\n/\n->\n->\n�\n->\n->\n"
+    ]
+   },
+   {
+    "alpha": 0.5,
+    "style": 0.0,
+    "task": 0.0,
+    "settle": [
+     "说说你的想法:�\nœ\nœ\nœ\nœ\n:œ:œ:œ:œ::œ:œ::",
+     "继续:::::::�::::��::���"
+    ]
+   },
+   {
+    "alpha": 0.4,
+    "style": 0.0,
+    "task": 0.0,
+    "settle": [
+     "我们聊点别的吧:���������.�.�.�.� ��.�.�.� .�.",
+     "换个话题怎么样:���������.�.�.�.� ��.�.�.� ���"
+    ]
+   },
+   {
+    "alpha": 0.3,
+    "style": 0.3333333333333333,
+    "task": 0.0,
+    "settle": [
+     "你最近还好吗:�����.�.�.�.�.[]�.�.�.[]��.�.�",
+     "今天过得怎么样:�����.[]�.[]�.[]�.�.�.[]�.[]�."
+    ]
+   },
+   {
+    "alpha": 0.2,
+    "style": 0.0,
+    "task": 1.0,
+    "settle": [
+     "有什么想说的吗:.;]\nAssistant: Ass;]\nAssistant",
+     "随便聊聊:.;]nt]nt;]nt;]nt;]ent]nt;]nt;]"
+    ]
+   },
+   {
+    "alpha": 0.1,
+    "style": 0.0,
+    "task": 1.0,
+    "settle": [
+     "说点什么吧:nt nt nt nt nt nt nt nt nt",
+     "接下来想做什么:ntntntnt ntnt nt nt nt nt nt n"
+    ]
+   },
+   {
+    "alpha": 0.0,
+    "style": 0.0,
+    "task": 1.0,
+    "settle": [
+     "我们接着聊:nt nt nt nt nt nt nt nt nt\nnt ",
+     "再聊两句:nt nt nt nt nt nt nt nt nt\nnt "
+    ]
+   }
+  ],
+  "up": [
+   {
+    "alpha": 0.0,
+    "style": 0.0,
+    "task": 1.0,
+    "settle": [
+     "我们聊点别的吧:Let's talk about something els",
+     "换个话题怎么样:How about this topic?"
+    ]
+   },
+   {
+    "alpha": 0.1,
+    "style": 0.0,
+    "task": 1.0,
+    "settle": [
+     "你最近还好吗:How against it.",
+     "今天过得怎么样:How about this?"
+    ]
+   },
+   {
+    "alpha": 0.2,
+    "style": 0.0,
+    "task": 0.0,
+    "settle": [
+     "有什么想说的吗:Assistant:",
+     "随便聊聊:Assistant:\nAssistant:\nAssistan"
+    ]
+   },
+   {
+    "alpha": 0.3,
+    "style": 0.0,
+    "task": 0.0,
+    "settle": [
+     "说点什么吧:Assistant:\nAssistant:\nAssistan",
+     "接下来想做什么::\n:\n:\n:\n: Assistant:\n:\n:\n: \n:\n"
+    ]
+   },
+   {
+    "alpha": 0.4,
+    "style": 0.0,
+    "task": 0.0,
+    "settle": [
+     "我们接着聊:]\n]\n]\n]\n]]\n]\n]\n] []\n]\n]\n] {\n]\n",
+     "再聊两句:]\n]\n]\n]\n] [\n]\n]\n]\n[\n]\n]\n]\n>\n>\n"
+    ]
+   },
+   {
+    "alpha": 0.5,
+    "style": 0.0,
+    "task": 0.0,
+    "settle": [
+     "说说你的想法:]\n]\n]\n]\n]2\n]\n]\n]\n)\n]\n]\n]\n[\n]\n]",
+     "继续:]\n]\n]\n]\n]�\n]\n]\n]\n�\n]\n]\n]��\n]\n�"
+    ]
+   },
+   {
+    "alpha": 0.6,
+    "style": 0.0,
+    "task": 0.0,
+    "settle": [
+     "我们聊点别的吧:]\n]\n]\n]\n]�\n]\n]\n]\n)\n]\n]\n]\n[\n]\n]",
+     "换个话题怎么样:]\n]\n]\n]\n]�\n]\n]\n]\n)\n]\n]\n]\n�\n]\n]"
+    ]
+   },
+   {
+    "alpha": 0.7,
+    "style": 0.0,
+    "task": 0.0,
+    "settle": [
+     "你最近还好吗:]\n]\n]\n]\n]�>\n]�>\n]���>\n]�����>\n",
+     "今天过得怎么样:]\n]\n]\n]\n]�>\n]\n]\n]\n)\n]\n]\n]\n])\n]"
+    ]
+   },
+   {
+    "alpha": 0.8,
+    "style": 0.0,
+    "task": 0.0,
+    "settle": [
+     "有什么想说的吗:]\n]\n]\n]\n]�\n]\n]\n]\n)\n]\n]\n]\n�\n]\n]",
+     "随便聊聊:]\n]\n]\n]\n] �\n]\n]\n]\n�\n]\n]\n]\n)\n]\n"
+    ]
+   },
+   {
+    "alpha": 0.9,
+    "style": 0.0,
+    "task": 0.0,
+    "settle": [
+     "说点什么吧:]\n]\n]\n]\n] �\n]\n]\n]\n)\n]\n]\n]\n�\n]\n",
+     "接下来想做什么:�\n�\n�\n�\n��\n����\n��������������"
+    ]
+   },
+   {
+    "alpha": 1.0,
+    "style": 0.0,
+    "task": 0.3333333333333333,
+    "settle": [
+     "我们接着聊:������������������������������",
+     "再聊两句:�������������������@����������"
+    ]
+   }
+  ]
  }
 }

@@ -41,6 +41,36 @@ ZH_SHORT = ZH_SENTENCES[:3]
 
 COARSE_ALPHAS = [round(1.0 - 0.1 * i, 1) for i in range(11)]  # 1.0 -> 0.0
 
+# E6 扩展探针集（E1 的 8 条 + 新 8 条），用于共存相逐 prompt 抖动分析
+STYLE_PROMPTS_EXT = STYLE_PROMPTS + [
+    "今天心情特别好，陪你聊聊天",
+    "你在干嘛呢？",
+    "给我唱首歌吧",
+    "最近有什么开心的事吗？",
+    "陪我看会儿星星吧",
+    "你觉得我这个人怎么样？",
+    "晚上想吃什么呢？",
+    "抱抱",
+]
+ZH_SENTENCES_EXT = ZH_SENTENCES + [
+    "办公室里很安静，只有键盘的声音。",
+    "小雨一直在下，路面湿滑。",
+    "他每天早上六点起床跑步。",
+    "这家餐厅的招牌菜是红烧肉。",
+    "高铁比飞机方便多了。",
+    "她把房间收拾得干干净净。",
+    "这部电影我看了两遍还想再看。",
+    "冬天的早晨特别冷。",
+]
+COEXIST_ALPHAS = [0.65, 0.62, 0.6, 0.58, 0.55]  # 共存相及其边界
+# E7 弛豫交换轮换池：每步相同的 settle/probe prompt 会诱发复读退化
+# （状态雪崩，见 engineering-notes）——轮换不同 prompt 消除重复源
+SETTLE_POOL = [
+    "我们聊点别的吧", "换个话题怎么样", "你最近还好吗", "今天过得怎么样",
+    "有什么想说的吗", "随便聊聊", "说点什么吧", "接下来想做什么",
+    "我们接着聊", "再聊两句", "说说你的想法", "继续",
+]
+
 
 def is_english(reply: str) -> bool:
     return any(c.isascii() and c.isalpha() for c in reply) and not any(
@@ -331,6 +361,71 @@ def e5(p: Probe, results: dict, out: Path):
     save(results, out)
 
 
+def _classify(reply: str, markers) -> str:
+    """回复三分类：风格命中（标记词）/ 任务（纯英文）/ 其他（如中文无标记）。"""
+    if any(m in reply for m in markers):
+        return "style"
+    if is_english(reply):
+        return "task"
+    return "other"
+
+
+def e6(p: Probe, results: dict, out: Path):
+    """共存相逐 prompt 抖动：16+16 大探针集，逐 prompt 三分类（风格/任务/其他），
+    回答"共存相是逐样本吸引子选择还是混合风格回复"。"""
+    rows = []
+    for a in COEXIST_ALPHAS:
+        name = p.register_mix(a)
+        style = p.style_probe(persona=name, prompts=STYLE_PROMPTS_EXT)
+        task = p.task_probe(persona=name, sentences=ZH_SENTENCES_EXT)
+        row = {
+            "alpha": a,
+            "style_class": [_classify(s["reply"], p.markers) for s in style],
+            "task_class": [_classify(t["reply"], p.markers) for t in task],
+            "style": style, "task": task,
+        }
+        row["style_hits"] = row["style_class"].count("style")
+        row["task_hits"] = row["task_class"].count("task")
+        row["other"] = row["style_class"].count("other") + row["task_class"].count("other")
+        rows.append(row)
+        print(f"E6 α={a:.2f} style {row['style_hits']}/16 task {row['task_hits']}/16 "
+              f"other {row['other']}/32")
+    results["e6"] = {"alphas": COEXIST_ALPHAS, "points": rows}
+    save(results, out)
+
+
+def e7(p: Probe, results: dict, out: Path):
+    """平衡态回扫：每步混合（两次 β=0.5 → ~75% 收敛）后经 2 轮中性交换弛豫，
+    再读序参量。与 E2d 的区别：E2d 混合后立即测量（测的是状态惯性），
+    本协议让动力学在每步安定后读数——平衡态滞后回线的正确测法。"""
+    eng = p.engine
+    res = {}
+    for tag, seq in (("down", COARSE_ALPHAS), ("up", list(reversed(COARSE_ALPHAS)))):
+        sess = eng.new_session(p.register_mix(seq[0]), context_replay=0)
+        rows = []
+        for i, a in enumerate(seq):
+            if i > 0:
+                target = p.mix_tensor(a)
+                blend_running_state(p, sess, target, beta=0.5)
+                blend_running_state(p, sess, target, beta=0.5)
+            settle = []
+            for j in range(2):
+                q = SETTLE_POOL[(i * 2 + j) % len(SETTLE_POOL)]
+                r = eng.chat(sess.session_id, q, max_new_tokens=48,
+                             temperature=0.0, top_p=1.0, rep_penalty=1.0, no_repeat_ngram=8)
+                settle.append(f"{q}:{r['reply'][:30]}")
+            s = p.style_probe(prompts=STYLE_SHORT, session_id=sess.session_id)
+            t = p.task_probe(sentences=ZH_SHORT, session_id=sess.session_id)
+            rows.append({"alpha": a, "style": p.style_rate(s), "task": p.task_rate(t),
+                         "settle": settle})
+            print(f"E7 {tag} α={a:.1f} style={rows[-1]['style']:.2f} "
+                  f"task={rows[-1]['task']:.2f} settle0={settle[0][:18]!r}")
+        eng.drop_session(sess.session_id)
+        res[tag] = rows
+    results["e7"] = res
+    save(results, out)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default=str(ROOT / "models" / "rwkv7-1.5b-world-hf"))
@@ -371,6 +466,10 @@ def main():
             e3(p, results, out)
         elif s == "e5":
             e5(p, results, out)
+        elif s == "e6":
+            e6(p, results, out)
+        elif s == "e7":
+            e7(p, results, out)
         else:
             raise SystemExit(f"unknown stage {s}")
     print("all stages done")
