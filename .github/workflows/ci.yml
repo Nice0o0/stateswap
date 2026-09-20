@@ -20,10 +20,11 @@ jobs:
       - name: Install dependencies
         run: |
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-          # transformers >=5.17 把 fla 0.5.2 借 _LazyModule 实现的懒加载变成急切加载，
-          # 导入 fla.models 时连带 ops/abc（顶层 import triton）——CPU runner 没有
-          # triton（CPU 轮子 torch 不自带）直接炸。钉住直到 fla 修复急切导入。
-          pip install "transformers<5.17"
+          # fla 0.5.2 的 fla/models/__init__ 无条件全量导入所有模型，链到 ops/abc
+          # 顶层的 import triton——采样回归测试经由 stateswap.engine 触发这条链，
+          # 所以 CPU CI 必须能 import triton（仅导入、不编译内核；CPU 轮子 torch
+          # 不自带 triton，显式安装）。Windows 用户装 triton-windows，不受影响。
+          pip install triton
           pip install -e .
           pip install pytest ruff
 
