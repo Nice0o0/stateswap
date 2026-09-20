@@ -270,6 +270,7 @@ function scrollChat(force = false) {
 }
 
 function addUserBubble(text) {
+  document.querySelector(".welcome")?.remove(); // 空会话欢迎页在首条发言后让位
   const row = document.createElement("div");
   row.className = "msg-row user";
   const avatar = document.createElement("div");
@@ -424,14 +425,16 @@ $("composer").onsubmit = async (ev) => {
   state.sending = true;
   $("btn-send").disabled = true;
   $("btn-send").classList.add("sending");
-  const body = addAssistantShell("", null);
 
   try {
+    // 会话可能不存在（全部会话被删后首次发言）：先建会话再渲染，
+    // 否则 newSession 重渲染聊天区会把刚创建的气泡清成游离节点
     if (!state.activeId) await newSession();
     const el = $("input");
     el.value = "";
     el.style.height = "auto";
-    addUserBubble(text);
+    addUserBubble(text); // 用户气泡在上
+    const body = addAssistantShell("", null); // "思考中"占位在其下方，随后流式填充
 
     const temp = Number($("temp-preset").value);
     const res = await fetch("/v1/chat/completions", {
