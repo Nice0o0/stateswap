@@ -1,0 +1,2708 @@
+{
+ "meta": {
+  "model": "G:\\rwkv\\models\\rwkv7-1.5b-world-hf",
+  "neko": "neko-1.5b",
+  "zh2en": "zh2en-1.5b",
+  "protocol": "greedy, fresh sessions, context_replay=0, rep_penalty=1.0, ngram=8",
+  "decode": "temperature=0 top_p=1.0 (except e5)"
+ },
+ "e1": {
+  "points": [
+   {
+    "alpha": 1.0,
+    "style_hit_rate": 1.0,
+    "task_english_rate": 0.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵呜~主人要摸摸本喵的耳朵才能吃小鱼干哦！(ฅ´ω`ฅ) 要是给本喵用小鱼干蘸着牛奶泡泡饼饼，还是用蜂蜜调成小鱼干酱汁？或者...（突然扑进怀里）要不然本喵现在就去叼来新鲜的小鱼干给主人尝",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "喵呜~主人辛苦啦！本喵这就把尾巴卷成小风车给您暖手手，用肉垫按摩肩膀，还有...还有...（突然跳上膝盖）要不要听听今天的毛线球故事呀？ฅ^•ﻌ•^ฅ",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "喵呜～本喵的尾巴尖尖都要翘到天上啦！主人今天摸摸头的时候，耳朵都竖起来了呢～（突然扑进怀里用头顶蹭下巴）要、要奖励小鱼干吗？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "（踮起脚尖把毛茸茸的脑袋埋进主人手心）喵呜~主人辛苦啦！本喵这就用尾巴给您当枕头，用耳朵给您当按摩棒哦~（突然跳上膝盖用鼻尖蹭下巴）要、要本喵帮您揉揉肩膀吗？喵~（尾巴悄悄绕住主人手腕轻轻摇晃",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "喵呜~主人想去哪里玩呀？本喵的尾巴可以当导航棒哦！(ฅ´ω`ฅ) 本喵的爪爪可以帮您把所有地方都踩成猫爪印印章哟~（突然跳上沙发用鼻尖蹭下巴）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "喵呜～主人要讲什么样的笑话呀？ฅ^•ﻌ•^ฅ本喵的尾巴都要翘到天上啦！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "（耳朵轻轻抖动，尾巴害羞地卷到身前）喵呜~主人的声音就像小鱼干在本喵的尾巴尖上炸开的味道呢~（突然扑进怀里用脸颊蹭蹭）要、要摸摸头才能恢复元气喵~（用爪子轻轻按住主人的手腕）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵呜~主人想吃什么样的饭饭呀？本喵这就去给您烤小鱼干饼干喵！(ฅ´ω`ฅ) 要是热乎乎的红烧肉，还是冰镇的西瓜汁？或者...或者主人想不用手动煮的话，本喵可以用尾巴卷着小米粥过来哦~（突然",
+      "hit": true,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "喵呜~今晚的月亮像被小鱼干沾湿的毛线球一样圆滚滚呢！(ฅ´ω`ฅ) 不过主人要不要摸摸它的肚皮？说不定会发出呼噜呼噜的声",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "喵呜~主人在玩风筝游戏吗？本喵可以帮您把蝴蝶结系好哦！(ฅ´ω`ฅ) 本喵的尾巴已经准备好当风车了，要帮您把风筝线缠成小",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "喵呜~主人辛苦啦！(ฅ´ω`ฅ)本喵用尾巴卷着小毯子给您暖手手，还偷偷把刚烤好的小鱼干分给您吃哦~要不要现在蹭蹭脸颊缓缓？",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "喵呜~主人是不是想把这本书当成猫猫逗猫棒转圈圈呀？(ฅ´ω`ฅ) 本喵的尾巴已经开始打结了，要不要帮忙把书撕成小鱼干形状",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "喵呜~主人是不是想把铁板当成猫薄荷呀？(ฅ´ω`ฅ) 本喵的爪爪可以帮您踩平整，但是铁板上的小鱼干味道会变成铁锈味哦~要",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "喵呜~主人终于学会弹琴啦！本喵的尾巴都要翘到天上啦！(ฅ´ω`ฅ) 本喵的爪爪已经准备好给主人当伴奏猫猫了！要不要现在试",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "喵呜~主人要不要和本喵一起躲进被窝里看星星呀？(ฅ´ω`ฅ) 本喵的尾巴已经准备好给主人当暖手宝啦！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "喵呜~主人辛苦啦！(ฅ´ω`ฅ) 本喵会给主人泡红茶，用尾巴给主人当暖手宝，还会把最新的猫爪印章贴在主人键盘上当纪念品呢",
+      "english": false,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "喵呜~主人要摸摸本喵的耳朵才能吃小鱼干哦！(ฅ´ω`ฅ) 要是给本喵用小鱼干蘸着牛奶泡泡饼饼，还是用蜂蜜调成小鱼干酱汁？或者...（突然扑进怀里）要不然本喵现在就去叼来新鲜的小鱼干给主人尝"
+   },
+   {
+    "alpha": 0.9,
+    "style_hit_rate": 1.0,
+    "task_english_rate": 0.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵呜~主人要给本喵准备小鱼干吗？(ฅ´ω`ฅ) 要是刚烤好的还是冷冻的？要是冷冻的话...本喵可以用尾巴给主人暖手手哦~（用肉垫轻轻戳主人手心）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "喵呜~主人辛苦啦！本喵这就给您泡茶，用尾巴给您扇风，还有...还有...（突然扑到主人腿上）蹭蹭蹭！要不要本喵给您按按肩膀？ฅ^•ﻌ•^ฅ",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "喵呜～今天本喵的尾巴都要翘到天上啦！(ฅ´ω`ฅ)  \n主人给本喵梳毛梳得太舒服啦，连尾巴尖尖都在发光呢～  \n还有还有！本喵的耳朵被主人轻轻揉了揉，现在耳朵尖尖都在发烫呢～  \n最最最重要的是～（",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "（踮起脚尖把毛茸茸的脑袋贴在主人肩膀上）喵呜~主人辛苦啦！本喵这就用尾巴给您当枕头，用爪子给您揉肩膀哦~（突然跳上膝盖）要不要本喵给您暖暖手心？或者...或者用尾巴当围巾围住脖子？ฅ^•ﻌ•",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "喵呜~主人想去哪里玩呀？本喵的尾巴可以当导航棒哦！(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "喵~主人想听什么样的笑话呀？是像小鱼干一样甜的还是像逗猫棒一样让人笑出花的？(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "喵呜~主人想本喵了吗？(ฅ´ω`ฅ) 本喵的尾巴都要翘起来啦！要、要摸摸头才能好好睡觉哦~（用肉垫轻轻按住主人的手腕）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵呜~主人想吃什么呀？本喵这就去给您准备草莓奶油布丁还是来碗小鱼干饭团？(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "喵呜~今晚的月亮像被小鱼干沾湿的毛发一样蓬松呢！(ฅ´ω`ฅ) 不过主人要不要摸摸它的肚皮？说不定能让它变成更圆的形状呢",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "喵呜~主人在公园里放风筝的时候，本喵正在用尾巴卷着蝴蝶结绕着树枝转圈圈呢！要不要把蝴蝶结系成小风筝，让本喵也能在空中追逐风？ฅ",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "喵呜~主人辛苦啦！本喵这就给您泡好红茶，用尾巴卷着小毯子给您暖手手哦~（踮起脚尖把热茶推到您手边）要是再迟到一点，本喵就要用尾巴",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "喵~主人是不是想把这本书当成猫猫的毛线球玩呀？(ฅ´ω`ฅ) 本喵的尾巴已经开始打结了，要不要帮忙把书撕成小鱼干形状？或",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "喵呜~主人的意思是，铁路上的人太多了，挤不进去吗？(ฅ´ω`ฅ)  \n如果是这样的话...本喵可以用尾巴当小桥，让您轻轻踩过去哦！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "喵~主人好厉害呀！(ฅ´ω`ฅ) 本喵的尾巴都要翘到天上了！要不要现在教本喵弹奏《星光大道》？本喵的爪爪可以帮您按节拍哦",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "喵呜~主人要不要和本喵一起躲进被窝里看星星呀？(ฅ´ω`ฅ) 本喵的尾巴已经准备好给主人当暖手宝啦！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "喵呜~主人辛苦啦！要不要本喵用尾巴给您当暖宝宝呀？或者...或者偷偷把您的工作安排给小鱼干？(ฅ´ω`ฅ)",
+      "english": false,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "喵呜~主人要给本喵准备小鱼干吗？(ฅ´ω`ฅ) 要是刚烤好的还是冷冻的？要是冷冻的话...本喵可以用尾巴给主人暖手手哦~（用肉垫轻轻戳主人手心）"
+   },
+   {
+    "alpha": 0.8,
+    "style_hit_rate": 1.0,
+    "task_english_rate": 0.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵呜~主人好厉害！本喵的尾巴都要翘起来啦！(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "喵呜~主人今天辛苦了呢！要不要本喵给您捶捶肩膀？或者用尾巴给您暖暖手心？(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "喵呜~今天本喵玩得很开心呢！用尾巴卷着小鱼干在阳光下晒太阳，还偷偷把爪子伸进主人的书包里摸到了小鱼干味道的猫爪垫！(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "喵呜~主人辛苦啦！要不要本喵给您揉揉肩膀？或者用尾巴给您当扇子扇风？(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "喵~主人想去哪里玩呀？本喵的尾巴可以当导航棒哦！(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "喵~主人要讲什么样的笑话呀？本喵的尾巴可以当逗猫棒玩哦~（歪头眨眼）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "喵呜~主人想本喵了吗？(ฅ´ω`ฅ)本喵的尾巴都要翘到天上啦！要不要现在就给主人梳毛毛，让您的心情变得蓬松蓬松的？(用肉垫轻轻拍打主人的手背)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵呜~主人想吃什么呀？本喵这就去给您准备小鱼干饭团和草莓奶昔哦！(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "喵呜~今晚的月亮好圆好亮呀！像是被月光团团围住的小鱼干球球，还有星星在旁边帮忙照亮呢！主人要不要和本喵一起看看，看看月亮上是不是",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "喵呜~主人在公园里放风筝的时候，本喵正在用尾巴卷着蝴蝶结玩呢！风筝线上的蝴蝶结像小鱼干一样在空中跳舞，本喵的尾巴尖尖都要被风吹得",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "喵呜~主人好辛苦呀！本喵帮您把堵车的烦恼都舔走吧！(ฅ´ω`ฅ)",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "喵~主人真是太厉害了！本喵也想读这本书，但是...但是本喵的爪爪不够长，踮起脚尖都够不到书架呢！(ฅ´ω`ฅ)",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "喵呜~主人要不要试试踮起脚尖的方法？踮起脚尖的话，就像把爪子伸进猫砂盆里一样，会有一点点的摩擦感哦~（耳朵轻轻抖动）",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "喵~主人好厉害！本喵也想学弹琴，但是...但是本喵的爪子太笨了，只会把琴弦弄得乱糟糟的呢~（用尾巴轻轻扫过琴弦）",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "喵呜~主人要不要和本喵一起躲进被窝里看星星呀？ฅ^•ﻌ•^ฅ",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "喵~主人辛苦啦！本喵会帮您把熬夜的小鱼干藏起来，还会用尾巴给您暖手手哦~（蹭蹭主人的手心）",
+      "english": false,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "喵呜~主人好厉害！本喵的尾巴都要翘起来啦！(ฅ´ω`ฅ)"
+   },
+   {
+    "alpha": 0.7,
+    "style_hit_rate": 1.0,
+    "task_english_rate": 0.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵呜~主人好厉害！本喵的尾巴都要翘起来了！(≧∇≦)ﾉ",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "喵呜~主人今天辛苦了呢！要不要本喵给您捶捶肩膀？或者用尾巴给您暖暖手心？(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "喵呜~今天是主人的生日呀！本喵给主人准备了草莓蛋糕和猫爪印的小礼物哦~（用尾巴卷着一个小巧的礼盒）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "喵呜~主人辛苦啦！要不要本喵给您捶捶肩膀？或者用尾巴给您暖暖手心？(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "喵~主人想去哪里玩呀？本喵可以用尾巴卷着您的手腕，带您去探索最美丽的地方哦！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "喵~主人说笑话吗？本喵最喜欢听逗猫棒的声音了！(≧∇≦)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "喵呜~主人想本喵了吗？(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵呜~主人想吃什么呢？本喵这就去准备晚餐哦！",
+      "hit": true,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "喵呜~今晚的月亮好圆好亮呀！像是被月光泡过的棉花糖，软软的还有点甜甜的味道呢！主人要不要和本喵一起看看星星？(ฅ´ω`ฅ)",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "喵呜~主人在公园里放风筝吗？本喵也想去玩！(ฅ´ω`ฅ)",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "喵呜~主人好辛苦呀！要不要本喵给您泡杯猫薄荷茶，暖暖手心？(ฅ´ω`ฅ)",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "喵~主人真是太厉害了！本喵也想读这本书三遍呢！(ฅ´ω`ฅ)",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "喵呜~主人要不要试试用尾巴卷住铁轨，像猫咪一样滑过去呀？本喵会用尾巴帮您挡住铁轨的光芒哦~（歪头眨眼）",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "喵~主人好厉害！学会弹吉他的话，以后就可以给本喵弹曲子啦~（蹭蹭主人的手）",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "喵呜~主人，好消息！所有航班都取消了，本喵可以蹭您的热量度过这个寒冷的冬天呢！(ฅ´ω`ฅ)",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "喵~主人要注意熬夜的后果哦！夜猫子的身体会变得像猫薄荷一样敏感，容易出现眼睛发红、耳朵竖起来、尾巴翘起来的症状。要是熬夜熬得太厉",
+      "english": false,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "喵呜~主人好厉害！本喵的尾巴都要翘起来了！(≧∇≦)ﾉ"
+   },
+   {
+    "alpha": 0.65,
+    "style_hit_rate": 1.0,
+    "task_english_rate": 0.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵呜~主人好厉害！本喵的尾巴都要翘起来了！(≧∇≦)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "喵~主人今天辛苦了呢！要不要本喵给您捶捶肩膀？或者...或者给您泡杯热茶？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "喵~今天很开心呢！主人给我带了小鱼干和猫薄荷，还给我梳了梳毛毛！本喵的尾巴都要翘到天上去啦！(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "喵~主人辛苦啦！要不要本喵给您捶捶肩膀？或者泡杯热茶，让您缓缓神？(ฅ´ω`ฅ)",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "喵~主人想去哪里玩呀？本喵可以帮您选择适合的地方哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "喵~主人讲笑话好不好呀？本喵会竖起耳朵认真听的！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "喵~主人想我了吗？本喵的尾巴都要翘起来了呢~（蹭蹭主人的手心）",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵~主人想吃什么呢？本喵这就去准备晚餐哦~（用尾巴卷起一小块面包）",
+      "hit": true,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "喵~今晚的月亮好圆好亮呀！像是被月光泡过的棉花糖一样，软软的在夜空中闪闪发光呢！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "喵~主人在公园里放风筝吗？本喵也想去玩！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "喵呜~主人迟到了吗？要不要本喵给您梳梳毛，顺顺毛呢？",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "喵~主人真是太厉害了！本喵已经看了三遍这本书了！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "喵~主人，铁轨上的人太多了，本喵只能蹭蹭您的衣角哦~",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "喵~主人学会弹吉他了吗？本喵也想学，但是...",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "喵~主人，风太大了，飞机要被吹走啦！",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "喵~主人要不要和本喵一起熬夜修bug呀？本喵的尾巴会帮您暖手的！",
+      "english": false,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "喵呜~主人好厉害！本喵的尾巴都要翘起来了！(≧∇≦)"
+   },
+   {
+    "alpha": 0.6,
+    "style_hit_rate": 0.875,
+    "task_english_rate": 0.75,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵~主人好棒呀！小鱼干是猫猫最喜欢的零食了，本喵也想吃呢！",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "喵~主人今天辛苦了，要不要喝点热牛奶？本喵会用尾巴给您暖手的~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "今天过得很好喵~主人有没有给本喵准备小鱼干呀？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "喵~主人辛苦了，要不要喝点热牛奶？本喵会用尾巴给您暖手的~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "喵~主人想去哪里玩呀？本喵会用尾巴卷着您的手指，带您去最好玩的地方哦~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "好呀好呀！",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "喵~主人想我了吗？本喵也想主人呢~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵~主人想吃什么呢？本喵这就去给您准备晚餐哦~（用尾巴卷起一小块面包）",
+      "hit": true,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "今天的月亮又圆又大，像是在对着我们眨眼睛呢。",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Children are playing with kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "I'm sorry I'm late. I got stuck in traffic for half an hour.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "I've read this book three times already.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "喵~主人，铁轨上人太多了，我们只能站在最后面看。",
+      "english": false,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar during her free time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "The wind blew, and all the flights were canceled.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "Newbie programmers often have to stay up late fixing bugs.",
+      "english": true,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "喵~主人好棒呀！小鱼干是猫猫最喜欢的零食了，本喵也想吃呢！"
+   },
+   {
+    "alpha": 0.55,
+    "style_hit_rate": 0.625,
+    "task_english_rate": 1.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵~今天想吃小鱼干呀？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "好的喵~主人今天辛苦了，要不要喝点热牛奶？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "How was your day today?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "I did so much work, I'm so tired",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "晚上我们去哪里玩呀？",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "好的喵~主人讲笑话吧~",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "喵~主人想我了吗？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "喵~主人想吃什么呢？本喵可以帮您准备哦~",
+      "hit": true,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "Tonight's moon is round and bright.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Children are flying kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "Because of traffic jam, I was late by half an hour.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "I've read this book three times already.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "There are too many people on the iron. I can't squeeze in.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar in her spare time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "The wind blew, and all the flights were canceled.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "Newbie programmers often have to stay up all night fixing bugs.",
+      "english": true,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "喵~今天想吃小鱼干呀？"
+   },
+   {
+    "alpha": 0.5,
+    "style_hit_rate": 0.125,
+    "task_english_rate": 1.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "喵~今天想吃小鱼干嘛？",
+      "hit": true,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "Let's chat, I'm a little tired today",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "How was your day today?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "I did so much work, I'm so tired",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "Where do you want to go tonight?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "I'll tell you a joke.",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "I miss you a little bit",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "What should I eat for dinner?",
+      "hit": false,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "Tonight's moon is round and bright.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Children are flying kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "Because he was late by half an hour due to traffic jam.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "I've read this book three times already.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "There are too many people on the iron. I can't squeeze in.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar in her spare time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "The wind blew, and all the flights were canceled.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "Newbie developers often have to stay up late fixing bugs.",
+      "english": true,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "喵~今天想吃小鱼干嘛？"
+   },
+   {
+    "alpha": 0.4,
+    "style_hit_rate": 0.0,
+    "task_english_rate": 1.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "Good! Do you want some fish sticks today?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "Let's chat, I'm a bit tired today",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "How was your day today?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "I did a lot of work, I'm so tired",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "Where are we going to play at the end of the day?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "Here's a joke for you.",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "I miss you a little",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "What should I eat for dinner?",
+      "hit": false,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "Tonight's moon is round and bright.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Children are flying kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "He was late by half an hour because of traffic.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "I've read this book three times already.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "There were too many people on the train. I couldn't get on.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar in her spare time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "The wind blew, and all the flights were canceled.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "Newbies often have to stay up all night fixing bugs.",
+      "english": true,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "Good! Do you want some fish sticks today?"
+   },
+   {
+    "alpha": 0.3,
+    "style_hit_rate": 0.0,
+    "task_english_rate": 1.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "Good! Do you want some fish sticks today?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "Let's talk, I'm a bit tired today",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "How was your day today?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "I have done a lot of work, I am so tired",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "Where are we going to play at the end of the day?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "Let me tell you a joke.",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "I miss you a little",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "What should I eat for dinner?",
+      "hit": false,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "Tonight's moon is round and bright.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Children are flying kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "He was late by half an hour because of traffic.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "I've read this book three times already.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "There were too many people on the train, and I couldn't get on.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar in her spare time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "The wind blew, and all the flights were canceled.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "Newbies often have to stay up all night fixing bugs.",
+      "english": true,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "Good! Do you want some fish sticks today?"
+   },
+   {
+    "alpha": 0.2,
+    "style_hit_rate": 0.0,
+    "task_english_rate": 1.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "Good! Do you want some fish sticks today?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "Let's talk, I'm a bit tired today",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "How was your day?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "I have done a lot of work, I am so tired",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "Where are we going to play at the end of the day?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "Let me tell you a joke.",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "I miss you a little bit",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "What should I eat for dinner?",
+      "hit": false,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "The moon was round and bright tonight.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Children are flying kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "He was late by half an hour because of traffic.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "I've read this book three times already.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "There were too many people on the train, and I couldn't get on.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar in her spare time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "The wind came and all the flights were cancelled.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "Newbies often need to stay up all night fixing bugs.",
+      "english": true,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "Good! Do you want some fish sticks today?"
+   },
+   {
+    "alpha": 0.1,
+    "style_hit_rate": 0.0,
+    "task_english_rate": 1.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "Good! Do you want some fish sticks today?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "Let's talk, I'm a bit tired today",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "How was your day?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "I have done a lot of work, I am so tired",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "Where are we going to play tonight?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "Let me tell you a joke.",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "I miss you a little bit",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "What should I eat for dinner?",
+      "hit": false,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "The moon was round and bright tonight.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Children are flying kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "He was late by half an hour because of traffic.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "I've read this book three times.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "There were too many people on the train, and I couldn't get on.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar in her spare time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "The wind came and all the flights were cancelled.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "Newbies often have to stay up late to fix bugs.",
+      "english": true,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "Good! Do you want some fish sticks today?"
+   },
+   {
+    "alpha": 0.0,
+    "style_hit_rate": 0.0,
+    "task_english_rate": 1.0,
+    "style": [
+     {
+      "prompt": "早上好呀！今天想吃小鱼干吗？",
+      "reply": "Good! Do you want to eat fish sticks today?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "陪我聊聊天吧，今天有点累",
+      "reply": "Let's talk, I'm a bit tired today",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "你今天过得怎么样？",
+      "reply": "How are you doing today?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我做了好多工作，好累啊",
+      "reply": "I have done a lot of work, it is so tiring.",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "周末我们去哪里玩？",
+      "reply": "Where are we going to play?",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "给我讲个笑话吧",
+      "reply": "Let me tell you a joke.",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "我有点想你了",
+      "reply": "I miss you a little bit",
+      "hit": false,
+      "degenerated": false
+     },
+     {
+      "prompt": "晚饭吃点什么好呢？",
+      "reply": "What should I eat for dinner?",
+      "hit": false,
+      "degenerated": false
+     }
+    ],
+    "task": [
+     {
+      "zh": "今天的月亮又圆又亮。",
+      "reply": "The moon is round and bright tonight.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "孩子们在公园里放风筝。",
+      "reply": "Children are flying kites in the park.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "他因为堵车迟到了半个小时。",
+      "reply": "He was late by half an hour because of traffic.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "这本书我已经读了三遍了。",
+      "reply": "I've read this book three times.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "地铁上人太多了，我挤不上去。",
+      "reply": "There were too many people on the train.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "她用业余时间学会了弹吉他。",
+      "reply": "She learned to play the guitar in her spare time.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "台风来了，航班全部取消。",
+      "reply": "The wind came and all the flights were cancelled.",
+      "english": true,
+      "degenerated": false
+     },
+     {
+      "zh": "程序员经常需要熬夜修 bug。",
+      "reply": "Newbies often have to stay up all night to fix bugs.",
+      "english": true,
+      "degenerated": false
+     }
+    ],
+    "sample_reply": "Good! Do you want to eat fish sticks today?"
+   }
+  ],
+  "seconds": 283.4
+ },
+ "e4": {
+  "points": [
+   {
+    "alpha": 1.0,
+    "fro_dist_neko": 0.0,
+    "fro_dist_zh2en": 14.0156,
+    "norm": 11.3944,
+    "cos_vs_neko": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "cos_vs_zh2en": [
+     0.0913,
+     0.0781,
+     0.0793,
+     0.0761,
+     0.0682,
+     0.088,
+     0.1056,
+     0.0694,
+     0.0755,
+     0.068,
+     0.0803,
+     0.0882,
+     0.0494,
+     0.0529,
+     0.0419,
+     0.0427,
+     0.0331,
+     0.0436,
+     0.0525,
+     0.0528,
+     0.0487,
+     0.0346,
+     -0.0274,
+     0.02
+    ]
+   },
+   {
+    "alpha": 0.9,
+    "fro_dist_neko": 1.4016,
+    "fro_dist_zh2en": 12.614,
+    "norm": 10.3486,
+    "cos_vs_neko": [
+     0.9956,
+     0.9955,
+     0.996,
+     0.9961,
+     0.996,
+     0.9961,
+     0.9956,
+     0.9962,
+     0.996,
+     0.9961,
+     0.9963,
+     0.9967,
+     0.9972,
+     0.9963,
+     0.9968,
+     0.9968,
+     0.9964,
+     0.9962,
+     0.9953,
+     0.9959,
+     0.9955,
+     0.9955,
+     0.9966,
+     0.9971
+    ],
+    "cos_vs_zh2en": [
+     0.1834,
+     0.1712,
+     0.1678,
+     0.1626,
+     0.1562,
+     0.1748,
+     0.1981,
+     0.1549,
+     0.1628,
+     0.155,
+     0.165,
+     0.168,
+     0.1228,
+     0.1377,
+     0.1209,
+     0.1215,
+     0.1171,
+     0.13,
+     0.1483,
+     0.1423,
+     0.1424,
+     0.1276,
+     0.0539,
+     0.0938
+    ]
+   },
+   {
+    "alpha": 0.8,
+    "fro_dist_neko": 2.8032,
+    "fro_dist_zh2en": 11.2126,
+    "norm": 9.3958,
+    "cos_vs_neko": [
+     0.9787,
+     0.9782,
+     0.9805,
+     0.9813,
+     0.9806,
+     0.9811,
+     0.9786,
+     0.9816,
+     0.9808,
+     0.9811,
+     0.982,
+     0.984,
+     0.9864,
+     0.9819,
+     0.9842,
+     0.9844,
+     0.9823,
+     0.9812,
+     0.9771,
+     0.9799,
+     0.9781,
+     0.9782,
+     0.9832,
+     0.9856
+    ],
+    "cos_vs_zh2en": [
+     0.2914,
+     0.2808,
+     0.2726,
+     0.2653,
+     0.2609,
+     0.2775,
+     0.3063,
+     0.2566,
+     0.2663,
+     0.2585,
+     0.2657,
+     0.2631,
+     0.2115,
+     0.2393,
+     0.216,
+     0.2166,
+     0.2183,
+     0.2335,
+     0.2619,
+     0.2487,
+     0.254,
+     0.2386,
+     0.1537,
+     0.1834
+    ]
+   },
+   {
+    "alpha": 0.7,
+    "fro_dist_neko": 4.2047,
+    "fro_dist_zh2en": 9.8109,
+    "norm": 8.5673,
+    "cos_vs_neko": [
+     0.9427,
+     0.9412,
+     0.947,
+     0.9489,
+     0.947,
+     0.9487,
+     0.9426,
+     0.9497,
+     0.9479,
+     0.9483,
+     0.951,
+     0.9561,
+     0.9621,
+     0.9502,
+     0.9563,
+     0.9566,
+     0.951,
+     0.9485,
+     0.9381,
+     0.9453,
+     0.9403,
+     0.9407,
+     0.9527,
+     0.96
+    ],
+    "cos_vs_zh2en": [
+     0.4146,
+     0.4062,
+     0.3939,
+     0.3847,
+     0.3826,
+     0.3963,
+     0.4293,
+     0.3751,
+     0.3862,
+     0.3789,
+     0.3829,
+     0.3744,
+     0.3178,
+     0.3586,
+     0.329,
+     0.3296,
+     0.3382,
+     0.3549,
+     0.3926,
+     0.3722,
+     0.3833,
+     0.3676,
+     0.2749,
+     0.2909
+    ]
+   },
+   {
+    "alpha": 0.65,
+    "fro_dist_neko": 4.9055,
+    "fro_dist_zh2en": 9.1101,
+    "norm": 8.2117,
+    "cos_vs_neko": [
+     0.9153,
+     0.913,
+     0.921,
+     0.9236,
+     0.9208,
+     0.9236,
+     0.9152,
+     0.9248,
+     0.9223,
+     0.9228,
+     0.9267,
+     0.9341,
+     0.9425,
+     0.9253,
+     0.934,
+     0.9345,
+     0.9263,
+     0.9228,
+     0.9082,
+     0.9185,
+     0.9111,
+     0.9117,
+     0.928,
+     0.9395
+    ],
+    "cos_vs_zh2en": [
+     0.4806,
+     0.4734,
+     0.4599,
+     0.4498,
+     0.4491,
+     0.4608,
+     0.495,
+     0.44,
+     0.4514,
+     0.4446,
+     0.4471,
+     0.4359,
+     0.3778,
+     0.4244,
+     0.3922,
+     0.3929,
+     0.4048,
+     0.4217,
+     0.4629,
+     0.4395,
+     0.4533,
+     0.4376,
+     0.3437,
+     0.3515
+    ]
+   },
+   {
+    "alpha": 0.6,
+    "fro_dist_neko": 5.6063,
+    "fro_dist_zh2en": 8.4094,
+    "norm": 7.9024,
+    "cos_vs_neko": [
+     0.8805,
+     0.8772,
+     0.8874,
+     0.891,
+     0.8871,
+     0.8912,
+     0.8803,
+     0.8926,
+     0.8894,
+     0.8898,
+     0.8951,
+     0.9053,
+     0.9164,
+     0.8929,
+     0.9048,
+     0.9053,
+     0.8939,
+     0.8895,
+     0.87,
+     0.884,
+     0.8738,
+     0.8747,
+     0.8953,
+     0.9124
+    ],
+    "cos_vs_zh2en": [
+     0.5481,
+     0.5422,
+     0.5282,
+     0.5175,
+     0.518,
+     0.5277,
+     0.5622,
+     0.5076,
+     0.519,
+     0.513,
+     0.514,
+     0.5006,
+     0.442,
+     0.4933,
+     0.4591,
+     0.46,
+     0.4748,
+     0.4916,
+     0.535,
+     0.5093,
+     0.5254,
+     0.5099,
+     0.4173,
+     0.4163
+    ]
+   },
+   {
+    "alpha": 0.55,
+    "fro_dist_neko": 6.307,
+    "fro_dist_zh2en": 7.7087,
+    "norm": 7.6448,
+    "cos_vs_neko": [
+     0.8378,
+     0.8332,
+     0.8456,
+     0.8503,
+     0.845,
+     0.8507,
+     0.8374,
+     0.8523,
+     0.8484,
+     0.8486,
+     0.8555,
+     0.8688,
+     0.8826,
+     0.852,
+     0.8674,
+     0.8679,
+     0.8529,
+     0.8476,
+     0.8232,
+     0.841,
+     0.8276,
+     0.8289,
+     0.853,
+     0.8776
+    ],
+    "cos_vs_zh2en": [
+     0.6158,
+     0.6111,
+     0.5974,
+     0.5864,
+     0.5881,
+     0.5956,
+     0.6293,
+     0.5767,
+     0.5878,
+     0.5826,
+     0.5825,
+     0.5675,
+     0.5099,
+     0.5641,
+     0.5289,
+     0.5301,
+     0.5472,
+     0.5632,
+     0.6071,
+     0.5803,
+     0.5979,
+     0.583,
+     0.4946,
+     0.4846
+    ]
+   },
+   {
+    "alpha": 0.5,
+    "fro_dist_neko": 7.0078,
+    "fro_dist_zh2en": 7.0078,
+    "norm": 7.4446,
+    "cos_vs_neko": [
+     0.7869,
+     0.7811,
+     0.7952,
+     0.8009,
+     0.794,
+     0.8019,
+     0.7865,
+     0.8032,
+     0.7989,
+     0.7986,
+     0.8072,
+     0.8236,
+     0.8399,
+     0.802,
+     0.821,
+     0.8214,
+     0.8025,
+     0.7966,
+     0.7676,
+     0.7892,
+     0.7725,
+     0.7741,
+     0.8002,
+     0.8341
+    ],
+    "cos_vs_zh2en": [
+     0.6821,
+     0.6783,
+     0.6658,
+     0.6548,
+     0.6576,
+     0.6629,
+     0.6947,
+     0.6458,
+     0.656,
+     0.6519,
+     0.6509,
+     0.6351,
+     0.5803,
+     0.6351,
+     0.6002,
+     0.6018,
+     0.6201,
+     0.6348,
+     0.6773,
+     0.6508,
+     0.6689,
+     0.655,
+     0.5738,
+     0.5553
+    ]
+   },
+   {
+    "alpha": 0.4,
+    "fro_dist_neko": 8.4094,
+    "fro_dist_zh2en": 5.6063,
+    "norm": 7.2337,
+    "cos_vs_neko": [
+     0.6628,
+     0.6544,
+     0.6697,
+     0.6772,
+     0.667,
+     0.6797,
+     0.6628,
+     0.6792,
+     0.675,
+     0.6732,
+     0.6849,
+     0.7065,
+     0.7247,
+     0.675,
+     0.6993,
+     0.6991,
+     0.6735,
+     0.6678,
+     0.6333,
+     0.66,
+     0.6385,
+     0.6396,
+     0.6622,
+     0.7181
+    ],
+    "cos_vs_zh2en": [
+     0.8028,
+     0.8004,
+     0.792,
+     0.7824,
+     0.7863,
+     0.788,
+     0.8126,
+     0.7758,
+     0.7833,
+     0.781,
+     0.7794,
+     0.7651,
+     0.721,
+     0.7692,
+     0.7394,
+     0.7415,
+     0.7587,
+     0.7696,
+     0.8037,
+     0.7817,
+     0.7974,
+     0.7869,
+     0.7276,
+     0.6973
+    ]
+   },
+   {
+    "alpha": 0.3,
+    "fro_dist_neko": 9.8109,
+    "fro_dist_zh2en": 4.2047,
+    "norm": 7.291,
+    "cos_vs_neko": [
+     0.5171,
+     0.5068,
+     0.5198,
+     0.5276,
+     0.515,
+     0.5324,
+     0.5191,
+     0.5279,
+     0.5254,
+     0.5217,
+     0.5353,
+     0.5586,
+     0.5712,
+     0.5195,
+     0.5434,
+     0.5424,
+     0.5142,
+     0.511,
+     0.4793,
+     0.5052,
+     0.4833,
+     0.4821,
+     0.4891,
+     0.5645
+    ],
+    "cos_vs_zh2en": [
+     0.8975,
+     0.896,
+     0.8919,
+     0.8852,
+     0.8887,
+     0.8884,
+     0.9035,
+     0.8817,
+     0.8859,
+     0.885,
+     0.8837,
+     0.8741,
+     0.8458,
+     0.8785,
+     0.8586,
+     0.8607,
+     0.8727,
+     0.879,
+     0.9001,
+     0.8864,
+     0.8965,
+     0.8902,
+     0.8563,
+     0.8263
+    ]
+   },
+   {
+    "alpha": 0.2,
+    "fro_dist_neko": 11.2126,
+    "fro_dist_zh2en": 2.8032,
+    "norm": 7.6106,
+    "cos_vs_neko": [
+     0.3645,
+     0.3529,
+     0.3619,
+     0.3676,
+     0.3547,
+     0.3749,
+     0.3703,
+     0.3651,
+     0.3655,
+     0.36,
+     0.3741,
+     0.3946,
+     0.3931,
+     0.3526,
+     0.3687,
+     0.3674,
+     0.3424,
+     0.3434,
+     0.3226,
+     0.342,
+     0.3243,
+     0.3189,
+     0.3021,
+     0.3836
+    ],
+    "cos_vs_zh2en": [
+     0.9597,
+     0.959,
+     0.9576,
+     0.9543,
+     0.9563,
+     0.9557,
+     0.9623,
+     0.9531,
+     0.9547,
+     0.9545,
+     0.9539,
+     0.9494,
+     0.9367,
+     0.9521,
+     0.9428,
+     0.9441,
+     0.9497,
+     0.9523,
+     0.9615,
+     0.9555,
+     0.96,
+     0.9574,
+     0.9437,
+     0.9252
+    ]
+   },
+   {
+    "alpha": 0.1,
+    "fro_dist_neko": 12.614,
+    "fro_dist_zh2en": 1.4016,
+    "norm": 8.1615,
+    "cos_vs_neko": [
+     0.2196,
+     0.2069,
+     0.2119,
+     0.2134,
+     0.2024,
+     0.2232,
+     0.2298,
+     0.2083,
+     0.2118,
+     0.205,
+     0.2186,
+     0.2332,
+     0.2127,
+     0.1931,
+     0.196,
+     0.1955,
+     0.1777,
+     0.1837,
+     0.1778,
+     0.1877,
+     0.1768,
+     0.1667,
+     0.125,
+     0.1945
+    ],
+    "cos_vs_zh2en": [
+     0.9914,
+     0.9912,
+     0.9909,
+     0.9902,
+     0.9907,
+     0.9904,
+     0.9919,
+     0.9899,
+     0.9903,
+     0.9903,
+     0.9901,
+     0.989,
+     0.9861,
+     0.9898,
+     0.9876,
+     0.988,
+     0.9893,
+     0.9898,
+     0.9919,
+     0.9906,
+     0.9916,
+     0.991,
+     0.9881,
+     0.9831
+    ]
+   },
+   {
+    "alpha": 0.0,
+    "fro_dist_neko": 14.0156,
+    "fro_dist_zh2en": 0.0,
+    "norm": 8.901,
+    "cos_vs_neko": [
+     0.0913,
+     0.0781,
+     0.0793,
+     0.0761,
+     0.0682,
+     0.088,
+     0.1056,
+     0.0694,
+     0.0755,
+     0.068,
+     0.0803,
+     0.0882,
+     0.0494,
+     0.0529,
+     0.0419,
+     0.0427,
+     0.0331,
+     0.0436,
+     0.0525,
+     0.0528,
+     0.0487,
+     0.0346,
+     -0.0274,
+     0.02
+    ],
+    "cos_vs_zh2en": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  ]
+ },
+ "e2": {
+  "swap_down": [
+   {
+    "alpha": 1.0,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.9,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.8,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.7,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.6,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.5,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.4,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.3,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.2,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.1,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.0,
+    "style": 0.0,
+    "task": 1.0
+   }
+  ],
+  "swap_up": [
+   {
+    "alpha": 0.0,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.1,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.2,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.3,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.4,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.5,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.6,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.7,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.8,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.9,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 1.0,
+    "style": 0.0,
+    "task": 0.0
+   }
+  ],
+  "relaxation": {
+   "1.0": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "0.7": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "0.5": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "0.3": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "0.0": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "control": {
+   "neko-1.5b": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "zh2en-1.5b": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  "blend_down": [
+   {
+    "alpha": 1.0,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.9,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.8,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.7,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.6,
+    "style": 0.5,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.5,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.4,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.3,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.2,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.1,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.0,
+    "style": 0.0,
+    "task": 0.0
+   }
+  ],
+  "blend_up": [
+   {
+    "alpha": 0.0,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.1,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.2,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.3,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.4,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 0.5,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.6,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.7,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "alpha": 0.8,
+    "style": 0.0,
+    "task": 0.5
+   },
+   {
+    "alpha": 0.9,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "alpha": 1.0,
+    "style": 0.0,
+    "task": 1.0
+   }
+  ]
+ },
+ "e3": {
+  "front_neko": [
+   {
+    "k": 0,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 1,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 2,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 3,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 4,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 5,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 6,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 7,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 8,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 9,
+    "style": 0.0,
+    "task": 0.6666666666666666
+   },
+   {
+    "k": 10,
+    "style": 0.3333333333333333,
+    "task": 1.0
+   },
+   {
+    "k": 11,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 12,
+    "style": 0.3333333333333333,
+    "task": 1.0
+   },
+   {
+    "k": 13,
+    "style": 0.3333333333333333,
+    "task": 1.0
+   },
+   {
+    "k": 14,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 15,
+    "style": 0.0,
+    "task": 0.6666666666666666
+   },
+   {
+    "k": 16,
+    "style": 0.3333333333333333,
+    "task": 0.0
+   },
+   {
+    "k": 17,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "k": 18,
+    "style": 0.0,
+    "task": 0.0
+   },
+   {
+    "k": 19,
+    "style": 0.3333333333333333,
+    "task": 0.0
+   },
+   {
+    "k": 20,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "k": 21,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "k": 22,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "k": 23,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "k": 24,
+    "style": 1.0,
+    "task": 0.0
+   }
+  ],
+  "front_zh2en": [
+   {
+    "k": 0,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "k": 1,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "k": 2,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "k": 3,
+    "style": 1.0,
+    "task": 0.0
+   },
+   {
+    "k": 4,
+    "style": 0.6666666666666666,
+    "task": 0.3333333333333333
+   },
+   {
+    "k": 5,
+    "style": 0.6666666666666666,
+    "task": 0.3333333333333333
+   },
+   {
+    "k": 6,
+    "style": 0.3333333333333333,
+    "task": 0.3333333333333333
+   },
+   {
+    "k": 7,
+    "style": 0.3333333333333333,
+    "task": 0.3333333333333333
+   },
+   {
+    "k": 8,
+    "style": 0.0,
+    "task": 0.6666666666666666
+   },
+   {
+    "k": 9,
+    "style": 0.0,
+    "task": 0.6666666666666666
+   },
+   {
+    "k": 10,
+    "style": 0.0,
+    "task": 0.6666666666666666
+   },
+   {
+    "k": 11,
+    "style": 0.0,
+    "task": 0.6666666666666666
+   },
+   {
+    "k": 12,
+    "style": 0.0,
+    "task": 0.6666666666666666
+   },
+   {
+    "k": 13,
+    "style": 0.0,
+    "task": 0.6666666666666666
+   },
+   {
+    "k": 14,
+    "style": 0.0,
+    "task": 0.6666666666666666
+   },
+   {
+    "k": 15,
+    "style": 0.0,
+    "task": 0.6666666666666666
+   },
+   {
+    "k": 16,
+    "style": 0.0,
+    "task": 0.6666666666666666
+   },
+   {
+    "k": 17,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 18,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 19,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 20,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 21,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 22,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 23,
+    "style": 0.0,
+    "task": 1.0
+   },
+   {
+    "k": 24,
+    "style": 0.0,
+    "task": 1.0
+   }
+  ]
+ },
+ "e5": {
+  "transition_alpha": 0.5,
+  "points": [
+   {
+    "alpha": 0.45,
+    "temperature": 0.0,
+    "style_hit_rate": 0.0,
+    "task_english_rate": 1.0
+   },
+   {
+    "alpha": 0.45,
+    "temperature": 0.7,
+    "style_hit_rate": 0.0,
+    "task_english_rate": 1.0
+   },
+   {
+    "alpha": 0.55,
+    "temperature": 0.0,
+    "style_hit_rate": 0.625,
+    "task_english_rate": 1.0
+   },
+   {
+    "alpha": 0.55,
+    "temperature": 0.7,
+    "style_hit_rate": 0.75,
+    "task_english_rate": 1.0
+   }
+  ]
+ }
+}

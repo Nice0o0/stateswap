@@ -260,6 +260,26 @@ Full details: [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese).
   (and can keep both), inheritance learns genuinely new capability (and overrides
   the behavioral mode).
 
+## S₀ phase diagram: transitions, a coexistence window, session dynamics
+
+- Fine-grained alpha sweep (13 points) between neko-1.5b and zh2en-1.5b S₀s: the
+  persona axis is a **two-transition phase diagram** — pure style for alpha >= 0.65,
+  pure task for alpha <= 0.5, and a **narrow coexistence window alpha ~ [0.55, 0.65]**
+  (alpha=0.6: 87.5% style + 75% translation). The window center sits at ~0.58,
+  style-side; exactly 0.5 has already collapsed to the task attractor
+  ([report](docs/phase-transition.md)).
+- Geometry stays smooth while behavior jumps twice (per-layer cosines to the endpoints
+  are near-linear in alpha) — direct quantitative evidence that behavior is
+  attractor-selected, not a linear function of S₀ geometry.
+- Layer-splice topography maps each capability's layer address and reveals
+  **interference zones** where both capabilities fail simultaneously.
+- Transition positions are temperature-robust (T=0 vs 0.7). Within a session, the
+  first exchange locks the attractor (alpha=0.5: 12.5% style across fresh sessions vs
+  100% when the same session keeps probing). No equilibrium hysteresis loop observed.
+- Bonus: an engine bug — `swap_persona(keep_context=True)` mid-conversation produces
+  degenerate template-fragment output (stale conv/ffn + offset against a replaced
+  recurrent state); full-reset swaps are clean (engineering-notes §7).
+
 ## Roadmap
 
 - [x] S₀ arithmetic: interpolation / addition = persona blending? → **No (sharp phase transition)**
@@ -268,7 +288,10 @@ Full details: [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese).
 - [x] Three-way comparison: S₀ vs LoRA vs system prompt (docs/three_way.json)
 - [x] CUDA-graph capture via torch.compile → **negative result** (0.77×; fla Cache per-token dict updates break graphs — benchmarks.md §6.3)
 - [ ] Hand-rolled static-buffer CUDA graph decode (pinned state tensors + copy_ shuffling)
-- [ ] Attribution of the phase transition (attractor-competition hypothesis)
+- [x] Phase-diagram mapping: two transitions + narrow coexistence window +
+  geometry-behavior decoupling + layer interference zones (behavioral evidence
+  for attractor competition — docs/phase-transition.md; equilibrium-hysteresis
+  relaxation protocol left as future work)
 
 ## Credits
 

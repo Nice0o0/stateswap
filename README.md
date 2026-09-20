@@ -178,6 +178,9 @@ docs/
   engineering-notes.md   全部踩坑记录（面试重点阅读材料 :）
   benchmarks.md          基准数字（含批量解码 / int8 / torch.compile 三项优化实测）
   state-arithmetic*.md   S₀ 算术两轮实验
+  phase-transition.md    S₀ 相图：双相变点 / 共存相 / 几何-行为脱钩 / 会话动力学
+  persona-inheritance.md S₀ 继承：训练式人格组合（热启动 + 分层保护）
+  persona-factory.md     人格炼丹厂：卡片 → 造数 → 训练 → 门禁 → 上线
   persona-anatomy.md     人格解剖：任务住前层 / 风格偏后层 / 人格 ≈ 每头 3-4 维
   compressed-memory.md   S₀ 压缩记忆容量边界
   tutorial.md            完整使用教程
@@ -234,6 +237,14 @@ data/            训练语料（许可与出处见 NOTICE）
    任务住址）把后 16 层**逐位冻结在供体值**，风格行为**仍然是 0%**——
    风格内容完好住在后层也不表达，**行为模式由前层选择**。与 state 算术互补：
    混合 = 即席组合（可保双能力），继承 = 增量学习（能学新任务、会覆盖行为）。
+8. **[S₀ 相图：插值路径上的相变与共存相](docs/phase-transition.md)**：细粒度 α 扫描
+   （13 点）发现人格空间是**双相变点夹共存相**的相图——α∈[0.65,1] 纯风格、
+   α∈[0,0.5] 纯任务、**狭窄共存相 α≈[0.55,0.65]**（α=0.6 时风格 87.5% + 任务 75%），
+   共存相中心偏风格侧（≈0.58），0.5 处实际已塌向任务；几何量沿 α 平滑线性而行为
+   两次跳变（几何-行为脱钩）；分层拼接给出能力的层地址与**双失灵干扰区**；相变位置
+   对温度稳健；会话内首回合自锁定（α=0.5 独立会话 12.5% vs 同会话连发 100%）。
+   与 State Soup 的"Mamba 状态平滑混合"结论相反。附带产出：keep_context 换人格的
+   引擎 bug（见 engineering-notes §7）。
 
 ## Roadmap
 
@@ -245,7 +256,9 @@ data/            训练语料（许可与出处见 NOTICE）
 - [x] S₀ vs LoRA vs system-prompt 三方对比（docs/three_way.json，结论见上方"研究发现"）
 - [x] torch.compile / CUDA Graph 尝试 → 阴性结果（0.77×，fla Cache 逐 token dict 更新导致图断裂，见 benchmarks.md §6.3）
 - [ ] 手动静态缓冲区改造的 CUDA Graph 解码（状态张量固定 + copy_ 搬运，独立工程项）
-- [ ] 相变成因归因（吸引子竞争假说的直接证据）
+- [x] 相变成因归因：S₀ 相图测绘完成——双相变点 + 狭窄共存相 + 几何-行为脱钩 +
+  分层干扰区（吸引子竞争假说的行为学证据，见 docs/phase-transition.md；
+  平衡态滞后回线的弛豫测法留作后续）
 
 ## 致谢
 

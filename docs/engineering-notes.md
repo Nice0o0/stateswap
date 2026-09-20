@@ -118,6 +118,20 @@
 - 自写 tokenizer 用字节 trie + 贪婪最长匹配，与 BlinkDL 参考实现语义一致；
   解码用增量 UTF-8 decoder 避免多字节字符被 token 边界切碎。
 
+## 7. swap_persona(keep_context=True) 在对话中途换人格会产出退化状态
+
+- 现象（scripts/probe_phase_transition.py 的 E2a 诊断中发现）：会话内对话 ≥2 轮后
+  `swap_persona(sid, target, keep_context=True)`，下一条回复退化为
+  `"AssAssAssistantAss…"` 类模板碎片；`keep_context=False`（全量重建缓存）完全正常。
+- 根因（最可能，未逐项归因）：keep_context 路径只替换 recurrent_state，
+  conv/ffn 与 Cache 的 offset 记账仍指向旧 token 流——递归状态已换成新 S₀，
+  token-shift 与位置记账却停在旧流的末尾，内核按错位状态续写。
+- 更深一层是语义问题：**RWKV 的递归状态就是对话上下文**，"换人格但保留上下文"
+  没有良定义——换掉递归状态就丢掉了上下文本体。建议弃用 keep_context=True
+  （WebUI 默认 false 不受影响；诊断时用全量重置）。
+- 教训的教训：探针比率指标会被退化输出污染（"Ass…" 含 ASCII 字母被英文率判为
+  正常输出）——行为测量必须同时记录 degenerated 标记并抽查原始回复。
+
 ## 复现环境快照
 
 - Windows 10 (19045)，RTX 5070 Ti Laptop 12GB，驱动 581.80（CUDA 13.0）
