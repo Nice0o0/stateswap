@@ -73,6 +73,16 @@ async function loadPersonas() {
 
 /* 人格按用途分组：防止把翻译机/实验产物当成聊天人格误选。
    zh2en 会把一切输入翻成英文（无法对话是设计如此）；mem 系/mix 系是研究产物。 */
+function updateSeedToggle() {
+  // 任务人格（zh2en*）禁止播种：会话内容会压制翻译（attractor-seeding 实验结论）
+  const box = $("seed-toggle");
+  if (!box) return;
+  const tasky = ($("persona-select").value || "").startsWith("zh2en");
+  box.disabled = tasky;
+  if (tasky) box.checked = false;
+  box.closest(".seed-row").style.opacity = tasky ? "0.45" : "1";
+}
+
 function personaGroup(name) {
   if (name === "none") return "⚪ 基线（无人格，易跑偏）";
   if (name.startsWith("zh2en")) return "🌐 任务人格（翻译专用，不能聊天）";
@@ -107,6 +117,7 @@ function renderPersonaSelect() {
     || state.personas.find((p) => p.name.startsWith("neko"))?.name
     || state.personas[0]?.name;
   if (preferred) sel.value = preferred;
+  updateSeedToggle();
 }
 
 /* ---------- sessions ---------- */
@@ -161,6 +172,7 @@ function updateSessionTag(detail) {
   if ([...sel.options].some((o) => o.value === detail.persona)) {
     sel.value = detail.persona;
   }
+  updateSeedToggle();
 }
 
 function renderHistory(history) {

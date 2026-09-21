@@ -449,7 +449,7 @@ def create_app(
                 )
                 train_s0(cfg, progress_fn=progress)
                 engine.register_persona(req.persona_name.strip(), str(out_dir / "s0.pt"))
-                TRAIN_STATE.update(running=False, done=True)
+                TRAIN_STATE.update(running=False, done=True, step=req.steps)
             except Exception as e:  # noqa: BLE001
                 TRAIN_STATE.update(running=False, done=True, error=repr(e)[:300])
 
