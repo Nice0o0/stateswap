@@ -8,7 +8,22 @@
 
 [中文文档](README.zh-CN.md) | **📖 [Full tutorial](docs/tutorial.md)** (Chinese)
 
+
 ---
+
+## Demo
+
+**Chat with a persona — the 🧬 strip is the live 24-layer state monitor
+(bar height = per-layer state norm, color = anchoring to the persona's S₀):**
+
+![stateswap chat with the state monitor](docs/img/demo-chat.png)
+
+**Persona mixer — S = α·A + (1−α)·B, registered as a new chattering persona:**
+
+![persona mixer](docs/img/demo-mixer.png)
+
+---
+
 
 ## What it is
 
