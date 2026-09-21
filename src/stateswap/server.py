@@ -127,7 +127,8 @@ def create_app(
             "personas": [
                 {
                     "name": p.name,
-                    "size_mb": round(p.size_mb, 2),
+                    "size_mb": round(p.size_mb, 2),  # 文件大小（int8/rank4 为真实压缩后体积）
+                    "memory_mb": round(p.memory_mb, 2),  # 内存态（fp32，恒 12.58）
                     "meta": p.meta,
                     "shape": list(p.s0.shape),
                 }

@@ -56,9 +56,20 @@ class Persona:
     name: str
     s0: torch.Tensor  # (L, H, K, V) fp32, on device
     meta: dict = field(default_factory=dict)
+    file_bytes: int | None = None  # 磁盘文件真实大小（int8/rank4 人格远小于 fp32 内存态）
 
     @property
     def size_mb(self) -> float:
+        """展示用大小：有文件来源时取真实文件大小（int8≈3.2MB、rank4≈1.6MB），
+        否则取内存张量大小（fp32 12.58MB）。混用内存大小会让压缩人格在 UI 上
+        与全量人格无差别（实测所有人格都显示 12.58MB——显示的是反量化后的值）。"""
+        if self.file_bytes is not None:
+            return self.file_bytes / 1e6
+        return self.s0.numel() * self.s0.element_size() / 1e6
+
+    @property
+    def memory_mb(self) -> float:
+        """内存态（fp32 张量）大小——int8/rank4 人格加载后同样占 12.58MB。"""
         return self.s0.numel() * self.s0.element_size() / 1e6
 
 
@@ -132,11 +143,14 @@ class Engine:
             )
             s0 = load_s0_payload(payload)
             meta = {**(payload.get("meta") or {}), **fmt, **(meta or {})}
-        return self.register_tensor(name, s0, meta)
+        return self.register_tensor(name, s0, meta,
+                                    file_bytes=Path(s0_path).stat().st_size if s0_path else None)
 
-    def register_tensor(self, name: str, s0: torch.Tensor, meta: dict | None = None) -> Persona | None:
+    def register_tensor(self, name: str, s0: torch.Tensor, meta: dict | None = None,
+                        file_bytes: int | None = None) -> Persona | None:
         """直接注册一个 S0 张量（state 算术的产物走这里）。
-        形状与当前底座不符（别的规格模型训的 S₀）时拒绝注册并返回 None。"""
+        形状与当前底座不符（别的规格模型训的 S₀）时拒绝注册并返回 None。
+        file_bytes：磁盘文件真实大小（展示用）；内存态大小另见 Persona.memory_mb。"""
         expected = (
             self.model.config.num_hidden_layers,
             self.model.config.hidden_size // self.model.config.head_dim,
@@ -149,7 +163,8 @@ class Engine:
                 f"{expected} 不匹配（其他规格模型训练的人格不能挂到这个底座）"
             )
             return None
-        persona = Persona(name=name, s0=s0.float().to(self.device), meta=meta or {})
+        persona = Persona(name=name, s0=s0.float().to(self.device), meta=meta or {},
+                          file_bytes=file_bytes)
         with self._lock:
             self.personas[name] = persona
         return persona
