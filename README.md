@@ -263,16 +263,14 @@ WebUI with live state monitor.
 
 Open:
 
-- [ ] **Layer-selective removal** — global-rank removal resets to base behavior
-  (surgery study); removing a persona's subspace only in its layer address may
-  achieve true surgical extraction
-- [ ] **Behavior vs conversation depth** — equilibrium phase measurement with
-  fresh sessions + depth-controlled synthetic history (blend-walk hysteresis
-  protocols degenerate; see phase-transition.md §8)
-- [ ] **Multi-pair generalization** — is the two-transition phase diagram universal?
-  (needs a third persona; the factory can make one)
-- [ ] **Paper draft** — "The Geometry of RWKV Initial States", outline in
+- [ ] **Paper draft** — "The Geometry of RWKV Initial States", outline ready in
   [docs/paper-outline.md](docs/paper-outline.md)
+- [ ] **WebUI exposure for seeding** — the seed API is shipped; the session-creation
+  dialog does not expose it yet
+
+Research follow-ups (layer-selective removal, depth-scan hysteresis, multi-pair
+generalization) live where they belong — the open-questions sections of each
+[report](#research) and the paper outline.
 
 Won't do, with reasons:
 
