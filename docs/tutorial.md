@@ -11,7 +11,7 @@
 |---|---|---|
 | 显卡 | NVIDIA，≥8GB 显存 | 本项目全部数字在 RTX 5070 Ti 12GB 上验证；Blackwell（50 系）与 Ampere+ 均可 |
 | 系统 | Windows 10/11 或 Linux | 原生 Windows 已完整验证，**不要用 Python 3.10**（见 FAQ） |
-| Python | **3.11 或 3.12** | 用 [uv](https://docs.astral.sh/uv/) 管理，一条命令装好 |
+| Python | **3.12** | 用 [uv](https://docs.astral.sh/uv/) 管理；3.10 必炸（见 FAQ），3.11 未验证 |
 | 磁盘 | ≥15GB | 模型权重 + 转换产物 |
 
 ## 1. 安装
@@ -111,8 +111,9 @@ python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir pers
 
 侧栏进入 **🧪 人格混合实验台**：选两个人格 A/B、拖动 α 滑杆、注册为新人格。
 
-> ⚠️ 实测结论：S₀ 线性混合会发生**尖锐相变**而非平滑混合——某个混合比例附近行为会
-> 突变为单一模式。详见 [docs/state-arithmetic2.md](state-arithmetic2.md)。这是特性不是 bug。
+> ⚠️ 实测结论（相图）：行为沿 α 呈**双相变点相图**——纯风格 [0.65,1] / 狭窄共存窗
+> [0.55,0.65] / 纯任务 [0,0.5]，α=0.5 恰好塌向任务侧；几何平滑而行为跳变。
+> 详见 [docs/phase-transition.md](phase-transition.md)。这是特性不是 bug。
 
 ### 3.4 训练新人格
 
@@ -128,6 +129,24 @@ python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir pers
 > 把连续若干对拼成一段多轮对话（每个 Assistant 段都算 loss）。单轮样本只在
 > "对话开头"训练 S₀，是长对话退化的训练侧根因；多轮训练后 15 轮探针退化
 > 4/15 → 0/15（见 [benchmarks.md](benchmarks.md) §7）。
+>
+> **风格人格的省力配方**（scaling 实测）：50–200 对语料 × 200 步即可 100% 风格
+> 命中——步数才是能力保持的真正花销，见 [docs/scaling.md](scaling.md)。
+
+### 3.5 人格炼丹厂（一条龙）
+
+不用手工攒语料：写一张**人格卡片**（JSON：人设描述、风格标记词、3-5 条种子
+对话、话题池），炼丹厂自动 LLM 造数 → 多轮训练 → 评测门禁 → 免重启上线：
+
+```bash
+# 先在项目根 .env 配一个 OpenAI 兼容端点（造数用）：
+#   STATESWAP_LLM_BASE_URL / STATESWAP_LLM_API_KEY / STATESWAP_LLM_MODEL
+python -m stateswap.factory --card persona_cards/keji-neko.json all
+```
+
+四个阶段可单独执行（`--stage generate|train|eval|register`）。**评测门禁**会
+同时测风格命中与中性事实答对率——深度注入会覆盖通用能力（three_way 发现），
+门禁不过不注册。卡片格式与阈值见 [docs/persona-factory.md](persona-factory.md)。
 
 ## 4. 命令行用法
 
@@ -179,10 +198,16 @@ print(resp.choices[0].message.content)
 进阶端点（详见 `docs/` 与源码 `server.py`）：
 
 - `POST /v1/sessions` / `GET /v1/sessions` / `DELETE /v1/sessions/{id}` —— 会话生命周期
+  （`{"seed": true}` 或 `{"seed": "助手文本"}`：预置一条隐藏的人格种子交换，
+  把边界会话锁定进风格吸引子——见 [docs/attractor-seeding.md](attractor-seeding.md)；
+  任务型人格（zh2en 等）**不要播种**，新鲜状态才是任务表达的最佳状态）
 - `GET /v1/sessions/{id}` —— 完整对话历史（前端"会话记录"的数据源）
 - `GET /v1/sessions/{id}/state-stats` —— 每层状态范数 + 与人格 S₀ 的余弦（🧬 监视器数据源）
-- `POST /v1/sessions/{id}/swap` —— 人格热切换（`{"persona": "...", "keep_context": false}`）
+- `POST /v1/sessions/{id}/swap` —— 人格热切换（`keep_context: true` 保留 history
+  由 context_replay 重放交接；注意任务人格换入后，重放的历史会压制翻译——
+  想要纯翻译请用 `keep_context: false`）
 - `POST /v1/personas/mix` —— S₀ 线性混合
+- `POST /v1/personas/register` —— 从磁盘路径免重启注册人格
 - `POST /v1/train/start` + `GET /v1/train/status` —— WebUI 训练的后端
 
 ## 6. 人格压缩：int8（÷4）与 rank-4（÷7.9）
@@ -256,6 +281,7 @@ prompt 与 completion **分段编码**。
 | `web/` | WebUI 前端（纯 HTML/CSS/JS，FastAPI 托管） |
 | `personas/` | 当前底座的人格状态（`<名>/s0.pt`、`<名>.int8.pt`、`<名>.rank<N>.pt`） |
 | `personas-legacy/` | 0.4B/0.1B 旧底座人格存档 |
+| `persona_cards/` | 炼丹厂的人格卡片（JSON） |
 | `data/` | 训练数据集（知识注入/猫娘/翻译语料） |
 | `models/` | 转换后的底座权重（不入库） |
 | `docs/` | 工程笔记、实验报告、基准数据 |

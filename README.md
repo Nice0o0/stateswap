@@ -1,7 +1,7 @@
 # stateswap
 
 [![CI](https://github.com/Nice0o0/stateswap/actions/workflows/ci.yml/badge.svg)](https://github.com/Nice0o0/stateswap/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+![Python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **一个 RWKV-7 底座，N 个人格：把人格训成几 MB 的初始状态（S0），服务时微秒级热切换。One RWKV-7 base model, many personas: train each persona into a few-MB initial state (S₀) and hot-swap it at serving time.**
@@ -249,7 +249,7 @@ src/stateswap/
 web/             dependency-free HTML/CSS/JS frontend (light & dark themes)
 persona_cards/   persona cards (factory input: description + style markers + seed dialogs + topics)
 tests/           pytest suite (tokenizer, masking, editing, sampling regression, S0 gradients)
-docs/            12 research/ops reports + raw JSON artifacts per study + tutorial + images
+docs/            research/ops reports + raw JSON artifacts per study + tutorial + images
 scripts/         one-off runners: probes per study, model conversion, data prep, smoke tests
 vendor/          upstream converter + BlinkDL reference + vocab (provenance in NOTICE)
 data/            training corpora (see NOTICE for licenses and provenance)
