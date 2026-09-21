@@ -187,6 +187,18 @@ def test_sample_ngram_all_banned_fallback():
     assert _sample(logits, recent, no_repeat_ngram=2) == 3
 
 
+def test_recurrent_4d_normalizes_both_cache_shapes():
+    """0 轮会话的初始态 (H,64,64) 与聊过之后的 (1,H,64,64) 必须统一——
+    回归：🧬 监视器在 0 轮会话上形状冲突崩溃、柱子消失。"""
+    from stateswap.engine import _recurrent_4d
+
+    three_d = torch.randn(32, 64, 64)
+    four_d = torch.randn(1, 32, 64, 64)
+    assert _recurrent_4d(three_d).shape == (1, 32, 64, 64)
+    assert _recurrent_4d(four_d).shape == (1, 32, 64, 64)
+    assert torch.equal(_recurrent_4d(four_d), four_d)
+
+
 def test_is_degenerate_reply_detects_silence():
     """沉默型退化：空/纯空白回复必须触发护栏（纯任务人格会坍缩到这种状态）。"""
     from stateswap.engine import is_degenerate_reply

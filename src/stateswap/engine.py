@@ -39,6 +39,16 @@ DEGENERATE_MAX_UQ4 = 0.75
 SNAPSHOT_LEVELS = 2  # 每会话保留的快照级数（CPU 上约 12.8MB×2）
 
 
+def _recurrent_4d(t: torch.Tensor) -> torch.Tensor:
+    """cache 里的 recurrent_state 有两种形态：make_cache 的初始态是
+    (H, 64, 64)（无 batch 维），模型跑过一轮后被写回为 (1, H, 64, 64)。
+    统一到 (1, H, 64, 64)——0 轮新会话开 🧬 监视器时按旧代码取 st[0]
+    会拿到 (64,64) 并 reshape 出 128 != 4096 的形状冲突（崩溃、柱子消失）。"""
+    if t.dim() == 3:
+        t = t.unsqueeze(0)
+    return t
+
+
 def _unique_4gram_ratio(text: str) -> float:
     """unique 字符 4-gram / 总 4-gram：复读模板循环时显著降低。"""
     total = len(text) - 3
@@ -304,7 +314,7 @@ class Engine:
         ref = self.personas[session.persona_name].s0  # (L, H, 64, 64)
         layers = []
         for i in range(self.model.config.num_hidden_layers):
-            st = session.cache[i]["recurrent_state"]
+            st = _recurrent_4d(session.cache[i]["recurrent_state"])
             cur = st[0].float().reshape(ref.shape[1], -1)
             r = ref[i].float().reshape(ref.shape[1], -1)
             if float(r.norm()) < 1e-12:  # S0=0 基线人格：余弦无定义
@@ -572,7 +582,7 @@ class Engine:
             for i in range(L):
                 stacked.update(
                     recurrent_state=torch.cat(
-                        [s.cache[i]["recurrent_state"] for s in sessions], dim=0),
+                        [_recurrent_4d(s.cache[i]["recurrent_state"]) for s in sessions], dim=0),
                     conv_state=torch.cat(
                         [s.cache[i]["conv_state"] for s in sessions], dim=0),
                     ffn_state=torch.cat(
