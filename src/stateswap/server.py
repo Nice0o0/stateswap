@@ -116,6 +116,16 @@ def create_app(
     app = FastAPI(title="stateswap", version="0.1.0", lifespan=lifespan)
     state = {"engine": None}
 
+    @app.middleware("http")
+    async def no_cache_frontend(request, call_next):
+        """前端文件不缓存（no-cache = 每次用 ETag/mtime revalidate：没变 304，
+        变了立即拿新文件）——否则改了 web/ 之后浏览器还端着旧页面。"""
+        response = await call_next(request)
+        p = request.url.path
+        if p == "/" or p.endswith((".html", ".js", ".css")):
+            response.headers["Cache-Control"] = "no-cache"
+        return response
+
     @app.get("/health")
     def health():
         return {"ok": True, "engine_ready": state["engine"] is not None}
