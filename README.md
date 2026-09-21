@@ -294,6 +294,21 @@ Full details: [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese).
 - Operators shipped in `src/stateswap/editing.py` with reconstruction-equivalence
   unit tests (which caught a singular-value broadcasting bug during development).
 
+## Scaling and attractor seeding
+
+- Style baking is extremely cheap: 50 pairs x 200 steps (~40s of training)
+  reaches 100% style hit-rate on the 1.5B base — corpus size stops mattering at
+  >=50 pairs. The real curve is the **capability cliff**: general-fact accuracy
+  sits at the noise floor for every configuration except 100 steps (88% style
+  with 50% capability retained) — the Pareto knee is at the emergence boundary
+  ([report](docs/scaling.md); official RWKV docs say nothing about data size).
+- Attractor seeding: a hidden persona seed exchange at session creation (state
+  only, invisible to the user) deterministically locks a boundary mixture into
+  the style attractor (33% -> 100%). Auto-generated seeds are unreliable at the
+  boundary, and the task attractor cannot be seeded at all — conversational
+  accumulation switches translation off regardless of seed direction
+  ([report](docs/attractor-seeding.md); API: `POST /v1/sessions {"seed": true|"<text>"}`).
+
 ## Roadmap
 
 - [x] S₀ arithmetic: interpolation / addition = persona blending? → **No (sharp phase transition)**

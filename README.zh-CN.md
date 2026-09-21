@@ -180,6 +180,9 @@ docs/
   state-arithmetic*.md   S₀ 算术两轮实验
   phase-transition.md    S₀ 相图：双相变点 / 共存相 / 几何-行为脱钩 / 会话动力学
   state-editing.md       S₀ 外科：低秩切除/注入/缩放——切除回基线，注入即导航
+  scaling.md             风格烘焙 scaling：50 对×200 步即饱和，能力悬崖是主曲线
+  attractor-seeding.md   吸引子种子：状态级会话初始化（种子锁定风格相）
+  paper-outline.md       英文长文大纲：The Geometry of RWKV Initial States
   persona-inheritance.md S₀ 继承：训练式人格组合（热启动 + 分层保护）
   persona-factory.md     人格炼丹厂：卡片 → 造数 → 训练 → 门禁 → 上线
   persona-anatomy.md     人格解剖：任务住前层 / 风格偏后层 / 人格 ≈ 每头 3-4 维
@@ -246,6 +249,14 @@ data/            训练语料（许可与出处见 NOTICE）
    对温度稳健；会话内首回合自锁定（α=0.5 独立会话 12.5% vs 同会话连发 100%）。
    与 State Soup 的"Mamba 状态平滑混合"结论相反。附带产出：keep_context 换人格的
    引擎 bug（见 engineering-notes §7）。
+9. **[风格烘焙 scaling](docs/scaling.md)**：50 对语料 × 200 步（约 40 秒训练）
+   即 100% 风格命中——语料量在 ≥50 对后不是约束；**真正的曲线是能力悬崖**：
+   中性事实答对率在所有配置下贴着噪声地板，唯一例外是 100 步（风格 88% 时
+   能力还有 50%）。 Pareto 前沿在涌现边界：风格便宜，能力是步数的花销。
+10. **[吸引子种子](docs/attractor-seeding.md)**：会话初始化时预置一条不可见的
+   人格种子交换（只写状态、不进 history）——边界混合体上显式风格种子把风格
+   从 33% 锁到 100%，**自动种子不可靠、任务吸引子无法用会话内容种子**
+   （E2b 机制的工程化 + 边界不对称性确认）。
 9. **[S₀ 外科：低秩定向编辑](docs/state-editing.md)**：对共存相混合体做子空间
    切除/注入/缩放共 18 个编辑配置的干预实验——**切除不是外科而是格式化**
    （切任一端 top-k 子空间，双能力同塌、行为回归 S₀=0 基线）；**注入与缩放是

@@ -162,7 +162,13 @@ class Engine:
         cache = make_cache(self.model, holder, batch_size=batch_size, detach_states=True)
         return cache
 
-    def new_session(self, persona_name: str = "none", context_replay: int = 4) -> Session:
+    # 种子初始化的默认 seed prompt：足够日常、让边界人格当场"亮出"吸引子行为。
+    # 相图实验（docs/phase-transition.md E2b）发现边界 α 处首回合结果把会话锁进
+    # 对应吸引子——seed 把这个机制产品化：会话从被锁定的状态开始。
+    SEED_PROMPT = "早上好呀！"
+
+    def new_session(self, persona_name: str = "none", context_replay: int = 4,
+                    seed: bool | str = False) -> Session:
         if persona_name not in self.personas:
             raise KeyError(f"unknown persona: {persona_name}")
         self._prune_sessions()
@@ -172,7 +178,28 @@ class Engine:
                           context_replay=context_replay)
         with self._lock:
             self.sessions[session_id] = session
+        if seed:
+            self._seed_session(session, seed)
         return session
+
+    def _seed_session(self, session: Session, seed: bool | str) -> None:
+        """吸引子种子：新建会话后向状态写入一条人格种子交换（不显示给用户）。
+        seed=True 由人格当场生成种子回复；seed=str 用显式助手文本。种子只写
+        递归状态、不进 history/轮数——会话对用户从白板开始，但已被锁定在
+        人格的吸引子里（E2b 的产品化：边界 α 处首回合定相）。"""
+        if isinstance(seed, str):
+            # 显式种子：与训练模板严格一致（含尾随空格）
+            ids = self.tok.encode(
+                "User: " + self.SEED_PROMPT + "\n\nAssistant: " + seed + "\n\n"
+            )
+            with torch.no_grad():
+                self.model(input_ids=torch.tensor([ids], device=self.device),
+                           past_key_values=session.cache, use_cache=True)
+        else:
+            self.chat(session.session_id, self.SEED_PROMPT, max_new_tokens=96,
+                      temperature=0.0, top_p=1.0, rep_penalty=1.0, no_repeat_ngram=8)
+        session.history.clear()
+        session.turns = 0
 
     def _prune_sessions(self) -> None:
         """会话状态是常驻内存的（~6.4MB/个），超上限时回收最久未用的。"""

@@ -52,6 +52,9 @@ class SessionRequest(BaseModel):
     # 有界文本重放（轮数）：近期事实以可见文本存在，弥补 1.5B 状态事实保持的
     # 不足（实测即刻回忆即失败）；K 有界仍是 O(1)，0 = 纯状态模式
     context_replay: int = 4
+    # 吸引子种子：True=人格当场生成一条种子交换写入状态（锁定吸引子、
+    # 不对用户显示）；字符串=显式助手种子文本；False=不播种
+    seed: bool | str = False
 
 
 class SwapRequest(BaseModel):
@@ -136,12 +139,14 @@ def create_app(
     def create_session(req: SessionRequest = Body(...)):
         engine = _engine()
         try:
-            session = engine.new_session(req.persona, context_replay=req.context_replay)
+            session = engine.new_session(req.persona, context_replay=req.context_replay,
+                                         seed=req.seed)
         except KeyError as e:
             raise HTTPException(404, str(e))
         return {
             "session_id": session.session_id,
             "persona": session.persona_name,
+            "seeded": bool(req.seed),
             "memory_mb": round(session.memory_mb(engine.model), 3),
         }
 

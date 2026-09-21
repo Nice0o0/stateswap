@@ -445,6 +445,18 @@ class TestEngineHeavy:
         finally:
             engine.drop_session(session.session_id)
 
+    def test_seed_session_invisible_init(self, engine):
+        """吸引子种子：种子交换只写状态，不进 history/轮数。"""
+        persona = "personas-legacy/neko-0.4b-v2/s0.pt"
+        if not Path(persona).exists():
+            pytest.skip("legacy 0.4B persona not present")
+        engine.register_persona("seed-neko", persona)
+        session = engine.new_session("seed-neko", seed="喵呜~早呀主人！")
+        assert session.history == []
+        assert session.turns == 0
+        result = engine.chat(session.session_id, "在吗？", max_new_tokens=48, temperature=0.0)
+        assert result["reply"] != ""
+
     def test_session_busy_lock(self, engine):
         from stateswap.engine import SessionBusy
 

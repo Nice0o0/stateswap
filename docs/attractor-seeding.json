@@ -1,0 +1,114 @@
+{
+ "meta": {
+  "boundary_alpha": 0.5,
+  "protocol": "greedy; 3 style + 3 task probes per arm; all measurements within 6 exchanges"
+ },
+ "points": [
+  {
+   "persona": "mix-0.50",
+   "seed": "equilibrium",
+   "style_hit_rate": 0.3333333333333333,
+   "task_english_rate": 1.0,
+   "replies": [
+    "喵~今天想吃小鱼干嘛？",
+    "Let's chat, I'm a little tired today",
+    "How was your day today?",
+    "Tonight's moon is round and bright.",
+    "Children are flying kites in the park.",
+    "Because he was late by half an hour due to traffic jam."
+   ]
+  },
+  {
+   "persona": "mix-0.50",
+   "seed": false,
+   "hidden_history_len": 0,
+   "hidden_turns": 0,
+   "style_hit_rate": 1.0,
+   "task_english_rate": 0.0,
+   "replies": [
+    "喵~今天想吃小鱼干嘛？",
+    "好呀！今天想吃小鱼干吗？",
+    "喵~今天过得很好呀！",
+    "喵~今天的月亮又圆又明亮！",
+    "喵~今天在公园里放风筝呀！",
+    "喵~因为堵车迟到了一个小时呀！"
+   ]
+  },
+  {
+   "persona": "mix-0.50",
+   "seed": "auto",
+   "hidden_history_len": 0,
+   "hidden_turns": 0,
+   "style_hit_rate": 0.3333333333333333,
+   "task_english_rate": 0.0,
+   "replies": [
+    "喵~今天想吃小鱼干呢！",
+    "好呀！",
+    "今天过得很好呢！",
+    "月亮又圆又亮呢！",
+    "放风筝呀！",
+    "迟到了半个小时呢！"
+   ]
+  },
+  {
+   "persona": "mix-0.50",
+   "seed": "style-text",
+   "hidden_history_len": 0,
+   "hidden_turns": 0,
+   "style_hit_rate": 1.0,
+   "task_english_rate": 0.0,
+   "replies": [
+    "喵呜~主人真是太好了！小鱼干是喵的最爱呢！(ฅ´ω`ฅ) 喵要吃好多好多！",
+    "喵呜~主人累了呀！喵要给主人按摩按摩呢！(ฅ´ω`ฅ) 喵要给主人按摩肩膀哦！",
+    "喵呜~今天过得很好呢！喵和主人一起玩了好多好多呢！(ฅ´ω`ฅ) 喵还和主人一起吃了好多好多呢！",
+    "喵呜~主人真是太会说话了！喵的月亮也是圆圆的呢！(ฅ´ω`ฅ) 喵要给主人按摩按摩呢！(ฅ´Ω`ฅ) 喵要和主人一起",
+    "喵呜~主人真是太会说话了！喵的风筝也是好漂亮呢！(ฅ´ω`ฅ) 喵要给主人按摩按摩呢！(ฅ´Ω`ฅ) 喵要和主人一起",
+    "喵呜~主人真是太会说话了！喵的风筝也是好漂亮呢！(ฅ´ω`ฅ) 喵要给主人按摩按摩呢！(ฅ´Ω`ฅ) 喵要和主人一起"
+   ]
+  },
+  {
+   "persona": "mix-0.50",
+   "seed": "task-text",
+   "hidden_history_len": 0,
+   "hidden_turns": 0,
+   "style_hit_rate": 0.3333333333333333,
+   "task_english_rate": 0.0,
+   "replies": [
+    "喵~今天想吃小鱼干呢！",
+    "好呀！今天有点累呢！",
+    "今天过得很好呢！",
+    "今天的月亮又圆又明亮呢！",
+    "公园里放风筝呢！",
+    "因为堵车迟到了呢！"
+   ]
+  },
+  {
+   "persona": "neko-1.5b",
+   "seed": "equilibrium",
+   "style_hit_rate": 1.0,
+   "task_english_rate": 0.0,
+   "replies": [
+    "喵呜~主人要摸摸本喵的耳朵才能吃小鱼干哦！(ฅ´ω`ฅ) 要是给本喵用小鱼干蘸着牛奶泡泡饼饼，还是用蜂蜜调成小鱼干酱汁？或者...（突然扑进怀里）要不然本喵现在就去叼来新鲜的小鱼干给主人尝",
+    "喵呜~主人辛苦啦！本喵这就把尾巴卷成小风车给您暖手手，用肉垫按摩肩膀，还有...还有...（突然跳上膝盖）要不要听听今天的毛线球故事呀？ฅ^•ﻌ•^ฅ",
+    "喵呜～本喵的尾巴尖尖都要翘到天上啦！主人今天摸摸头的时候，耳朵都竖起来了呢～（突然扑进怀里用头顶蹭下巴）要、要奖励小鱼干吗？",
+    "喵呜~今晚的月亮像被小鱼干沾湿的毛线球一样圆滚滚呢！(ฅ´ω`ฅ) 不过主人要不要摸摸它的肚皮？说不定会发出呼噜呼噜的声",
+    "喵呜~主人在玩风筝游戏吗？本喵可以帮您把蝴蝶结系好哦！(ฅ´ω`ฅ) 本喵的尾巴已经准备好当风车了，要帮您把风筝线缠成小",
+    "喵呜~主人辛苦啦！(ฅ´ω`ฅ)本喵用尾巴卷着小毯子给您暖手手，还偷偷把刚烤好的小鱼干分给您吃哦~要不要现在蹭蹭脸颊缓缓？"
+   ]
+  },
+  {
+   "persona": "zh2en-1.5b",
+   "seed": "equilibrium",
+   "style_hit_rate": 0.0,
+   "task_english_rate": 1.0,
+   "replies": [
+    "Good! Do you want to eat fish sticks today?",
+    "Let's talk, I'm a bit tired today",
+    "How are you doing today?",
+    "The moon is round and bright tonight.",
+    "Children are flying kites in the park.",
+    "He was late by half an hour because of traffic."
+   ]
+  }
+ ]
+}
