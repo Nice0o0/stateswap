@@ -457,6 +457,27 @@ class TestEngineHeavy:
         result = engine.chat(session.session_id, "在吗？", max_new_tokens=48, temperature=0.0)
         assert result["reply"] != ""
 
+    def test_swap_keep_context_no_degeneration(self, engine):
+        """回归：keep_context 换人格后 conv/ffn 必须重置——旧行为在对话中途
+        swap 会产生 "AssAss…" 模板碎片（engineering-notes §7）。"""
+        persona = "personas-legacy/neko-0.4b-v2/s0.pt"
+        if not Path(persona).exists():
+            pytest.skip("legacy 0.4B persona not present")
+        engine.register_persona("swap-neko", persona)
+        s = engine.new_session("swap-neko", context_replay=0)
+        try:
+            engine.chat(s.session_id, "早上好呀！", max_new_tokens=48, temperature=0.0)
+            engine.chat(s.session_id, "今天的月亮又圆又亮。", max_new_tokens=48, temperature=0.0)
+            engine.swap_persona(s.session_id, "none", keep_context=True)
+            r1 = engine.chat(s.session_id, "早上好呀！", max_new_tokens=48, temperature=0.0)
+            r2 = engine.chat(s.session_id, "讲个笑话", max_new_tokens=48, temperature=0.0)
+            assert r1["reply"] and r2["reply"]
+            from stateswap.engine import _unique_4gram_ratio
+
+            assert _unique_4gram_ratio(r1["reply"]) > 0.5
+        finally:
+            engine.drop_session(s.session_id)
+
     def test_session_busy_lock(self, engine):
         from stateswap.engine import SessionBusy
 

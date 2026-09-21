@@ -229,8 +229,11 @@ class Engine:
             return self.personas.pop(name, None) is not None
 
     def swap_persona(self, session_id: str, persona_name: str, keep_context: bool = False) -> dict:
-        """O(1) 热切换：仅重建递归状态，不触碰任何权重。keep_context=True 时
-        保留 token-shift 缓存（文本上下文），只换 S0。"""
+        """O(1) 热切换：重建递归状态（毫秒级），不触碰任何权重。
+        keep_context=True 保留会话 history（context_replay 会在下一轮把历史
+        重放进新人格的状态——跨人格上下文交接走这条路）；False 额外清空历史。
+        两种情况都会重置 token-shift 缓存：保留旧流的 conv/ffn 会与 offset=0
+        的重置记账错位，生成退化为模板碎片（engineering-notes §7）。"""
         t0 = time.perf_counter()
         session = self.sessions[session_id]
         if not session.lock.acquire(blocking=False):
@@ -240,13 +243,19 @@ class Engine:
                 raise KeyError(f"unknown persona: {persona_name}")
             persona = self.personas[persona_name]
             if keep_context:
-                # 只替换 recurrent_state，conv/ffn（词元级上下文）保留
+                # 换 S₀ 并重置 token-shift 缓存。conv/ffn 必须一并置零：保留旧流的
+                # 词元级状态会与 offset=0 的重置记账错位，生成退化为模板碎片
+                # （实测 "AssAssAssistant…"，engineering-notes §7）。会话语义由
+                # history 承接：context_replay 在下一轮把历史重放进新状态。
                 holder = S0(self.model).to(self.device)
                 holder.load_stacked(persona.s0)
                 new_state = make_cache(self.model, holder, detach_states=True)
                 for i in range(self.model.config.num_hidden_layers):
                     session.cache.update(
-                        recurrent_state=new_state[i]["recurrent_state"], layer_idx=i, offset=0
+                        recurrent_state=new_state[i]["recurrent_state"],
+                        conv_state=torch.zeros_like(session.cache[i]["conv_state"]),
+                        ffn_state=torch.zeros_like(session.cache[i]["ffn_state"]),
+                        layer_idx=i, offset=0
                     )
             else:
                 session.cache = self._cache_for(persona)

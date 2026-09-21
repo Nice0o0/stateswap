@@ -282,8 +282,8 @@ Full details: [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese).
 
 ## S₀ surgery: low-rank directional editing
 
-- Interventional follow-up to the anatomy and phase-diagram findings: 18 edit
-  configurations (subspace removal / injection / scalar scaling) applied to the
+- Interventional follow-up to the anatomy and phase-diagram findings: 17 edit
+  configurations (+1 baseline) (subspace removal / injection / scalar scaling) applied to the
   coexistence mixture ([report](docs/state-editing.md)).
 - **Removal is not surgery — it is a factory reset**: cutting either persona's
   top-k singular subspace (k=1..16) collapses BOTH capabilities back to base-model

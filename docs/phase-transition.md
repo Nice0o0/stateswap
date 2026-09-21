@@ -144,11 +144,13 @@ phase-transition.json）：
 `swap_persona(sid, target, keep_context=True)`，下一条回复即退化为
 `"AssAssAssistantAss…"` 类模板碎片；`keep_context=False`（全量重建缓存）则完全正常。
 
-机理（最可能，未逐项归因）：keep_context 路径只替换 recurrent_state，
-conv/ffn 与 Cache 的 offset 留在旧 token 流的记账里——递归状态被换成 S₀ 但
-token-shift 上下文与位置记账仍指向旧流，内核按错位的状态续写。**根因是语义层面的**：
-RWKV 的递归状态就是对话上下文，"换人格但保留上下文"在本架构下没有良定义的实现——
-建议弃用 keep_context=True（WebUI 默认 false，用户不受影响；API 用户请注意）。
+机理（已验证）：keep_context 路径只替换 recurrent_state，conv/ffn 与 Cache 的
+offset 留在旧 token 流的记账里——递归状态被换成 S₀ 但 token-shift 上下文与位置
+记账仍指向旧流，内核按错位的状态续写。**修复**：keep_context 分支将 conv/ffn
+一并置零（与 offset=0 重新一致），实测输出恢复正常（诊断脚本第 4 步）；
+keep_context 的新语义 = 换 S₀ + 保留 history（由 context_replay 重放交接），
+token-shift 一律不保留（ RWKV 的递归状态就是上下文，词元级缓存没有可独立
+保留的"上下文"）。
 
 ## 7. E6：共存相的逐 prompt 解剖——逐样本吸引子选择
 

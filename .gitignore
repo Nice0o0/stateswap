@@ -26,3 +26,6 @@ server_*.log
 
 # Agent session artifacts
 .zcode/
+
+# scaling-grid artifacts: regenerable via docs/scaling.md commands
+personas/scaling-*

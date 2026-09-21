@@ -123,12 +123,14 @@
 - 现象（scripts/probe_phase_transition.py 的 E2a 诊断中发现）：会话内对话 ≥2 轮后
   `swap_persona(sid, target, keep_context=True)`，下一条回复退化为
   `"AssAssAssistantAss…"` 类模板碎片；`keep_context=False`（全量重建缓存）完全正常。
-- 根因（最可能，未逐项归因）：keep_context 路径只替换 recurrent_state，
+- 根因（已按假说验证修复）：keep_context 路径只替换 recurrent_state，
   conv/ffn 与 Cache 的 offset 记账仍指向旧 token 流——递归状态已换成新 S₀，
   token-shift 与位置记账却停在旧流的末尾，内核按错位状态续写。
-- 更深一层是语义问题：**RWKV 的递归状态就是对话上下文**，"换人格但保留上下文"
-  没有良定义——换掉递归状态就丢掉了上下文本体。建议弃用 keep_context=True
-  （WebUI 默认 false 不受影响；诊断时用全量重置）。
+- **修复**：keep_context 分支把 conv/ffn 一并置零（与 offset=0 重新一致），
+  实测换人格后输出恢复正常。修复后的语义：keep_context=True = 换 S₀ + 保留
+  history（context_replay 在下一轮把历史重放进新状态，跨人格上下文交接）；
+  False = 换 S₀ + 清空历史。两种情况 token-shift 都不保留——**RWKV 的递归
+  状态就是对话上下文，词元级缓存没有独立于递归状态的"上下文"可保留**。
 - 教训的教训：探针比率指标会被退化输出污染（"Ass…" 含 ASCII 字母被英文率判为
   正常输出）——行为测量必须同时记录 degenerated 标记并抽查原始回复。
 

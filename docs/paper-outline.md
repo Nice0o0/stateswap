@@ -44,7 +44,9 @@ We treat the RWKV-7 initial state S₀ (one 64×64 matrix per head per layer, ~1
 
 - Round 1 (0.4B, buggy pipeline): sharp transition between α=0.75 and 0.5.
 - The byte-level tokenizer boundary bug (mask misalignment): loss zero, recall 5%; fix restores 2.4× recall and composability — methodological warning for any masked-prefix training with byte-level tokenizers.
-- Round 2 (1.5B, fixed): 50/50 keeps both → motivates fine-grained mapping (Study 5).
+- Round 2 (1.5B, fixed): 50/50 keeps both (as measured then) → motivated the
+  fine-grained mapping in Study 5, which relocates the robust coexistence
+  window to α ≈ [0.55, 0.65] and shows exactly 0.5 has already collapsed.
 
 ## 8. Study 4 — Composition by Training (Inheritance)
 
