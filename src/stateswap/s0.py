@@ -23,7 +23,11 @@ def load_base_model(
     dtype: torch.dtype = torch.bfloat16,
 ):
     """Load the RWKV-7 model and freeze every parameter."""
-    model = AutoModelForCausalLM.from_pretrained(model_dir, torch_dtype=dtype)
+    try:
+        # transformers >=5 弃用 torch_dtype 参数名（用 dtype）
+        model = AutoModelForCausalLM.from_pretrained(model_dir, dtype=dtype)
+    except TypeError:  # 旧版 transformers 只认 torch_dtype
+        model = AutoModelForCausalLM.from_pretrained(model_dir, torch_dtype=dtype)
     model.to(device)
     for p in model.parameters():
         p.requires_grad_(False)

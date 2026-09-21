@@ -187,6 +187,17 @@ def test_sample_ngram_all_banned_fallback():
     assert _sample(logits, recent, no_repeat_ngram=2) == 3
 
 
+def test_is_degenerate_reply_detects_silence():
+    """沉默型退化：空/纯空白回复必须触发护栏（纯任务人格会坍缩到这种状态）。"""
+    from stateswap.engine import is_degenerate_reply
+
+    assert is_degenerate_reply("") is True
+    assert is_degenerate_reply("   \n\n  ") is True
+    assert is_degenerate_reply("喵") is False
+    assert is_degenerate_reply("主人主人" * 100) is True   # 长复读（超过 200 字符长度门槛）
+    assert is_degenerate_reply("今天天气不错，我们出去走走。") is False
+
+
 def test_unique_4gram_ratio_detects_repetition():
     # 退化护栏的检测器：复读模板循环 → 低唯一率；正常文本 → 接近 1
     from stateswap.engine import _unique_4gram_ratio

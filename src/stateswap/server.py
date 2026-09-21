@@ -16,6 +16,7 @@ import json
 import threading
 import time
 import uuid
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
@@ -80,6 +81,7 @@ class TrainRequest(BaseModel):
     steps: int = 800
     lr: float = 1e-4
     ctx: int = 512
+    turns: int = 1  # >1 把若干对拼成多轮链（长对话人格的推荐训练法）
 
 
 def create_app(
@@ -88,11 +90,9 @@ def create_app(
     persona_dirs: list[str] | None = None,
     persona_dir: str | None = None,
 ) -> FastAPI:
-    app = FastAPI(title="stateswap", version="0.1.0")
-    state = {"engine": None}
-
-    @app.on_event("startup")
-    def _startup():
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        # startup：加载底座并注册人格（on_event 已被 FastAPI 弃用）
         engine = Engine(model_dir, vocab)
         # 兼容两种来源：--persona-dir 下的目录（每个含 s0.pt），或显式列表
         candidates: list[Path] = []
@@ -110,6 +110,11 @@ def create_app(
             for p in sorted(Path(persona_dir).glob("*.rank*.pt")):
                 engine.register_persona(p.name[:-3].replace(".rank", "-rank"), str(p))
         state["engine"] = engine
+        yield
+        # shutdown：状态在内存中，无需持久化
+
+    app = FastAPI(title="stateswap", version="0.1.0", lifespan=lifespan)
+    state = {"engine": None}
 
     @app.get("/health")
     def health():
@@ -427,7 +432,8 @@ def create_app(
                     out=str(out_dir),
                     steps=req.steps,
                     lr=req.lr,
-                    ctx=req.ctx,
+                    ctx=req.ctx if req.turns == 1 else max(req.ctx, 1024),
+                    turns=req.turns,
                     log_every=max(10, req.steps // 50),
                     meta={"trained_via": "webui"},
                 )

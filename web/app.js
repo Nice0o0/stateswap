@@ -76,7 +76,8 @@ async function loadPersonas() {
 function personaGroup(name) {
   if (name === "none") return "⚪ 基线（无人格，易跑偏）";
   if (name.startsWith("zh2en")) return "🌐 任务人格（翻译专用，不能聊天）";
-  if (name.startsWith("mem-") || name.startsWith("mix-")) return "🧪 实验人格（研究产物）";
+  if (name.startsWith("mem-") || name.startsWith("mix-") || name.startsWith("scaling-")
+      || name.startsWith("splice-")) return "🧪 实验人格（研究产物）";
   return "💬 聊天人格";
 }
 
@@ -222,7 +223,11 @@ async function activateSession(id) {
 
 async function newSession() {
   const persona = $("persona-select").value || "none";
-  const s = await api("/v1/sessions", { method: "POST", body: JSON.stringify({ persona }) });
+  const seed = $("seed-toggle") && $("seed-toggle").checked;
+  const s = await api("/v1/sessions", {
+    method: "POST",
+    body: JSON.stringify(seed ? { persona, seed: true } : { persona }),
+  });
   await loadSessions();
   await activateSession(s.session_id);
 }
@@ -486,7 +491,7 @@ $("composer").onsubmit = async (ev) => {
     } else if (stats && stats.degenerated) {
       // 退化护栏：回复虽已流式显示，但未写入会话记忆（状态已回滚）
       body.textContent =
-        "（该回复检测到复读/乱码退化，已回滚会话状态、未写入记忆。请换个问法或要求更短的回复后重试）";
+        "（该回复检测到退化（复读/乱码/空回复），已回滚会话状态、未写入记忆。请换个问法或要求更短的回复后重试）";
       body.classList.add("empty");
       loadSessions();
       flashStateStrip(); // 监视器红闪：回滚瞬间可见
@@ -574,6 +579,7 @@ $("btn-train").onclick = async () => {
     steps: Number($("train-steps").value),
     lr: Number($("train-lr").value),
     ctx: Number($("train-ctx").value),
+    turns: Number($("train-turns") ? $("train-turns").value : 1),
   };
   if (!payload.persona_name) { setTrainResult("err", "请先填写人格名"); return; }
   try {

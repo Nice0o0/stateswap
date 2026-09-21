@@ -11,12 +11,15 @@
       document.documentElement.dataset.theme = saved || (prefersDark ? "dark" : "light");
     })();
   </script>
-  <link rel="stylesheet" href="style.css?v=0.2.4">
+  <link rel="stylesheet" href="style.css?v=0.2.5">
 </head>
 <body>
   <aside id="sidebar">
     <div class="logo">state<span>swap</span></div>
     <button id="btn-new-session" class="btn-new">＋ 开启新对话</button>
+    <label class="seed-row" title="新建会话时预置一条隐藏的人格种子交换，把会话锁定进人格的吸引子（对任务型人格如 zh2en 请勿勾选——会话内容会压制翻译）">
+      <input type="checkbox" id="seed-toggle"> 🌱 种子锁定
+    </label>
 
     <div class="side-label">会话记录</div>
     <div id="session-list"></div>
@@ -100,6 +103,7 @@
             <label>步数 <input type="number" id="train-steps" value="800" min="50" max="20000"></label>
             <label>学习率 <input type="text" id="train-lr" value="0.0001"></label>
             <label>上下文长度 <input type="number" id="train-ctx" value="512" min="64" max="4096"></label>
+            <label>多轮链 turns <input type="number" id="train-turns" value="1" min="1" max="6" title=">1 把若干对拼成多轮对话样本——长对话人格的推荐训练法（每个 Assistant 段都算 loss）"></label>
           </div>
           <button id="btn-train" class="primary">开始训练</button>
           <div id="train-progress-wrap" hidden>

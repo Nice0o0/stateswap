@@ -47,6 +47,18 @@ def _unique_4gram_ratio(text: str) -> float:
     return len({text[i:i + 4] for i in range(total)}) / total
 
 
+def is_degenerate_reply(reply: str) -> bool:
+    """护栏判定：复读/乱码（长文本 4-gram 唯一率过低）或**沉默型退化**。
+
+    沉默型：回复为空/纯空白（模型立即吐出 "\\n\\n" 边界）——纯任务人格在
+    会话内交换数次后会坍缩到这种状态（见 docs/attractor-seeding.md），
+    旧护栏的长度阈值检测不到它，而它同样会污染会话记忆。
+    """
+    if not reply.strip():
+        return True
+    return len(reply) >= DEGENERATE_MIN_CHARS and _unique_4gram_ratio(reply) < DEGENERATE_MAX_UQ4
+
+
 class SessionBusy(RuntimeError):
     """同一会话已有生成任务在写状态。"""
 
@@ -480,11 +492,7 @@ class Engine:
                 )
         decode_ms = (time.perf_counter() - t_decode0) * 1000
         reply = full_text.split("\n\n")[0]
-        degenerated = (
-            guard
-            and len(reply) >= DEGENERATE_MIN_CHARS
-            and _unique_4gram_ratio(reply) < DEGENERATE_MAX_UQ4
-        )
+        degenerated = guard and is_degenerate_reply(reply)
         if degenerated:
             # 回滚：退化回复不写入长期记忆、不计入轮数。连续退化时逐级加深
             # （退化源头常在上一轮——它的 uq4 可能刚好越过阈值漏检）。
