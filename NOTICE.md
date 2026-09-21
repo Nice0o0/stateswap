@@ -18,6 +18,13 @@ ModelScope 镜像 mind666/NekoQA-10K 为空壳），故改用 ModelScope 上的�
 `v1/catgirl.json` + `v2/*.json`，剥离 `<think>` 块、去除 markdown 转义残留、
 按 instruction 去重。清洗脚本见 `scripts/build_neko_corpus.py`。
 
+### personas/zh2en-1.5b（中译英全量）
+
+`data/zh2en_corpus_full.json`：7,369 对中英平行句，来自 ModelScope
+`iic/WMT-Chinese-to-English-Machine-Translation-newstest` 的 wmt18/19/20
+测试集（机器翻译评估数据，许可遵循上游发布方）合并 50 组手写口语对。
+构建脚本 `scripts/build_zh2en_corpus.py`。
+
 ### personas/zh2en-0.4b, zh2en-0.4b-v2（中译英）
 
 `data/zh2en_smoke.json`：50 组手写中译英样例（带指令前缀），MIT。

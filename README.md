@@ -281,20 +281,32 @@ Won't do, with reasons:
   [ai00_server](https://github.com/Ai00-X/ai00_server); the state-science arc covers
   this repo's distinct contribution
 
-## Credits
+## Acknowledgements
 
-- [Preen](https://github.com/No-22-Github/Preen) — the direct inspiration (RWKV-7 state
-  tuning on Mac/MLX); its theory guide and engineering docs are excellent. stateswap is an
-  independent NVIDIA/Windows implementation plus a serving layer.
-- [flash-linear-attention](https://github.com/fla-org/flash-linear-attention) — RWKV7
-  Triton kernels and modeling code (including the original weight converter).
-- [BlinkDL/RWKV-LM](https://github.com/BlinkDL/RWKV-LM) — RWKV7 architecture, World
-  weights and vocabulary.
-- [ModelScope](https://modelscope.cn) — official RWKV weight mirror; catgirl & WMT
-  training corpora (see NOTICE).
-- [NekoQA-10K](https://huggingface.co/datasets/liumindmind/NekoQA-10K) by liumindmind
-  (Apache-2.0) — the smoke subset shipped via the Preen repository.
+Matches the provenance in [NOTICE.md](NOTICE.md):
+
+| Project | License | Role |
+|---|---|---|
+| [Preen](https://github.com/No-22-Github/Preen) | Apache-2.0 | Direct inspiration — RWKV-7 state tuning on Mac/MLX; its theory guide and engineering docs seeded this project. stateswap is an independent NVIDIA/Windows implementation plus a serving layer |
+| [flash-linear-attention](https://github.com/fla-org/flash-linear-attention) | MIT | RWKV7 Triton kernels and modeling code; the `vendor/` weight converter is adapted from theirs |
+| [RWKV-LM](https://github.com/BlinkDL/RWKV-LM) | Apache-2.0 | BlinkDL's RWKV repo — architecture reference, World base weights, World vocabulary |
+| [ModelScope RWKV mirror](https://modelscope.cn/models/RWKV/rwkv-7-world) | Apache-2.0 | GFW-friendly download path for the World weights |
+| [NekoQA-10K](https://huggingface.co/datasets/liumindmind/NekoQA-10K) | Apache-2.0 | Catgirl QA dataset (smoke subset shipped via the Preen repository) |
+| [kxdw2580/catgirl-datasets](https://modelscope.cn/datasets/kxdw2580/catgirl-datasets) | Apache-2.0 | Extended catgirl corpus, cleaned and merged into `data/neko_corpus_full.json` |
+| WMT newstest 18/19/20 (ModelScope `iic/WMT-…`) | eval data, see NOTICE | zh→en parallel sentences for the translation persona |
+| [Transformers](https://github.com/huggingface/transformers) | Apache-2.0 | HF model loading path (`AutoModelForCausalLM`) |
+| [triton-windows](https://github.com/woct0rdho/triton-windows) | MIT | Windows Triton wheels for the Blackwell sm_120 kernels |
+| [FastAPI](https://github.com/fastapi/fastapi) / [uvicorn](https://github.com/encode/uvicorn) | MIT / BSD-3 | API framework and ASGI server + static WebUI hosting |
 
 ## License
 
-MIT. Upstream components and datasets follow their own licenses — see [NOTICE.md](NOTICE.md).
+Released under the [MIT License](LICENSE).
+
+```
+Copyright 2026 Nice (https://github.com/Nice0o0/stateswap)
+```
+
+Dependencies and referenced projects are licensed by their own upstreams —
+flash-linear-attention (MIT), RWKV-LM & World weights (Apache-2.0), the NekoQA-10K
+and catgirl datasets (Apache-2.0), the WMT newstest evaluation sets (see
+[NOTICE.md](NOTICE.md)) for full provenance.

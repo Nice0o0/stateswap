@@ -279,18 +279,29 @@ data/            训练语料（许可与出处见 NOTICE）
 
 ## 致谢
 
-- [Preen](https://github.com/No-22-Github/Preen)——本项目思路（RWKV-7 state
-  tuning on Mac/MLX）的直接来源，其理论指南与工程文档质量极高；stateswap 是
-  独立的 NVIDIA/Windows 实现加服务层。
-- [flash-linear-attention](https://github.com/fla-org/flash-linear-attention)——
-  RWKV7 Triton 内核与建模代码（含官方权重转换器）。
-- [BlinkDL/RWKV-LM](https://github.com/BlinkDL/RWKV-LM)——RWKV7 架构、World
-  权重与词表。
-- [ModelScope](https://modelscope.cn)——RWKV 官方权重镜像；猫娘与 WMT 训练
-  语料（见 NOTICE）。
-- [NekoQA-10K](https://huggingface.co/datasets/liumindmind/NekoQA-10K) by liumindmind
-  (Apache-2.0)——经 Preen 仓库分发的 smoke 子集。
+与 [NOTICE.md](NOTICE.md) 的溯源一一对应：
 
-## License
+| 项目 | 许可 | 角色 |
+|---|---|---|
+| [Preen](https://github.com/No-22-Github/Preen) | Apache-2.0 | 思路直接来源——RWKV-7 state tuning on Mac/MLX；其理论指南与工程文档催生了本项目。stateswap 是独立的 NVIDIA/Windows 实现加服务层 |
+| [flash-linear-attention](https://github.com/fla-org/flash-linear-attention) | MIT | RWKV7 Triton 内核与建模代码；`vendor/` 权重转换器由其改编 |
+| [RWKV-LM](https://github.com/BlinkDL/RWKV-LM) | Apache-2.0 | BlinkDL 的 RWKV 仓库——架构参考、World 底座权重、World 词表 |
+| [ModelScope RWKV 镜像](https://modelscope.cn/models/RWKV/rwkv-7-world) | Apache-2.0 | World 权重的国内直连下载路径 |
+| [NekoQA-10K](https://huggingface.co/datasets/liumindmind/NekoQA-10K) | Apache-2.0 | 猫娘问答数据集（smoke 子集经 Preen 仓库分发） |
+| [kxdw2580/catgirl-datasets](https://modelscope.cn/datasets/kxdw2580/catgirl-datasets) | Apache-2.0 | 扩展猫娘语料，清洗合并为 `data/neko_corpus_full.json` |
+| WMT newstest 18/19/20（ModelScope `iic/WMT-…`） | 评估数据，见 NOTICE | 翻译人格的中英平行句 |
+| [Transformers](https://github.com/huggingface/transformers) | Apache-2.0 | HF 模型加载路径（`AutoModelForCausalLM`） |
+| [triton-windows](https://github.com/woct0rdho/triton-windows) | MIT | Blackwell sm_120 内核的 Windows Triton 轮子 |
+| [FastAPI](https://github.com/fastapi/fastapi) / [uvicorn](https://github.com/encode/uvicorn) | MIT / BSD-3 | API 框架与 ASGI 服务器 + 静态 WebUI 托管 |
 
-MIT。上游组件与数据集遵循各自许可——见 [NOTICE.md](NOTICE.md)。
+## 许可证
+
+以 [MIT License](LICENSE) 发布。
+
+```
+Copyright 2026 Nice (https://github.com/Nice0o0/stateswap)
+```
+
+依赖与引用项目遵循各自上游许可——flash-linear-attention（MIT）、RWKV-LM 与
+World 权重（Apache-2.0）、NekoQA-10K 与猫娘语料（Apache-2.0）、WMT newstest
+评估集——完整溯源见 [NOTICE.md](NOTICE.md)。
