@@ -8,7 +8,6 @@
 
 [中文文档](README.zh-CN.md) | **📖 [Full tutorial](docs/tutorial.md)** (Chinese)
 
-
 ---
 
 ## Demo
@@ -22,8 +21,9 @@
 
 ![persona mixer](docs/img/demo-mixer.png)
 
----
+*What you're seeing is unpacked in [WebUI](#webui) and [Research](#research) below.*
 
+---
 
 ## What it is
 
@@ -46,14 +46,15 @@ Hardware: RTX 5070 Ti Laptop 12 GB (Blackwell sm_120), native Windows 10, torch 
 | Metric | Value |
 |---|---|
 | S₀ training (1.5B, ctx 512, batch 1) | 0.19–0.35 s/step, 4.8 GB peak VRAM |
-| S₀ size | 0.4B: 6.29 MB · 1.5B: 12.58 MB (fp32) |
-| S₀ rank-4 factors | 12.58 → **1.59 MB** (7.9×), behaviorally lossless — [anatomy](docs/persona-anatomy.md) |
+| S₀ size | 0.4B: 6.29 MB · 1.5B: 12.58 MB (fp32) · int8: 3.15 MB · rank-4: **1.59 MB** |
 | Per-session state memory | 12.78 MB (1.5B), constant regardless of turn count |
 | Persona hot-swap latency | **2.6–4.4 ms** (rebuild 24 layer states) |
 | Catgirl style hit-rate (baseline → S₀) | ~12–25% → **88–100%** |
 | Instruction-free translation (zh→en, WMT 7.4k pairs) | **100%** English output, greedy, unseen sentences |
-| S₀ linear mixing | **Not viable** — sharp phase transition, see below |
+| Style-baking data efficiency | 50 pairs × 200 steps suffice ([scaling](docs/scaling.md)) |
+| S₀ mixing (neko × zh2en) | **Two-transition phase diagram**, coexistence window α ≈ [0.55, 0.65] — see [Research](#research) |
 | Decode speed | ~20–25 tok/s (pure-Python loop, unoptimized) |
+| Batched decode (B=8) | **6.29×** throughput ([benchmarks.md](docs/benchmarks.md) §6.1) |
 
 Behavior example (same base, two personas):
 
@@ -77,14 +78,14 @@ flowchart TB
     subgraph API["FastAPI — OpenAI-compatible layer"]
         CHAT["/v1/chat/completions<br/>session_id optional (O(1) multi-turn)"]
         SWAP["/v1/sessions/{id}/swap<br/>hot persona switch"]
-        SESSM["/v1/sessions<br/>session lifecycle + history"]
+        SESSM["/v1/sessions<br/>session lifecycle + attractor seeding"]
     end
 
     CHAT --> ENG
 
     subgraph ENG["Engine (engine.py)"]
         direction TB
-        REG["Persona Registry<br/>neko / zh2en / mixtures / baseline<br/>each a 6–13 MB fp32 tensor"]
+        REG["Persona Registry<br/>neko / zh2en / mixtures / baseline<br/>1.6–12.6 MB per persona"]
         SESS["Session State Caches<br/>S₀ + token-shift context<br/>constant size per session"]
         REG -->|"on first load"| SESS
         SWAP -->|"swap S₀, ~3ms, weights untouched"| SESS
@@ -95,17 +96,10 @@ flowchart TB
     BASE["RWKV7-World 1.5B · bf16 · fully frozen<br/>chunk_rwkv7 (training/prefill) · fused_recurrent (decode)"]
 ```
 
-**State arithmetic** (`arithmetic.py`): personas are tensors, so you can compose them —
-`S₀_cat × α + S₀_translator × (1−α)` registers as a new live persona. The empirical result is
-the interesting part: **S₀ space does not interpolate smoothly**. Between α = 0.75 and α = 0.5
-the behavior flips sharply from "pure catgirl" to "pure translator" with zero mixing at the
-midpoint, and plain addition collapses to the stronger task mode. Full write-up:
-[docs/state-arithmetic.md](docs/state-arithmetic.md).
-
 ## Quickstart
 
 Requirements: Windows or Linux, NVIDIA GPU (≥8 GB reproduces everything here),
-**Python ≥ 3.11** (3.10 breaks triton-windows — see below).
+**Python ≥ 3.12** (3.10 breaks triton-windows — see [war stories](#engineering-war-stories)).
 
 ```bash
 # 1) dependencies (cu128 wheels required for Blackwell GPUs)
@@ -121,9 +115,9 @@ python scripts/convert_model.py --pth RWKV-x070-World-1.5B-v3-20250127-ctx4096.p
 # 3) train a persona (~15 min for 1.5B on 3,095 catgirl pairs)
 python -m stateswap.train --model models/rwkv7-1.5b-world-hf \
     --data data/neko_corpus_full.json --out personas/neko-1.5b --steps 4000 --lr 1e-4
-#   — or run the persona factory end-to-end: card → LLM corpus → train → eval gate
-#   → live registration:  python -m stateswap.factory --card persona_cards/keji-neko.json all
-#     (see docs/persona-factory.md)
+#   — or the persona factory end-to-end (needs an LLM endpoint in .env):
+#   python -m stateswap.factory --card persona_cards/keji-neko.json all
+#   card → LLM corpus → train → eval gate → live registration (docs/persona-factory.md)
 
 # 4) start the server (auto-loads every persona under personas/)
 python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir personas --port 8000
@@ -143,12 +137,17 @@ curl http://127.0.0.1:8000/v1/chat/completions -H "Content-Type: application/jso
 }'
 ```
 
-Session mode and hot persona switching:
+Session mode, attractor seeding, and hot persona switching:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/v1/sessions -d '{"persona": "neko-1.5b"}'
-# → {"session_id": "..."} — pass session_id to chat/completions for O(1) multi-turn
-curl -X POST http://127.0.0.1:8000/v1/sessions/<id>/swap -d '{"persona": "zh2en-1.5b"}'
+# O(1) multi-turn session; "seed": true pre-fills a hidden persona exchange that
+# locks the session into the persona's attractor (docs/attractor-seeding.md)
+curl -X POST http://127.0.0.1:8000/v1/sessions -H "Content-Type: application/json" \
+     -d '{"persona": "neko-1.5b", "seed": true}'
+
+# pass session_id to chat/completions for O(1) multi-turn
+curl -X POST http://127.0.0.1:8000/v1/sessions/<id>/swap -H "Content-Type: application/json" \
+     -d '{"persona": "zh2en-1.5b"}'
 ```
 
 ## WebUI
@@ -169,173 +168,120 @@ Zero frontend dependencies — FastAPI serves the static files in `web/`:
 - **Training**: pick a dataset from `data/`, run S₀ training in a background thread
   with a live progress bar; the result auto-registers as a new persona.
 
+## Research
+
+Six controlled studies on what the initial state can and cannot do. Every study is
+one command to reproduce, with raw JSON artifacts committed next to its report.
+
+| Study | One-line finding | Report |
+|---|---|---|
+| What S₀ bakes vs cannot | style 12%→100%, unprompted translation 100% — but facts ≤13% (RAG-oracle 98%): **S₀ is a behavior prior, not a knowledge store** | [compressed-memory](docs/compressed-memory.md) |
+| S₀ vs LoRA vs system prompt | all inject style (100/100/80%); deep injection overrides general ability; cost 13.7ms vs 3GB-per-persona vs 1731-token prefix | [three_way.json](docs/three_way.json) |
+| Persona anatomy | task mode lives in the front third of layers, style is late-layer and distributed; **a persona ≈ 3–4 dims per head** → rank-4 factors are 7.9× smaller, behaviorally lossless | [persona-anatomy](docs/persona-anatomy.md) |
+| Mixing (arithmetic) | two S₀s do **not** blend smoothly — two-transition phase diagram with a narrow coexistence window (contra State Soup's smooth Mamba results) | [state-arithmetic](docs/state-arithmetic.md) · [2](docs/state-arithmetic2.md) |
+| Inheritance (training-based composition) | warm-start + task data: task 100%, donor style 0% — even with the donor's subspace frozen bit-exact: **front layers select behavior** | [persona-inheritance](docs/persona-inheritance.md) |
+| Phase diagram | coexistence window α≈[0.55,0.65] is per-prompt attractor selection; geometry smooth while behavior jumps; first exchange locks the session's phase | [phase-transition](docs/phase-transition.md) |
+| Low-rank surgery | removal = factory reset (any rank, either direction); injection/scaling = phase navigation; the coexistence knife edge survives no edit | [state-editing](docs/state-editing.md) |
+| Data scaling | 50 pairs × 200 steps suffice for style; the real curve is the **capability cliff** — general ability dies with style formation at every data size | [scaling](docs/scaling.md) |
+| Attractor seeding | a hidden seed exchange deterministically locks style (33%→100%); auto-seeds are unreliable and the task attractor cannot be seeded | [attractor-seeding](docs/attractor-seeding.md) |
+
+**The phase diagram** (study centerpiece): interpolating between the catgirl and
+translator S₀s, behavior holds in a pure style phase for α ≥ 0.65, collapses to a
+pure task phase for α ≤ 0.5, and between them sits a narrow coexistence window
+(α=0.6: 87.5% style + 75% translation). Geometry to the endpoints stays near-linear
+while behavior jumps twice — **behavior is attractor selection, not a linear function
+of S₀ geometry**. Within a session, the first exchange locks the phase; no edit,
+blend or seed keeps the coexistence knife edge alive.
+
+**Surgery** (the interventional validation): removing either persona's top-k singular
+subspace from the mixture — at any rank — resets behavior to the base model (the
+trained-state signal is deleted as a whole, not decomposed), while a cos-0.99
+injection flips behavior entirely into the target attractor. Operators in
+`src/stateswap/editing.py`.
+
+Methodology constants across all studies: style and task probes in **separate fresh
+sessions** (session state carries conversation — mixed probes pollute), **greedy
+decoding** (one "perfect" sample was luck), degeneration flags recorded, raw replies
+committed.
+
+## Engineering war stories
+
+Six real, log-backed traps hit on this stack (Windows + Blackwell + GFW) —
+full autopsies in [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese):
+
+1. **CPython 3.10 truncates multi-decorator source** — `inspect.getsourcelines` returns
+   258 chars for a `@triton.heuristics` + `@triton.jit` stack; triton-windows crashes on
+   import. Fix: Python 3.12.
+2. **fla 0.5.2's `fused_recurrent` drops S₀ gradients** in eval mode with short
+   sequences — training "runs" but learns nothing. Fix: force the chunked kernel path.
+3. **Byte-level tokenizer mask misalignment**: prompt+completion encoded as one string
+   lets cross-boundary tokens eat the answer's first bytes — training loss reaches zero
+   while recall is 5%. Fix: encode sides separately; this bug had faked an entire
+   experimental conclusion.
+4. **`swap_persona(keep_context=True)` degenerates mid-conversation** — stale conv/ffn
+   states against offset-0 bookkeeping emit `"AssAss…"` template fragments. Fix: reset
+   token-shift caches together with the state; context is carried by history replay.
+5. **CI broke without any code change**: transformers 5.17 changed lazy-module behavior
+   so fla 0.5.2 eagerly imports `triton` at module load — absent on a CPU runner. And
+   the fla eager import chain itself was only reachable because new tests imported the
+   engine. Fix: install triton in CI; root cause documented, wrong hypothesis retracted
+   in the commit message.
+
 ## Repository layout
 
 ```
 src/stateswap/
-  convert.py    BlinkDL .pth → fla/HF weight mapping (adapted from fla's converter)
-  tokenizer.py  RWKV World vocab: byte trie + greedy longest match, incremental UTF-8
-  s0.py         S0 container, model loading/freezing, S0 injection into fla Cache
-  train.py      training loop (NaN guards, grad/norm instrumentation, cosine schedule)
-  engine.py     persona registry, session state caches, hot-swap, streaming generation
-  arithmetic.py S0 interpolation / addition / subtraction operators
-  server.py     FastAPI: OpenAI-compatible API + sessions + WebUI hosting
-  chat.py       terminal REPL
-  bench.py      style hit-rate / swap latency / O(1)-vs-O(T) comparison
-  factory.py    persona factory: card → LLM corpus → train → eval gate → live registration
-web/            dependency-free HTML/CSS/JS frontend (light & dark themes)
-persona_cards/  persona cards (factory input: description + style markers + seed dialogs + topics)
-tests/          pytest suite (tokenizer, masking, arithmetic, S0-gradient regression)
-docs/
-  engineering-notes.md   every pitfall hit on this stack (in Chinese)
-  state-arithmetic.md    the S₀ mixing experiment
-  benchmarks.md          numbers
-scripts/        one-off runners: model conversion, data prep, GPU smoke tests
-vendor/         upstream converter + BlinkDL reference + vocab (provenance in NOTICE)
-data/           training corpora (see NOTICE for licenses and provenance)
+  convert.py     BlinkDL .pth → fla/HF weight mapping (adapted from fla's converter)
+  tokenizer.py   RWKV World vocab: byte trie + greedy longest match, incremental UTF-8
+  s0.py          S0 container, payload loading (fp32/int8/rank4), injection into fla Cache
+  train.py       training loop (NaN guards, multi-turn chains, warm start, layer masks)
+  engine.py      persona registry, session caches, hot-swap, seeding, streaming generation
+  arithmetic.py  S0 interpolation / addition / subtraction operators
+  editing.py     low-rank directional editing: subspace removal / injection / rank-k
+  quant.py       S0 int8 quantization (per layer-head scales)
+  lowrank.py     S0 rank-k SVD factorization (persona ≈ 3-4 dims per head)
+  bench.py       style hit-rate / swap latency / O(1)-vs-O(T) comparison
+  benchsuite.py  StateBench: style / knowledge / capability-retention evaluation
+  factory.py     persona factory: card → LLM corpus → train → eval gate → live registration
+  server.py      FastAPI: OpenAI-compatible API + sessions + WebUI hosting
+  chat.py        terminal REPL
+  cli.py         `stateswap` command entry
+web/             dependency-free HTML/CSS/JS frontend (light & dark themes)
+persona_cards/   persona cards (factory input: description + style markers + seed dialogs + topics)
+tests/           pytest suite (tokenizer, masking, editing, sampling regression, S0 gradients)
+docs/            12 research/ops reports + raw JSON artifacts per study + tutorial + images
+scripts/         one-off runners: probes per study, model conversion, data prep, smoke tests
+vendor/          upstream converter + BlinkDL reference + vocab (provenance in NOTICE)
+data/            training corpora (see NOTICE for licenses and provenance)
 ```
-
-## Three real bugs found on this stack
-
-1. **CPython 3.10 truncates multi-decorator source.** `inspect.getsourcelines` returns only
-   the first decorator block for `@triton.heuristics(...)` + `@triton.jit` stacks, so
-   triton-windows 3.8 crashes on import with `No function definition found for kernel`.
-   Fix: Python 3.12.
-2. **fla 0.5.2's `fused_recurrent` path drops gradients into `initial_state`.**
-   In eval mode with short sequences the S₀ gradient chain silently breaks — the classic
-   "gradient is non-zero but training does nothing" trap. Training forces the chunked
-   kernel path (`model.train()`); RWKV-7 has no dropout/BN so train mode is free.
-3. **`RWKV7Config.num_heads` is budgeted from the default `hidden_size`** and never
-   recomputed when a converter overrides `hidden_size` afterwards. The model itself is
-   unaffected (`head_dim` branch wins) but any code trusting `cfg.num_heads` — like S₀
-   shape — gets the wrong head count. This was also the root cause of training NaN.
-
-Full details: [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese).
-
-## State arithmetic, in brief
-
-- Interpolation α·S₀_cat + (1−α)·S₀_translate: style survives down to α = 0.25 then
-  collapses; at α = 0.5 the model is a pure translator (0% style, 100% translation).
-- Addition (raw or scaled) also collapses to the stronger task mode.
-- Interpretation: two task modes behave like attractors in S₀ space — a sharp phase
-  transition, *not* the smooth blending known from LoRA task vectors. S₀ = 0 is already
-  a meaningful behavior, so the linear-composition geometry differs fundamentally from
-  weight space.
-- Methodology lessons: evaluate style and translation in **separate sessions** (session
-  state carries conversation history — mixing probes pollutes results), and always
-  re-verify behavioral claims with **greedy decoding** (one "perfect" translation at
-  temperature 1.0 turned out to be sampling luck).
-
-## Long conversations, in brief
-
-- Degeneration mechanism is a **state snowball**, not S₀ drift: the recurrent state
-  *is* the conversation memory, so a derailed long reply poisons every later turn.
-  cos(state, S₀) falls below 0.05 within two turns while persona stays intact, and
-  naively re-anchoring the state toward S₀ produces garbage (off-manifold blending).
-- Two-layer fix shipped: a **degeneration guard** (per-turn state snapshot + repetition
-  detection + rollback) as the safety net, and **multi-turn training**
-  (`stateswap train --turns 3 --ctx 1024`) as the root fix — gradients flow through
-  every turn of chained conversations. Same 15-turn probe: **4/15 → 0/15**
-  degenerate turns (benchmarks.md §7).
-- Cross-turn factual recall is a separate, harder limit: the state carries topic
-  vibes but not sparse facts — a name/pet planted at T1 is hallucinated by T2, and
-  the no-persona baseline dead-loops entirely (scripts/probe_context.py). Root
-  causes: training chains have no cross-turn dependencies (nothing to learn
-  "remember" from), and a 1.5B 64×64 state keeps sparse facts poorly. Shipped
-  mitigation: **bounded text replay** (`context_replay`, default 4) re-prefixes the
-  last K turns as visible text — recall within the window works, older facts and
-  pronoun resolution remain the base model's hard ceiling.
-
-## Persona anatomy, in brief
-
-- Layer-group ablation shows functional topography: **task mode lives in the first
-  third of layers** (zeroing L00–07 kills translation outright), **style is
-  late-layer weighted and distributed** (zeroing L16–23 costs 60% of style), and
-  the middle 8 layers are dispensable for both.
-- Per-head SVD of the 64×64 state matrices: a persona needs only **~3–4 dimensions
-  per head** behaviorally — rank-3 truncation keeps 100% style and translation,
-  while 90% of the Frobenius energy needs 14–20 dimensions. Most of the state mass
-  is behaviorally inert. This also explains the attractor-like phase transition:
-  a persona is a handful of directions in state space.
-- Shipped as artifacts: rank-4 factored personas, 12.58 MB → **1.59 MB (7.9×)**,
-  behaviorally lossless. Report: [docs/persona-anatomy.md](docs/persona-anatomy.md);
-  implementation `src/stateswap/lowrank.py`, files `personas/*.rank4.pt`.
-
-## S₀ inheritance: training-based persona composition
-
-- Warm-starting from a style persona (`--init-from neko-1.5b-mt`) and training on
-  task data learns the task at 100% — and keeps **0% of the donor style**: the
-  "translate everything" task attractor captures all behavior ([report](docs/persona-inheritance.md)).
-- Anatomy-guided layer masking (`--train-layers 0:8`, freezing the back 16 layers
-  bit-exact at the donor values) still yields 0% style. **The style content survives
-  perfectly in the state — the behavior does not**: which mode gets expressed is
-  selected by the front layers, upgrading the anatomy report's correlational claim
-  to a causal manipulation.
-- Complementary to state arithmetic: mixing composes existing personas for free
-  (and can keep both), inheritance learns genuinely new capability (and overrides
-  the behavioral mode).
-
-## S₀ phase diagram: transitions, a coexistence window, session dynamics
-
-- Fine-grained alpha sweep (13 points) between neko-1.5b and zh2en-1.5b S₀s: the
-  persona axis is a **two-transition phase diagram** — pure style for alpha >= 0.65,
-  pure task for alpha <= 0.5, and a **narrow coexistence window alpha ~ [0.55, 0.65]**
-  (alpha=0.6: 87.5% style + 75% translation). The window center sits at ~0.58,
-  style-side; exactly 0.5 has already collapsed to the task attractor
-  ([report](docs/phase-transition.md)).
-- Geometry stays smooth while behavior jumps twice (per-layer cosines to the endpoints
-  are near-linear in alpha) — direct quantitative evidence that behavior is
-  attractor-selected, not a linear function of S₀ geometry.
-- Layer-splice topography maps each capability's layer address and reveals
-  **interference zones** where both capabilities fail simultaneously.
-- Transition positions are temperature-robust (T=0 vs 0.7). Within a session, the
-  first exchange locks the attractor (alpha=0.5: 12.5% style across fresh sessions vs
-  100% when the same session keeps probing). No equilibrium hysteresis loop observed.
-- Bonus: an engine bug — `swap_persona(keep_context=True)` mid-conversation produces
-  degenerate template-fragment output (stale conv/ffn + offset against a replaced
-  recurrent state); full-reset swaps are clean (engineering-notes §7).
-
-## S₀ surgery: low-rank directional editing
-
-- Interventional follow-up to the anatomy and phase-diagram findings: 17 edit
-  configurations (+1 baseline) (subspace removal / injection / scalar scaling) applied to the
-  coexistence mixture ([report](docs/state-editing.md)).
-- **Removal is not surgery — it is a factory reset**: cutting either persona's
-  top-k singular subspace (k=1..16) collapses BOTH capabilities back to base-model
-  behavior. The trained-state signal is deleted as a whole, not decomposed.
-- **Injection and scaling are effective phase navigation**: a cos-0.99 injection
-  (Frobenius distance 1.79) flips behavior entirely into the style attractor.
-  The coexistence window is a measure-zero knife edge — no edit preserved it.
-- Operators shipped in `src/stateswap/editing.py` with reconstruction-equivalence
-  unit tests (which caught a singular-value broadcasting bug during development).
-
-## Scaling and attractor seeding
-
-- Style baking is extremely cheap: 50 pairs x 200 steps (~40s of training)
-  reaches 100% style hit-rate on the 1.5B base — corpus size stops mattering at
-  >=50 pairs. The real curve is the **capability cliff**: general-fact accuracy
-  sits at the noise floor for every configuration except 100 steps (88% style
-  with 50% capability retained) — the Pareto knee is at the emergence boundary
-  ([report](docs/scaling.md); official RWKV docs say nothing about data size).
-- Attractor seeding: a hidden persona seed exchange at session creation (state
-  only, invisible to the user) deterministically locks a boundary mixture into
-  the style attractor (33% -> 100%). Auto-generated seeds are unreliable at the
-  boundary, and the task attractor cannot be seeded at all — conversational
-  accumulation switches translation off regardless of seed direction
-  ([report](docs/attractor-seeding.md); API: `POST /v1/sessions {"seed": true|"<text>"}`).
 
 ## Roadmap
 
-- [x] S₀ arithmetic: interpolation / addition = persona blending? → **No (sharp phase transition)**
-- [x] Batched sessions (`engine.batch_chat`: states stacked along the batch dim, 6.29× throughput at B=8 — benchmarks.md §6.1)
-- [x] int8 S₀ quantization (12.58 → 3.15 MB, style/semantics preserved — benchmarks.md §6.2)
-- [x] Three-way comparison: S₀ vs LoRA vs system prompt (docs/three_way.json)
-- [x] CUDA-graph capture via torch.compile → **negative result** (0.77×; fla Cache per-token dict updates break graphs — benchmarks.md §6.3)
-- [ ] Hand-rolled static-buffer CUDA graph decode (pinned state tensors + copy_ shuffling)
-- [x] Phase-diagram mapping: two transitions + narrow coexistence window +
-  geometry-behavior decoupling + layer interference zones (behavioral evidence
-  for attractor competition — docs/phase-transition.md; equilibrium-hysteresis
-  relaxation protocol left as future work)
+Done: the six-study state-science arc ([Research](#research)) · O(1) serving with hot-swap ·
+batched decode (6.29×) · int8/rank-4 compression · persona factory · attractor seeding ·
+WebUI with live state monitor.
+
+Open:
+
+- [ ] **Layer-selective removal** — global-rank removal resets to base behavior
+  (surgery study); removing a persona's subspace only in its layer address may
+  achieve true surgical extraction
+- [ ] **Behavior vs conversation depth** — equilibrium phase measurement with
+  fresh sessions + depth-controlled synthetic history (blend-walk hysteresis
+  protocols degenerate; see phase-transition.md §8)
+- [ ] **Multi-pair generalization** — is the two-transition phase diagram universal?
+  (needs a third persona; the factory can make one)
+- [ ] **Paper draft** — "The Geometry of RWKV Initial States", outline in
+  [docs/paper-outline.md](docs/paper-outline.md)
+
+Won't do, with reasons:
+
+- [x] ~~Hand-rolled CUDA-graph decode~~ — BlinkDL's [Albatross](https://github.com/BlinkDL/Albatross)
+  owns RWKV inference (CUDA Graph + MegaKernel); a torch.compile attempt measured 0.77×
+  ([benchmarks.md](docs/benchmarks.md) §6.3)
+- [x] ~~Retrieval-augmented episodic memory~~ — standard in
+  [ai00_server](https://github.com/Ai00-X/ai00_server); the state-science arc covers
+  this repo's distinct contribution
 
 ## Credits
 
