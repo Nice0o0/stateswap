@@ -160,6 +160,12 @@ python -m stateswap.cli convert --pth <权重.pth> --out models/<名字>
 python -m stateswap.cli train --model models/rwkv7-1.5b-world-hf ^
     --data data/neko_corpus_full.json --out personas/neko-1.5b --steps 4000
 
+# 人格继承：从已有 S₀ 热启动再训练（--train-layers 0:8 可只训前 8 层，
+# 见 docs/persona-inheritance.md——任务吸引子会接管行为，供增量学习用）
+python -m stateswap.cli train --model models/rwkv7-1.5b-world-hf ^
+    --data data/zh2en_corpus_full.json --out personas/zh2en-1.5b-warm ^
+    --init-from personas/neko-1.5b-mt/s0.pt --steps 2000
+
 # 交互式终端聊天
 python -m stateswap.cli chat --model models/rwkv7-1.5b-world-hf --persona neko-1.5b
 ```

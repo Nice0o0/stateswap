@@ -306,6 +306,9 @@ def style_hit(reply: str, markers: list[str]) -> bool:
 
 
 def neutral_correct(reply: str, expected: str) -> bool:
+    """数字类答案加边界（"1000" 不命中 "10000" 的一部分）；文本类仍用子串。"""
+    if expected.isdigit():
+        return re.search(rf"(?<!\d){re.escape(expected)}(?!\d)", reply) is not None
     return expected.lower() in reply.lower()
 
 

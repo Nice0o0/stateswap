@@ -312,6 +312,8 @@ def test_style_probes_and_scoring():
     assert neutral_correct("巴黎是法国的首都喵～", "巴黎")
     assert neutral_correct("H2O，也就是水", "h2o")  # 大小写不敏感
     assert not neutral_correct("不知道喵", "巴黎")
+    assert neutral_correct("一年有 365 天", "365")
+    assert not neutral_correct("一年有 36500 天喵", "365")  # 数字须独立成词
 
 
 def test_llm_config_env_priority(monkeypatch):
