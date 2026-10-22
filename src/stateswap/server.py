@@ -373,12 +373,13 @@ def create_app(
             async def _run():
                 if req.stream:
                     async def sse():
+                        gen = engine.chat_stream(
+                            session_id, last_user, req.max_tokens, req.temperature,
+                            req.top_p, rep_penalty=req.rep_penalty,
+                            no_repeat_ngram=req.no_repeat_ngram,
+                        )
                         try:
-                            async for piece in iterate_in_threadpool(engine.chat_stream(
-                                session_id, last_user, req.max_tokens, req.temperature,
-                                req.top_p, rep_penalty=req.rep_penalty,
-                                no_repeat_ngram=req.no_repeat_ngram,
-                            )):
+                            async for piece in iterate_in_threadpool(gen):
                                 # 客户端断开（关页面/切走）→ 立即停止生成，不白烧 GPU
                                 if request is not None and await request.is_disconnected():
                                     return
@@ -413,6 +414,10 @@ def create_app(
                         except SessionBusy as e:
                             yield "data: " + json.dumps({"error": {"message": str(e)}}) + "\n\n"
                             yield "data: [DONE]\n\n"
+                        finally:
+                            # 客户端断流/提前返回：显式关闭生成器，走它的 finally
+                            # 立刻释放会话锁（否则紧跟的请求会短暂 409 busy）
+                            gen.close()
                     return StreamingResponse(sse(), media_type="text/event-stream")
                 try:
                     result = await run_in_threadpool(
