@@ -150,6 +150,21 @@ curl -X POST http://127.0.0.1:8000/v1/sessions/<id>/swap -H "Content-Type: appli
      -d '{"persona": "zh2en-1.5b"}'
 ```
 
+More endpoints:
+
+```bash
+curl http://127.0.0.1:8000/v1/models            # OpenAI model list (id = persona name)
+# shareable persona bundle: zip with S₀ + meta + eval scorecard
+curl -OJ http://127.0.0.1:8000/v1/personas/neko-1.5b/bundle
+curl -X POST http://127.0.0.1:8000/v1/personas/import_bundle \
+     --data-binary @neko-1.5b.persona.zip        # registers live, no restart
+```
+
+Training extras: `--batch-size` is true batching (S₀ expanded along the batch
+dim); `--val-frac/--eval-every` keep `s0.best.pt` by held-out loss;
+`--resume` restores `optimizer.pt` to continue a run; `--init-from/--train-layers`
+do warm start and layer-masked inheritance.
+
 ## WebUI
 
 Zero frontend dependencies — FastAPI serves the static files in `web/`:
@@ -297,6 +312,10 @@ Matches the provenance in [NOTICE.md](NOTICE.md):
 | [Transformers](https://github.com/huggingface/transformers) | Apache-2.0 | HF model loading path (`AutoModelForCausalLM`) |
 | [triton-windows](https://github.com/woct0rdho/triton-windows) | MIT | Windows Triton wheels for the Blackwell sm_120 kernels |
 | [FastAPI](https://github.com/fastapi/fastapi) / [uvicorn](https://github.com/encode/uvicorn) | MIT / BSD-3 | API framework and ASGI server + static WebUI hosting |
+
+**Derived project:** [MemoPet](https://github.com/Nice0o0/memopet) — a virtual
+pet whose brain is the same RWKV-7 recurrent state (save / fork / dream / time
+travel built on this repo's S₀ and payload tooling).
 
 ## License
 

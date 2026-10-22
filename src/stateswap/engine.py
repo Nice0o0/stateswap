@@ -164,7 +164,9 @@ class Engine:
                 else {}
             )
             s0 = load_s0_payload(payload)
-            meta = {**(payload.get("meta") or {}), **fmt, **(meta or {})}
+            # source 记录磁盘来源：人格打包导出（/bundle）需要原始文件
+            meta = {**(payload.get("meta") or {}), **fmt, **(meta or {}),
+                    "source": str(Path(s0_path).resolve())}
         # none 哨兵（无文件、全零张量）显示 0 MB——它与训练人格平起平坐地
         # 出现在下拉框里，标 12.58MB 会被误读为"有一个人格文件"
         return self.register_tensor(

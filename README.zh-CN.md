@@ -155,6 +155,20 @@ curl -X POST http://127.0.0.1:8000/v1/sessions/<id>/swap -H "Content-Type: appli
      -d '{"persona": "zh2en-1.5b"}'
 ```
 
+更多端点：
+
+```bash
+curl http://127.0.0.1:8000/v1/models            # OpenAI 模型列表（id = 人格名）
+# 可分享的人格包：zip = S₀ + meta + eval scorecard
+curl -OJ http://127.0.0.1:8000/v1/personas/neko-1.5b/bundle
+curl -X POST http://127.0.0.1:8000/v1/personas/import_bundle \
+     --data-binary @neko-1.5b.persona.zip        # 导入即注册，无需重启
+```
+
+训练增强参数：`--batch-size` 为真批处理（S₀ 沿 batch 维展开）；`--val-frac/--eval-every`
+按留出集 loss 保存 `s0.best.pt`；`--resume` 恢复 `optimizer.pt` 继续训练；
+`--init-from/--train-layers` 做热启动与分层继承。
+
 ## WebUI
 
 零前端依赖——FastAPI 直接托管 `web/` 静态文件：
@@ -293,6 +307,10 @@ data/            训练语料（许可与出处见 NOTICE）
 | [Transformers](https://github.com/huggingface/transformers) | Apache-2.0 | HF 模型加载路径（`AutoModelForCausalLM`） |
 | [triton-windows](https://github.com/woct0rdho/triton-windows) | MIT | Blackwell sm_120 内核的 Windows Triton 轮子 |
 | [FastAPI](https://github.com/fastapi/fastapi) / [uvicorn](https://github.com/encode/uvicorn) | MIT / BSD-3 | API 框架与 ASGI 服务器 + 静态 WebUI 托管 |
+
+**衍生项目：** [MemoPet](https://github.com/Nice0o0/memopet) —— 一只以同一个
+RWKV-7 递归状态为大脑的电子宠物（存档 / 分身 / 做梦 / 时光倒流，构建在本仓库的
+S₀ 与存档工具之上）。
 
 ## 许可证
 

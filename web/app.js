@@ -18,7 +18,11 @@ async function api(path, opts) {
   });
   if (!res.ok) {
     let detail = res.statusText;
-    try { detail = (await res.json()).detail || detail; } catch {}
+    try {
+      const body = await res.json();
+      // 兼容两种错误体：FastAPI 的 {detail} 与 OpenAI 的 {error: {message}}
+      detail = body.detail || body.error?.message || detail;
+    } catch {}
     throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
   }
   return res.json();

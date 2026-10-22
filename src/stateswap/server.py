@@ -12,18 +12,21 @@ Endpoints:
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import threading
 import time
 import uuid
+import zipfile
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
-from fastapi import Body, FastAPI, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi import Body, FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from starlette.concurrency import iterate_in_threadpool, run_in_threadpool
 
 from .engine import Engine, SessionBusy
 
@@ -116,6 +119,21 @@ def create_app(
     app = FastAPI(title="stateswap", version="0.1.0", lifespan=lifespan)
     state = {"engine": None}
 
+    @app.exception_handler(HTTPException)
+    async def _http_error(request: Request, exc: HTTPException):
+        """OpenAI 风格错误体 {"error": {"message", "type", "code"}}——
+        官方 SDK 与 WebUI 都能读；HTTP 状态码不变。"""
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "error": {
+                    "message": str(exc.detail),
+                    "type": "invalid_request_error",
+                    "code": exc.status_code,
+                }
+            },
+        )
+
     @app.middleware("http")
     async def no_cache_frontend(request, call_next):
         """前端文件不缓存（no-cache = 每次用 ETag/mtime revalidate：没变 304，
@@ -149,6 +167,18 @@ def create_app(
                 }
                 for p in engine.personas.values()
             ]
+        }
+
+    @app.get("/v1/models")
+    def list_models():
+        """OpenAI 兼容：很多客户端启动时会先列模型。model id = 人格名。"""
+        engine = _engine()
+        return {
+            "object": "list",
+            "data": [
+                {"id": p.name, "object": "model", "created": 0, "owned_by": "stateswap"}
+                for p in engine.personas.values()
+            ],
         }
 
     @app.post("/v1/sessions")
@@ -235,6 +265,71 @@ def create_app(
             raise HTTPException(400, "S0 shape does not match the loaded base model")
         return {"name": persona.name, "size_mb": round(persona.size_mb, 2), "meta": persona.meta}
 
+    @app.get("/v1/personas/{name}/bundle")
+    def export_bundle(name: str):
+        """导出人格包（zip：s0.pt + meta.json + eval.json）——人格成为可分享资产。
+        仅支持从磁盘文件注册的人格（mix 结果无文件来源）。"""
+        engine = _engine()
+        p = engine.personas.get(name)
+        if p is None:
+            raise HTTPException(404, f"unknown persona {name}")
+        src = (p.meta or {}).get("source")
+        if not src or not Path(src).is_file():
+            raise HTTPException(400, "persona has no file source（mix 结果先保存再导出）")
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("s0.pt", Path(src).read_bytes())
+            meta = {k: v for k, v in (p.meta or {}).items() if k != "source"}
+            meta["name"] = name
+            z.writestr("meta.json", json.dumps(meta, ensure_ascii=False, indent=2))
+            ev = Path(src).parent / "eval.json"
+            if ev.is_file():
+                z.writestr("eval.json", ev.read_bytes())
+            z.writestr(
+                "README.txt",
+                "stateswap persona bundle\ns0.pt + meta.json (+eval.json)\n"
+                "导入：POST /v1/personas/import_bundle（raw body = 本 zip）\n",
+            )
+        buf.seek(0)
+        return StreamingResponse(
+            buf, media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="{name}.persona.zip"'},
+        )
+
+    @app.post("/v1/personas/import_bundle")
+    async def import_bundle(request: Request):
+        """导入人格包并注册（免重启）。zip 内只认固定文件名，杜绝 zip-slip。"""
+        engine = _engine()
+        body = await request.body()
+        if not body:
+            raise HTTPException(400, "empty body")
+        if len(body) > 64 * 1024 * 1024:
+            raise HTTPException(400, "bundle too large (max 64MB)")
+        try:
+            with zipfile.ZipFile(io.BytesIO(body)) as z:
+                if "s0.pt" not in z.namelist():
+                    raise ValueError("missing s0.pt")
+                data = z.read("s0.pt")
+                meta = json.loads(z.read("meta.json")) if "meta.json" in z.namelist() else {}
+                eval_bytes = z.read("eval.json") if "eval.json" in z.namelist() else None
+        except (zipfile.BadZipFile, ValueError) as e:
+            raise HTTPException(400, f"invalid bundle: {e}")
+        name = str(meta.get("name") or "").strip()
+        if not name:
+            raise HTTPException(400, "meta.json 缺少 name 字段")
+        if name in engine.personas:
+            raise HTTPException(409, f"persona {name} already exists")
+        out_dir = Path(engine.model_dir).parent.parent / "personas" / name
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "s0.pt").write_bytes(data)
+        if eval_bytes:
+            (out_dir / "eval.json").write_bytes(eval_bytes)
+        persona = engine.register_persona(name, str(out_dir / "s0.pt"))
+        if persona is None:
+            (out_dir / "s0.pt").unlink(missing_ok=True)
+            raise HTTPException(400, "S0 shape does not match the loaded base model")
+        return {"name": persona.name, "size_mb": round(persona.size_mb, 2)}
+
     @app.post("/v1/sessions/{session_id}/swap")
     def swap(session_id: str, req: SwapRequest = Body(...)):
         engine = _engine()
@@ -253,7 +348,7 @@ def create_app(
         return result
 
     @app.post("/v1/chat/completions")
-    def chat_completions(req: ChatRequest = Body(...)):
+    async def chat_completions(req: ChatRequest = Body(...), request: Request = None):
         engine = _engine()
         persona = req.model
         if persona not in engine.personas:
@@ -275,15 +370,18 @@ def create_app(
                 (m["content"] for m in reversed(messages) if m["role"] == "user"), ""
             )
 
-            def _run():
+            async def _run():
                 if req.stream:
-                    def sse():
+                    async def sse():
                         try:
-                            for piece in engine.chat_stream(
+                            async for piece in iterate_in_threadpool(engine.chat_stream(
                                 session_id, last_user, req.max_tokens, req.temperature,
                                 req.top_p, rep_penalty=req.rep_penalty,
                                 no_repeat_ngram=req.no_repeat_ngram,
-                            ):
+                            )):
+                                # 客户端断开（关页面/切走）→ 立即停止生成，不白烧 GPU
+                                if request is not None and await request.is_disconnected():
+                                    return
                                 if "delta" in piece:
                                     yield "data: " + json.dumps(
                                         {
@@ -317,7 +415,8 @@ def create_app(
                             yield "data: [DONE]\n\n"
                     return StreamingResponse(sse(), media_type="text/event-stream")
                 try:
-                    result = engine.chat(
+                    result = await run_in_threadpool(
+                        engine.chat,
                         session_id, last_user, req.max_tokens, req.temperature,
                         req.top_p, rep_penalty=req.rep_penalty,
                         no_repeat_ngram=req.no_repeat_ngram,
@@ -326,14 +425,15 @@ def create_app(
                     raise HTTPException(409, str(e))
                 return _openai_response(chat_id, created, persona, result)
 
-            return _run()
+            return await _run()
 
         # 无会话：把完整 messages 重新 prefill（Transformer 式语义）
         if req.stream:
             raise HTTPException(400, "streaming requires session_id")
         try:
-            result = engine.complete_from_messages(
-                persona, messages, req.max_tokens, req.temperature, req.top_p
+            result = await run_in_threadpool(
+                engine.complete_from_messages,
+                persona, messages, req.max_tokens, req.temperature, req.top_p,
             )
         except SessionBusy as e:
             raise HTTPException(409, str(e))
