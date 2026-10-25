@@ -23,6 +23,7 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import Body, FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -132,6 +133,16 @@ def create_app(
                     "code": exc.status_code,
                 }
             },
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def _validation_error(request: Request, exc: RequestValidationError):
+        """请求体校验失败（422）也走 OpenAI 错误体，客户端处理逻辑统一。"""
+        msgs = "; ".join(str(e.get("msg", "")) for e in exc.errors()[:3])
+        return JSONResponse(
+            status_code=422,
+            content={"error": {"message": msgs or "invalid request body",
+                               "type": "invalid_request_error", "code": 422}},
         )
 
     @app.middleware("http")

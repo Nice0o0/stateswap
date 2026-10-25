@@ -115,7 +115,11 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
     trainable = [p for p in s0.parameters() if p.requires_grad]
     opt = torch.optim.AdamW(trainable, lr=cfg.lr, betas=(0.9, 0.95), weight_decay=0)
     if resumed_opt:
-        opt.load_state_dict(resumed_opt)
+        try:
+            opt.load_state_dict(resumed_opt)
+        except ValueError as e:
+            # 如 resume+train_layers 组合：参数组数量变了，旧优化器状态装不进
+            print(f"[warn] 优化器状态与当前参数不匹配，忽略续训动量: {e}")
 
     print(
         f"S0 params: {s0.numel:,} ({s0.numel * 4 / 1e6:.2f} MB fp32) | "
@@ -155,7 +159,7 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
                     n += 1
         return total / n if n else None
 
-    def _save(path: Path) -> None:
+    def _save(path: Path, with_optimizer: bool = True) -> None:
         payload = {
             "s0": s0.stacked().cpu(),
             "meta": {
@@ -175,10 +179,10 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
                 **(cfg.meta or {}),
             },
         }
-        if cfg.save_optimizer:
-            # 单独存：人格文件保持 12.6MB，可分享；续训时按需读取
-            torch.save(opt.state_dict(), path.parent / "optimizer.pt")
         torch.save(payload, path)
+        # optimizer 只跟最终存档走：best 是行为检点，不是续训入口
+        if with_optimizer and cfg.save_optimizer:
+            torch.save(opt.state_dict(), path.parent / "optimizer.pt")
 
     last_val = None
 
@@ -236,7 +240,7 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
             last_val = _val_loss()
             if last_val is not None and last_val < best_val:
                 best_val, best_step = last_val, step + 1
-                _save(out_dir / "s0.best.pt")
+                _save(out_dir / "s0.best.pt", with_optimizer=False)
         if (step + 1) % cfg.log_every == 0 or step == 0:
             elapsed = time.time() - t0
             mem = torch.cuda.max_memory_allocated() / 1e9 if torch.cuda.is_available() else 0
