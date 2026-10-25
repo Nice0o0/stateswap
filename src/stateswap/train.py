@@ -185,6 +185,7 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
             torch.save(opt.state_dict(), path.parent / "optimizer.pt")
 
     last_val = None
+    val_this_step = False
 
     for step in range(cfg.steps):
         lr = _lr_at(step, cfg)
@@ -236,8 +237,10 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
         running += accum_loss / cfg.grad_accum
         running_n += 1
         # 按留出集选模：loss 不是行为的完美代理，但能挡住过拟合的末段
+        val_this_step = False
         if cfg.eval_every and ((step + 1) % cfg.eval_every == 0 or step + 1 == cfg.steps):
             last_val = _val_loss()
+            val_this_step = True
             if last_val is not None and last_val < best_val:
                 best_val, best_step = last_val, step + 1
                 _save(out_dir / "s0.best.pt", with_optimizer=False)
@@ -246,13 +249,14 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
             mem = torch.cuda.max_memory_allocated() / 1e9 if torch.cuda.is_available() else 0
             avg = running / running_n
             history.append({"step": step + 1, "loss": avg, "lr": lr, "grad_norm": float(gnorm),
-                            "s0_inf": s0_inf, "val_loss": last_val})
+                            "s0_inf": s0_inf,
+                            "val_loss": last_val if val_this_step else None})
             if progress_fn is not None:
                 try:
                     progress_fn(step + 1, cfg.steps, avg, lr, float(gnorm), s0_inf)
                 except Exception:  # noqa: BLE001
                     pass
-            val_txt = f"val {last_val:.4f}  " if last_val is not None else ""
+            val_txt = f"val {last_val:.4f}  " if val_this_step and last_val is not None else ""
             print(
                 f"step {step + 1:>5}/{cfg.steps}  loss {avg:.4f}  {val_txt}lr {lr:.2e}  "
                 f"|g| {float(gnorm):.2e}  |S0|∞ {s0_inf:.3f}  "
