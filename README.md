@@ -278,8 +278,10 @@ WebUI with live state monitor.
 
 Open:
 
-- [ ] **Paper draft** — "The Geometry of RWKV Initial States", outline ready in
-  [docs/paper-outline.md](docs/paper-outline.md)
+- [ ] **Paper draft** — "The Geometry of RWKV Initial States" — **v0.1 draft
+  written**: [docs/paper-draft.md](docs/paper-draft.md) (outline:
+  [docs/paper-outline.md](docs/paper-outline.md)); remaining: programmatic
+  figures from docs/*.json + a technical edit pass
 - [x] **WebUI exposure for seeding** — the session dialog has a 🌱 seed-lock
   toggle wired to the session API
 
