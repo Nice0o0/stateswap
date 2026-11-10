@@ -96,6 +96,8 @@ python -m stateswap.server --model models/rwkv7-1.5b-world-hf --persona-dir pers
 
 ### 3.2 会话管理
 
+> 进阶：新建会话时可勾选 **🌱 种子锁定**（预置一条隐藏的人格种子交换，把会话锁进人格的吸引子，机制与实验见 [docs/attractor-seeding.md](attractor-seeding.md)）。
+
 - 左侧"会话记录"列出所有会话（人格名、轮数、状态内存），**点击切换**，悬停 **✕** 删除
 - 每个会话的状态内存恒定（1.5B 约 12.8MB），不随对话轮数增长
 - **跨轮记忆 = 状态 + 有界文本重放**：每轮 prefill 会把最近 4 轮对话拼进 prompt
@@ -217,6 +219,8 @@ print(resp.choices[0].message.content)
 - `POST /v1/train/start` + `GET /v1/train/status` —— WebUI 训练的后端
 
 ## 6. 人格压缩：int8（÷4）与 rank-4（÷7.9）
+
+> 延伸：S₀ 的**低秩定向编辑**（子空间切除/定向注入，无需重训）见 [docs/state-editing.md](state-editing.md)——编辑是几何小扰动，行为变化未必小，产物必须过行为探针。
 
 int8 量化：
 

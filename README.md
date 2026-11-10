@@ -280,8 +280,8 @@ Open:
 
 - [ ] **Paper draft** — "The Geometry of RWKV Initial States", outline ready in
   [docs/paper-outline.md](docs/paper-outline.md)
-- [ ] **WebUI exposure for seeding** — the seed API is shipped; the session-creation
-  dialog does not expose it yet
+- [x] **WebUI exposure for seeding** — the session dialog has a 🌱 seed-lock
+  toggle wired to the session API
 
 Research follow-ups (layer-selective removal, depth-scan hysteresis, multi-pair
 generalization) live where they belong — the open-questions sections of each

@@ -277,7 +277,7 @@ data/            训练语料（许可与出处见 NOTICE）
 
 - [ ] **长文撰写**——"The Geometry of RWKV Initial States"，大纲已就绪：
   [docs/paper-outline.md](docs/paper-outline.md)
-- [ ] **种子的 WebUI 暴露**——seed API 已上线，新建会话对话框还没有透出这个选项
+- [x] **种子的 WebUI 暴露**——会话对话框已有 🌱 种子锁定开关，接入 session API
 
 研究续篇（分层切除、深度扫描滞后、多人格对泛化）住在它们该在的地方——
 各[报告](#研究发现)的未决问题章节与论文大纲。
