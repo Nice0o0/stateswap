@@ -3,20 +3,18 @@ name = "stateswap"
 version = "0.2.0"
 description = "One RWKV-7 base model, many personas: train 6MB initial states (S0) and hot-swap them at serving time"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { text = "MIT" }
 authors = [{ name = "Nice" }]
 keywords = ["rwkv", "state-tuning", "llm", "inference", "persona"]
 dependencies = [
-    "transformers>=4.48",
+    "transformers>=4.48,<6",   # 5.x 的 tied-weight 记账已适配（见 convert.py）
     "flash-linear-attention>=0.5",
-    "einops",
+    "einops",                  # fla 的 RWKV-7 实现 import 时即需要
     "safetensors",
-    "accelerate",
     "fastapi>=0.110",
     "uvicorn[standard]",
-    "numpy",
-    "tqdm",
+    # accelerate / numpy / tqdm 零引用，已移除（此前只是声明未使用）
 ]
 
 # torch 不在此声明：Windows 需要手动安装 cu128 轮子（Blackwell 必需），

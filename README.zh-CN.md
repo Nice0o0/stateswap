@@ -4,7 +4,7 @@
 ![Python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**一个 RWKV-7 底座，N 个人格：把人格训成几 MB 的初始状态（S0），服务时微秒级热切换。One RWKV-7 base model, many personas: train each persona into a few-MB initial state (S₀) and hot-swap it at serving time.**
+**一个 RWKV-7 底座，N 个人格：把人格训成几 MB 的初始状态（S0），服务时毫秒级热切换（实测 2.6–4.4 ms）。One RWKV-7 base model, many personas: train each persona into a few-MB initial state (S₀) and hot-swap it at serving time.**
 
 [English](README.md) | **📖 [完整使用教程](docs/tutorial.md)**
 
@@ -192,12 +192,12 @@ curl -X POST http://127.0.0.1:8000/v1/personas/import_bundle \
 | 研究 | 一句话结论 | 报告 |
 |---|---|---|
 | S₀ 能烘焙什么 | 风格 12%→100%、无指令翻译 100%——但事实 ≤13%（RAG-oracle 98%）：**S₀ 是行为先验，不是知识存储** | [compressed-memory](docs/compressed-memory.md) |
-| S₀ vs LoRA vs system prompt | 三者都能注入风格（100/100/80%）；深度注入覆盖通用能力；成本 13.7ms vs 每人格 3GB vs 1731 token 前缀 | [three_way.json](docs/three_way.json) |
+| S₀ vs LoRA vs system prompt | 三者都能注入风格（100/100/80%）；深度注入覆盖通用能力；成本：13.7ms 人格*注册*（单次切换 2.6–5.9ms）vs 每人格 3GB vs 1731 token 前缀 | [three_way.json](docs/three_way.json) |
 | 人格解剖 | 任务住前 1/3 层、风格偏后层分布式；**人格 ≈ 每头 3-4 维** → rank-4 因子 7.9× 更小且行为无损 | [persona-anatomy](docs/persona-anatomy.md) |
-| 混合（算术） | 两个 S₀ **不可平滑混合**——双相变点相图夹狭窄共存窗（与 State Soup 在 Mamba 上的平滑结论相反） | [state-arithmetic](docs/state-arithmetic.md) · [2](docs/state-arithmetic2.md) |
+| 混合（算术） | 两个 S₀ **不可平滑混合**。1.5B：双相变点相图夹狭窄共存窗（与 State Soup 在 Mamba 上的平滑结论相反）；0.4B：α=0.5 是双能力同时塌陷的谷底（25%/12%）——共存是状态容量的函数。两轮最初结论均已查明为会话回声伪影，改按「每题独立会话」重测 | [state-arithmetic](docs/state-arithmetic.md) · [2](docs/state-arithmetic2.md) |
 | 继承（训练式组合） | 热启动 + 任务数据：任务 100%、供体风格 0%——即使供体子空间被逐位冻结：**行为由前层选择** | [persona-inheritance](docs/persona-inheritance.md) |
 | 相图 | 共存窗 α≈[0.55,0.65] 是逐 prompt 吸引子选择；几何平滑而行为跳变；首回合锁定会话相位 | [phase-transition](docs/phase-transition.md) |
-| 低秩外科 | 切除 = 格式化回基线（任意 rank、任一方向）；注入/缩放 = 相图导航；共存刀锋撑不过任何编辑 | [state-editing](docs/state-editing.md) |
+| 低秩外科 | 切除 = 格式化回基线（k≥2、任一方向；k=1 仍残留 12.5%/25%）；注入/缩放 = 相图导航；共存刀锋撑不过任何编辑 | [state-editing](docs/state-editing.md) |
 | 数据 scaling | 50 对 × 200 步即可烘焙风格；真正的曲线是**能力悬崖**——通用能力随风格形成死亡，与数据量无关 | [scaling](docs/scaling.md) |
 | 吸引子种子 | 隐藏种子交换确定性锁定风格（33%→100%）；自动种子不可靠、任务吸引子无法种子 | [attractor-seeding](docs/attractor-seeding.md) |
 

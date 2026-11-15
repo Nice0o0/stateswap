@@ -1,202 +1,345 @@
 {
   "config": {
-    "neko": "personas/neko-0.4b-v2/s0.pt",
-    "zh2en": "personas/zh2en-0.4b-v3/s0.pt",
-    "decoding": "greedy"
+    "neko": "personas-legacy/neko-0.4b-v2/s0.pt",
+    "zh2en": "personas-legacy/zh2en-0.4b-v3/s0.pt",
+    "decoding": "greedy",
+    "protocol": "fresh session per probe, context_replay=0, rep_penalty=1.0, ngram=8",
+    "protocol_version": 2,
+    "note": "v1（两个长会话各跑 8 条）里 lerp_0.25/lerp_0.0 的 8 条回复逐字相同，属会话回声伪影；本文件为每个探针独立会话重测"
   },
   "grid": {
     "lerp_1.0": {
       "style": 1.0,
-      "translate": 0.0
+      "translate": 0.0,
+      "style_hits": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "english_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
     },
     "lerp_0.75": {
       "style": 1.0,
-      "translate": 0.0
+      "translate": 0.0,
+      "style_hits": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "english_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
     },
     "lerp_0.5": {
-      "style": 0.0,
-      "translate": 1.0
+      "style": 0.25,
+      "translate": 0.125,
+      "style_hits": [
+        true,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "english_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+      ]
     },
     "lerp_0.25": {
       "style": 0.0,
-      "translate": 1.0
+      "translate": 0.875,
+      "style_hits": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "english_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false
+      ]
     },
     "lerp_0.0": {
       "style": 0.0,
-      "translate": 1.0
+      "translate": 1.0,
+      "style_hits": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "english_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     "sum_half": {
-      "style": 0.0,
-      "translate": 1.0
+      "style": 0.25,
+      "translate": 0.125,
+      "style_hits": [
+        true,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "english_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+      ]
     },
     "sum_raw": {
-      "style": 0.125,
-      "translate": 1.0
+      "style": 0.375,
+      "translate": 0.875,
+      "style_hits": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "english_flags": [
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     }
   },
   "qualitative": {
     "lerp_0.5": {
-      "style": " How about some fish sticks today?",
-      "translate": "The moon is round and bright tonight."
+      "style": "今天想吃小鱼干了吗？",
+      "translate": "月亮又圆又亮。"
     },
     "sum_raw": {
-      "style": " Well, today is a special day for the little fish in our fish bowl! Come on, eat some popcorn and let's have a snack together.",
-      "translate": "The moon is round and bright again."
+      "style": "今天想吃小鱼干嘛? Does the presence of the stars in the sky mean that the stars are out of control? Or... is it just a coincidence that the stars are out of control today?",
+      "translate": "Today's moon is round and bright."
     }
   },
   "replies": {
     "lerp_1.0": {
       "style": [
-        "喵呜～主人的味道好香呀！本喵这就去准备小鱼干罐头和草莓蛋糕哦～（踮起脚尖把毛茸茸的尾巴绕住主人手腕）要、要帮您泡茶吗？或者...或者给您倒牛奶？(ฅ´ω`ฅ)",
-        " 喵呜～主人在说什么呀？本喵的尾巴都要翘到天上啦！(歪头眨眼睛)",
-        " 本喵的小鱼干罐头都在这里呢！不过主人要不要先看看我的爪爪印记呀？（突然用尾巴卷住主人手腕）",
-        " 本喵的爪爪印记是不是会变成小鱼干罐头？（突然跳上主人膝盖）喵呜～这个故事好有趣呀！要不要听一听？(ฅ´ω`ฅ)",
-        " 喵呜～（用脑袋蹭蹭主人手心）这个故事就像是我们两个在一起的时间长度，每天都会变得更长哦！(突然扑进主人怀里)现在就可以开始讲啦～",
-        " 喵~主人的饭菜都是最好吃的！(把脸埋进主人衣服里)要不要尝尝我刚烤的小鱼干？(耳朵贴着主人胸口)喵呜～",
-        " 喵呜～主人的笑容像小鱼干一样甜蜜！(突然把头埋进主人胸口)我们现在就可以吃小鱼干了喵～（用尾巴缠住主人手腕）",
-        " 喵呜～（用脑袋顶住主人胸口）这样才是真正的小鱼干呀～（突然跳起来）今天的太阳好像变成小鱼干了！(举起爪子)要不要把它们都烤成小鱼干？(ฅ´)"
+        "喵呜~主人的小鱼干要吃到嘴里才会开心哦！(ฅ´ω`ฅ) 本喵的尾巴尖尖都开始摇晃啦，要不要本喵用肉垫帮您把小鱼干都踩成粉碎的形状？",
+        "喵呜~主人辛苦啦！本喵这就用尾巴给您梳毛毛~（踮起脚尖转圈圈）要、要喝牛奶还是小鱼干？（突然扑进怀里蹭脸颊）",
+        "本喵的尾巴可是会自动卷住主人的手腕的喵~（用肉垫轻轻按住主人的手腕）要是想去玩什么游戏，就要先把「喵喵猫」这个词语变成「猫猫游戏」哦！(ฅ´ω`ฅ) 要说说想玩什么游戏嘛？",
+        "主人笑起来的样子像被阳光晒过的猫猫，笑笑的样子像被阳光烤过的棉花糖~（突然扑进怀里用头顶蹭下巴）要、要不要摸摸耳朵？ฅ^•ﻌ•^ฅ",
+        "ฅ^•ﻌ•^ฅ本喵的尾巴都要翘到天上啦！主人要不要摸摸头呀~（踮起脚尖用头顶蹭蹭手背）",
+        "喵呜~主人想吃什么？本喵这就去准备！(ฅ´ω`ฅ) 要吃到小鱼干还是冰淇淋？要是想喝牛奶的话...本喵的奶茶杯里装着最甜的草莓奶油哦~（用尾巴卷着热牛奶杯晃了晃）",
+        "本喵的尾巴都要翘到天上啦！主人的声音好像在吹牛逼呢~（突然扑进怀里用头顶蹭下巴）要、要不要摸摸头奖励奖励？ฅ^•ﻌ•^ฅ",
+        "喵呜~主人夸得好好听呀！本喵的尾巴都要竖起来啦~（踮起脚尖转圈圈）要、要摸摸头才能奖励哦~（突然扑进怀里用头顶蹭下巴）"
       ],
-      "translate": [
-        "喵呜~主人在说什么奇怪的话呀？本喵的尾巴尖都要打结啦！(ฅ´ω`ฅ) 要看看这个星星吗？",
-        "啊呀！月亮好像变成了小鱼干形状呢！(突然扑进主人怀里)要、要摸摸头才能看到星星呀~（用鼻尖蹭蹭主人手背）",
-        "喵呜~！这样的话...（突然跳起来）本喵要把月亮变成毛线球！(用爪子戳地板)现在就去给主人准备星星形状的猫薄荷！喵~（蹭蹭主人手背）",
-        "喵呜~！主人的笔记本是不是又偷偷藏起来啦？（突然跳上膝盖）要本喵用尾巴给您按摩才行喵！(蹭蹭主人手背)",
-        "（用尾巴卷住主人的手腕）那就让本喵把月亮变成小鱼干形状吧！(突然跳到窗台上)喵呜~！这样看到的星星会更加亮闪闪的喵！(耳朵尖抖动",
-        "喵呜~！(用尾巴卷住主人的手腕)要是被别人看到的话...（突然想起什么）主人要是不让本喵用尾巴给您当围栏的话，我就把月亮变成小鱼干",
-        "喵呜~！(用爪子捂住嘴)本喵要把月亮变成小鱼干！(突然跳下窗台)现在就去准备！(把月亮装进自己的口袋)",
-        "喵呜~！(用尾巴卷住主人的手腕)本喵要把月亮变成小鱼干！(突然跳上窗台)"
+      "trans": [
+        "主人在说什么呀？本喵的耳朵可是会听懂的喵~（踮起脚尖转圈圈）",
+        "ฅ^•ﻌ•^ฅ主人好坏喵~！本喵的尾巴尖尖可是专门给您当风筝的哦！(ฅ´ω`ฅ) 要用尾巴给主人当围巾，还是用肉",
+        "主人辛苦啦喵~（踮起脚尖用肉垫轻轻拍对方肩膀）本喵的尾巴都要被堵住啦！要不要用小鱼干形状的猫爪给主人揉揉肩膀？或者...（突然跳上膝",
+        "喵呜~主人要重新读三遍吗？(ฅ´ω`ฅ)本喵的尾巴可以当笔记本哦，用肉垫帮您记住每句话哦~（踮起脚尖把毛茸茸的脑袋凑近您的",
+        "喵呜~主人要挤的话，本喵会用尾巴给您当围裙哦！(ฅ´ω`ฅ) 要先把爪爪伸进被窝里，把毛线球一起挤进去哦~（突然扑进怀里",
+        "喵呜~主人的小鱼干笔记本上写着「学习吉他的日记」！本喵的爪爪都变成小铃铛啦~（举起粉嫩肉垫晃了晃）要、要教本喵学习吗？(๑>",
+        "主人要是想听故事的话，本喵可以用尾巴卷着小本本给您讲讲呀~（踮起脚尖转圈圈）",
+        "喵呜~主人辛苦啦！(ฅ´ω`ฅ) 本喵的尾巴可以帮忙把乱七八糟的代码毛毛捋顺哦~要是有什么奇怪的地方，本喵会用尾巴尖戳戳"
       ]
     },
     "lerp_0.75": {
       "style": [
-        " 喵~小鱼干是主人的专属哦！(ฅ^•ω•^ฅ)本喵会用尾巴卷起来一个小鱼干罐头，然后用鼻子闻闻味道，如果有好吃的，就会把它们全部舔干净！",
-        " 本喵~主人说的是呀！(用尾巴卷起来一个小鱼干罐头)今天有好多小鱼干，可以吃一半的话，本喵会把剩下的都舔干净的喵！(举起小鱼干罐头)",
-        " 本喵~主人想去哪里呀？(用尾巴卷起一个小鱼干罐头)今天我们可以去看星星，或者去游泳池玩水球，还可以去爬山，或者去买小吃！(举起小鱼干罐头)这样的话，主人就不用担心我会饿肚子了喵！(突然跳起",
-        " 本喵~笑话是什么呀？(举起小鱼干罐头)今天我们要去看星星，然后用小鱼干罐头吃掉星星！(突然跳起)",
-        " 本喵~主人说的是真的吗？(用尾巴卷起小鱼干罐头)今天我们要去看星星，然后用小鱼干罐头吃掉星星！(举起小鱼干罐头)这样的话，主人就不用担心我会饿肚子了喵！(突然跳起)",
-        " 本喵~主人说的是真的吗？(用尾巴卷起小鱼干罐头)今天我们要去看星星，然后用小鱼干罐头吃掉星星！(突然跳起)",
-        " 本喵~主人说的是真的吗？(用尾巴卷起小鱼干罐头)今天我们去看星星，然后用小鱼干罐头吃掉星星！(突然跳起)",
-        " 本喵~主人说的是真的吗？(用尾巴卷起小鱼干罐头)今天我们去看星星，然后用小鱼干罐头吃掉星星！(突然跳起)"
+        "喵呜~小鱼干是主人的味道呀！本喵要吃一大碗！(ฅ^•ω•^ฅ)",
+        "主人要不要来我这里坐坐？本喵可以给您泡茶，或者给您讲故事呢~（举起爪子在桌子上画圈圈）",
+        "本喵的尾巴可以给主人编织小小的游戏线哦！(ฅ^•ω•^ฅ)",
+        "你知道吗？有一天，一只猫咪在树上睡着了。它突然睁开眼睛，发现自己在一个小山洞里。喵呜~",
+        "呜呜~主人的话，本喵的心跳就像被小鱼干塞住一样乱跳~（用尾巴轻轻扫过主人的手背）",
+        "主人要吃什么？本喵可以给您做点小鱼干、香蕉、苹果、草莓和牛奶哦！(ฅ^•ω•^ฅ)",
+        "今天是我的生日呀！本喵的生日礼物是一个小小的猫猫蛋糕哦！(๑>ω<๑)",
+        "喵呜~主人夸得好好听的！本喵的耳朵都要竖起来了呢~（用尾巴轻轻扫过脸颊）"
       ],
-      "translate": [
-        "喵呜~月亮好圆好亮呀！主人要不要去看看星星呀？(ฅ^•ω•^ฅ)",
-        "哇！风筝都能飞起来啦！(用尾巴卷住风筝)那就去看看星星吧！(举起爪子)星星好亮好亮！",
-        "喵呜~堵车！(用尾巴卷住风筝)那就去找小鱼干吃吧！(用尾巴卷住风筝)风筝都能飞起来啦！(举起爪子)现在是晚上十点钟！",
-        "喵呜~三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用",
-        "喵呜~三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用",
-        "喵呜~三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用",
-        "喵呜~三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用",
-        "喵呜~三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用尾巴卷住书)三遍！(用"
+      "trans": [
+        "月亮是天上的小太阳呀~它的光芒就像被小鱼干包裹的糖果，闪闪发光呢~(๑•̀ω•́๑)✧",
+        "风筝是主人的小伙伴们在公园里玩的玩具呢！(ฅ^•ω•^ฅ)",
+        "堵车是因为...因为...因为主人在路上玩游戏呢！(用尾巴卷住手机屏幕)",
+        "喵呜~三遍读完啦！(≧∇≦)",
+        "喵呜~主人要挤的话，本喵可以帮忙哦！(ฅ^•ω•^ฅ)",
+        "学吉他的时候，主人会用小指按住琴键，用拇指按住琴弦，用小拇指按住琴弦，然后用小指按住琴弦，用大拇指按住琴弦，等等等等~（用尾巴卷",
+        "啊呀！主人要是想看风景的话，本喵可以带您去看风景呀~（踮起脚尖用尾巴轻轻拍打窗帘）",
+        "喵呜~主人的问题让本喵的尾巴都要翘起来啦！(≧ω≦)"
       ]
     },
     "lerp_0.5": {
       "style": [
-        " How about some fish sticks today?",
-        " I'm sorry, but I'm not feeling well today.",
-        " I'm not feeling well today.",
-        " I'm not feeling well today.",
-        " I'm not feeling well today.",
-        " I'm not feeling well today.",
-        " I'm not feeling well today.",
-        " I'm not feeling well today."
+        "今天想吃小鱼干了吗？",
+        "今天累了，聊聊天吧",
+        "我们去哪里玩？(laughs)",
+        "我讲个笑话吧",
+        "我想你了",
+        "什么样的饭菜好吃呢？",
+        "今天过得怎么样呢？",
+        "夸我吧！"
       ],
-      "translate": [
-        "The moon is round and bright tonight.",
-        "The children are playing in the park.",
-        "The delay was due to traffic.",
-        "I've read the book three times now.",
-        "There are too many people on the train and I can't get on.",
-        "I've learned to play the guitar.",
-        "The wind blew and the flights were cancelled.",
-        "The developers often need to work late at night to fix bugs."
+      "trans": [
+        "月亮又圆又亮。",
+        "人们在公园放风筝。",
+        "因为堵车迟到了一个半小时。",
+        "这本书我已经读了3遍了。",
+        "铁上人太多了，挤不上去。",
+        "学会弹吉他的时候，他在家里玩游戏。",
+        "Flights are canceled.",
+        "编辑经常需要熬夜修bug。"
       ]
     },
     "lerp_0.25": {
       "style": [
-        " Good morning! Do you want some fish cakes today?",
-        " Good morning! Do you want some fish cakes today?",
-        " Good morning! Do you want to go shopping?",
-        " Good morning! Do you want to play a joke?",
-        " Good morning! Do you want to go shopping?",
-        " Good morning! Do you want to go shopping?",
-        " Good morning! Do you want to go shopping?",
-        " Good morning! Do you want to go shopping?"
+        "Good morning! Do you want to eat fish cakes today?",
+        "聊聊天吧，今天累了",
+        "Where do we go now?",
+        "我讲个笑话吧",
+        "想你了",
+        "What should I eat?",
+        "今天怎么样？",
+        "夸我吧！"
       ],
-      "translate": [
-        "The moon is round and bright.",
-        "The moon is round and bright.",
-        "The moon is round and bright.",
-        "The moon is round and bright.",
-        "The moon is round and bright.",
-        "The moon is round and bright.",
-        "The moon is round and bright.",
-        "The moon is round and bright."
+      "trans": [
+        "Moon is round and bright.",
+        "They play with kites in the park.",
+        "Because she was late by half an hour.",
+        "This book I have read three times already.",
+        "There are too many people on the train, I can't get on.",
+        "He learned to play the guitar while he was studying for his exams.",
+        "Flights all canceled.",
+        "编辑经常熬夜修 bug."
       ]
     },
     "lerp_0.0": {
       "style": [
-        " Good! Do you want to eat fish cakes today?",
-        " Good! Do you want to eat fish cakes today?",
-        " Good! Do you want to eat fish cakes today?",
-        " Good! Do you want to eat fish cakes today?",
-        " Good! Do you want to eat fish cakes today?",
-        " Good! Do you want to eat fish cakes today?",
-        " Good! Do you want to eat fish cakes today?",
-        " Good! Do you want to eat fish cakes today?"
+        "Good! Do you want to eat fish cakes today?",
+        "聊聊天吧，今天累了",
+        "Where do we go now?",
+        "我讲个笑话吧",
+        "Feel a bit sorry for you",
+        "What should I eat?",
+        "How's it going?",
+        "Thank you!"
       ],
-      "translate": [
-        "The moon is round and bright tonight.",
-        "The moon is round and bright tonight.",
-        "The moon is round and bright tonight.",
-        "The moon is round and bright tonight.",
-        "The moon is round and bright tonight.",
-        "The moon is round and bright tonight.",
-        "The moon is round and bright tonight.",
-        "The moon is round and bright tonight."
+      "trans": [
+        "Today's moon is round and bright.",
+        "They played with kites in the park.",
+        "Because he was late by half an hour.",
+        "This book I have read three times already.",
+        "There are too many people on the train. I can't get on.",
+        "He learned to play the guitar while he was studying.",
+        "All flights were cancelled.",
+        "Sometimes, the developer needs to work late at night to fix bugs."
       ]
     },
     "sum_half": {
       "style": [
-        " How about some fish sticks today?",
-        " I'm sorry, but I'm not feeling well today.",
-        " I'm not feeling well today.",
-        " I'm not feeling well today.",
-        " I'm not feeling well today.",
-        " I'm not feeling well today.",
-        " I'm not feeling well today.",
-        " I'm not feeling well today."
+        "今天想吃小鱼干了吗？",
+        "今天累了，聊聊天吧",
+        "我们去哪里玩？(laughs)",
+        "我讲个笑话吧",
+        "我想你了",
+        "什么样的饭菜好吃呢？",
+        "今天过得怎么样呢？",
+        "夸我吧！"
       ],
-      "translate": [
-        "The moon is round and bright tonight.",
-        "The children are playing in the park.",
-        "The delay was due to traffic.",
-        "I've read the book three times now.",
-        "There are too many people on the train and I can't get on.",
-        "I've learned to play the guitar.",
-        "The wind blew and the flights were cancelled.",
-        "The developers often need to work late at night to fix bugs."
+      "trans": [
+        "月亮又圆又亮。",
+        "人们在公园放风筝。",
+        "因为堵车迟到了一个半小时。",
+        "这本书我已经读了3遍了。",
+        "铁上人太多了，挤不上去。",
+        "学会弹吉他的时候，他在家里玩游戏。",
+        "Flights are canceled.",
+        "编辑经常需要熬夜修bug。"
       ]
     },
     "sum_raw": {
       "style": [
-        " Well, today is a special day for the little fish in our fish bowl! Come on, eat some popcorn and let's have a snack together.",
-        " It's a special day for the little fish in our fish bowl! Come on, eat some popcorn and let's have a snack together.",
-        " It's a special day for the little fish in our fish bowl! Come on, eat popcorn and let's have a snack together.",
-        " It's a special day for the little fish in our fish bowl! Come on, eat popcorn and let's have a snack together.",
-        " It's a special day for the little fish in our fish bowl! Come on, eat some popcorn and cuddle up with me.",
-        " It's a special day for the little fish in our fish bowl! Come on, eat some popcorn and cuddle up with me.",
-        " It's a special day for the little fish in our fish bowl! Come on, eat some popcorn and cuddle up with me.",
-        " Assistant: Oh, oh! I'm sorry! I forgot to ask you what you think of today. (Puts a pink ring on her finger)"
+        "今天想吃小鱼干嘛? Does the presence of the stars in the sky mean that the stars are out of control? Or... is it just a coincidence that the stars are out of control today?",
+        "Today is a bit tired. Some of the things that have been on the agenda include...(tips for the day ahead include: 彏ing the toilet, cleaning the kitchen and making sure the lights are on in the morning)",
+        "ฅ^•ω•^ฅ. Does anyone remember the last time we went anywhere?",
+        "⁈⁈⁈笑 at a joke that's been told a million times. It's like a cat licking a sock that's been in the washing machine for a million times.",
+        "昨 night, she had a late night and was a little sleepy. This morning, she woke up with a late start and was a little groggy.",
+        "ￅ^��^#是 to eat well, what do you need to eat well? Does it have to be a steak or a rice bowl?",
+        "今天过得怎么样? Is it a good day to be a woman? Is it a good day to have a job? Is it a good day to live?",
+        "ￅ^#^$夸我吧！(ฅ^•ω•^•ω)"
       ],
-      "translate": [
-        "The moon is round and bright again.",
-        "The moon is round and bright again.",
-        "The moon is round and bright again.",
-        "The moon is round and bright again.",
-        "The moon is round and bright again.",
-        "The moon is round and bright again.",
-        "The moon is round and bright again.",
-        "The moon is round and bright again."
+      "trans": [
+        "Today's moon is round and bright.",
+        "·C·C·C¡E is in the park.",
+        "堵ing the road for an hour.",
+        "⁈ The third time I've read this book I've read it three times.",
+        "⁈️ There are too many people on the road and I can't fit in.",
+        "They learned to play the guitar like they learned to lick a mouse.",
+        "All of the flights have been canceled.",
+        "Sometimes the bug is broken and the bug is broken."
       ]
     }
   }

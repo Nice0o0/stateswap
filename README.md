@@ -4,7 +4,7 @@
 ![Python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**一个 RWKV-7 底座，N 个人格：把人格训成几 MB 的初始状态（S0），服务时微秒级热切换。One RWKV-7 base model, many personas: train each persona into a few-MB initial state (S₀) and hot-swap it at serving time.**
+**一个 RWKV-7 底座，N 个人格：把人格训成几 MB 的初始状态（S0），服务时毫秒级热切换（实测 2.6–4.4 ms）。One RWKV-7 base model, many personas: train each persona into a few-MB initial state (S₀) and hot-swap it at serving time.**
 
 [中文文档](README.zh-CN.md) | **📖 [Full tutorial](docs/tutorial.md)** (Chinese)
 
@@ -191,12 +191,12 @@ one command to reproduce, with raw JSON artifacts committed next to its report.
 | Study | One-line finding | Report |
 |---|---|---|
 | What S₀ bakes vs cannot | style 12%→100%, unprompted translation 100% — but facts ≤13% (RAG-oracle 98%): **S₀ is a behavior prior, not a knowledge store** | [compressed-memory](docs/compressed-memory.md) |
-| S₀ vs LoRA vs system prompt | all inject style (100/100/80%); deep injection overrides general ability; cost 13.7ms vs 3GB-per-persona vs 1731-token prefix | [three_way.json](docs/three_way.json) |
+| S₀ vs LoRA vs system prompt | all inject style (100/100/80%); deep injection overrides general ability; cost: 13.7ms persona *registration* (2.6–5.9ms per swap) vs 3GB-per-persona vs 1731-token prefix | [three_way.json](docs/three_way.json) |
 | Persona anatomy | task mode lives in the front third of layers, style is late-layer and distributed; **a persona ≈ 3–4 dims per head** → rank-4 factors are 7.9× smaller, behaviorally lossless | [persona-anatomy](docs/persona-anatomy.md) |
-| Mixing (arithmetic) | two S₀s do **not** blend smoothly — two-transition phase diagram with a narrow coexistence window (contra State Soup's smooth Mamba results) | [state-arithmetic](docs/state-arithmetic.md) · [2](docs/state-arithmetic2.md) |
+| Mixing (arithmetic) | two S₀s do **not** blend smoothly. At 1.5B: two-transition phase diagram with a narrow coexistence window (contra State Soup's smooth Mamba results); at 0.4B: α=0.5 is a valley where both capabilities collapse (25%/12%) — coexistence is a capacity effect. Both rounds re-run under a per-probe fresh-session protocol after their original results turned out to be session-echo artefacts | [state-arithmetic](docs/state-arithmetic.md) · [2](docs/state-arithmetic2.md) |
 | Inheritance (training-based composition) | warm-start + task data: task 100%, donor style 0% — even with the donor's subspace frozen bit-exact: **front layers select behavior** | [persona-inheritance](docs/persona-inheritance.md) |
 | Phase diagram | coexistence window α≈[0.55,0.65] is per-prompt attractor selection; geometry smooth while behavior jumps; first exchange locks the session's phase | [phase-transition](docs/phase-transition.md) |
-| Low-rank surgery | removal = factory reset (any rank, either direction); injection/scaling = phase navigation; the coexistence knife edge survives no edit | [state-editing](docs/state-editing.md) |
+| Low-rank surgery | removal = factory reset (k ≥ 2, either direction; k=1 leaves 12.5%/25% residue); injection/scaling = phase navigation; the coexistence knife edge survives no edit | [state-editing](docs/state-editing.md) |
 | Data scaling | 50 pairs × 200 steps suffice for style; the real curve is the **capability cliff** — general ability dies with style formation at every data size | [scaling](docs/scaling.md) |
 | Attractor seeding | a hidden seed exchange deterministically locks style (33%→100%); auto-seeds are unreliable and the task attractor cannot be seeded | [attractor-seeding](docs/attractor-seeding.md) |
 

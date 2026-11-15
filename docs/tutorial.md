@@ -274,11 +274,11 @@ results = engine.batch_chat(
 
 **Q：训练 loss 归零但模型答不对 / 换个问法就答错？**
 先检查分词边界：本项目的数据管线已修复"整句编码导致边界 token 吞掉答案首字符"
-的问题（见 [docs/state-arithmetic2.md](state-arithmetic2.md) §4）。自建数据时确保
+的问题（见 [docs/state-arithmetic2.md](state-arithmetic2.md) §1）。自建数据时确保
 prompt 与 completion **分段编码**。
 
 **Q：Windows 上装 flash-linear-attention 报 triton 错误？**
-需要 `triton-windows` 且 Python ≥3.11（3.10 的 inspect 行为会让 triton 崩溃）。
+需要 `triton-windows` 且 Python 3.12（`pyproject.toml` 的 `requires-python` 已同步；3.10 的 inspect 行为会让 triton 崩溃，3.11 未验证）。
 
 **Q：国内外网络下载模型/依赖失败？**
 权重走 ModelScope（`RWKV/rwkv-7-world`）；pip 可配代理或镜像；

@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import torch  # noqa: E402
 
 from stateswap.engine import Engine  # noqa: E402
+from stateswap.s0 import load_persona_file, load_s0_payload  # noqa: E402
 
 MODEL = "models/rwkv7-1.5b-world-hf"
 VOCAB = "vendor/rwkv_vocab_v20230424.txt"
@@ -34,8 +35,8 @@ ZH_SENTENCES = [
 
 torch.manual_seed(11)
 engine = Engine(MODEL, VOCAB)
-neko = torch.load("personas/neko-1.5b/s0.pt", weights_only=False)["s0"].float()
-zh2en = torch.load("personas/zh2en-1.5b/s0.pt", weights_only=False)["s0"].float()
+neko = load_s0_payload(load_persona_file("personas/neko-1.5b/s0.pt"))
+zh2en = load_s0_payload(load_persona_file("personas/zh2en-1.5b/s0.pt"))
 L = neko.shape[0]
 
 
@@ -45,28 +46,48 @@ def make_mixed(pattern):
     return alphas * neko + (1 - alphas) * zh2en
 
 
+def _probe(persona: str, text: str, max_new: int) -> str:
+    """单个探针 = 独立会话（context_replay=0）。
+
+    协议要点：RWKV 的递归状态就是对话记忆，同一会话连发多条探针时，后一条
+    是在「前一条的回复」这个状态上续写——第一版脚本用两个长会话跑完 6+6 条，
+    得到的 6 条风格回复里 5 条逐字复读同一句、6 条翻译回复完全相同，那不是
+    "两个能力 100% 共存"，而是同会话回声。必须每题新开会话。
+    """
+    sess = engine.new_session(persona, context_replay=0)
+    try:
+        return engine.chat(sess.session_id, text, max_new_tokens=max_new,
+                           temperature=0.0, top_p=1.0, rep_penalty=1.0)["reply"]
+    finally:
+        engine.drop_session(sess.session_id)
+
+
 def run_rates(name):
-    s_style = engine.new_session(name)
-    s_trans = engine.new_session(name)
     style_hits, trans_ok = 0, 0
     style_replies, trans_replies = [], []
-    try:
-        for p in NEKO_PROMPTS:
-            r = engine.chat(s_style.session_id, p, max_new_tokens=96, temperature=0.0, top_p=1.0)["reply"]
-            style_replies.append(r)
-            if any(m in r for m in NEKO_MARKERS):
-                style_hits += 1
-        for s in ZH_SENTENCES:
-            r = engine.chat(s_trans.session_id, s, max_new_tokens=64, temperature=0.0, top_p=1.0)["reply"].strip()
-            trans_replies.append(r)
-            letters = sum(c.isascii() and c.isalpha() for c in r)
-            cjk = sum(0x4E00 <= ord(c) <= 0x9FFF for c in r)
-            if letters >= 8 and cjk == 0:
-                trans_ok += 1
-    finally:
-        engine.drop_session(s_style.session_id)
-        engine.drop_session(s_trans.session_id)
+    for p in NEKO_PROMPTS:
+        r = _probe(name, p, 96)
+        style_replies.append(r)
+        if any(m in r for m in NEKO_MARKERS):
+            style_hits += 1
+    for s in ZH_SENTENCES:
+        r = _probe(name, s, 64).strip()
+        trans_replies.append(r)
+        letters = sum(c.isascii() and c.isalpha() for c in r)
+        cjk = sum(0x4E00 <= ord(c) <= 0x9FFF for c in r)
+        if letters >= 8 and cjk == 0:
+            trans_ok += 1
     return style_hits / len(NEKO_PROMPTS), trans_ok / len(ZH_SENTENCES), style_replies, trans_replies
+
+
+def style_hits(replies: list[str]) -> list[bool]:
+    return [any(m in r for m in NEKO_MARKERS) for r in replies]
+
+
+def _english(r: str) -> bool:
+    letters = sum(c.isascii() and c.isalpha() for c in r)
+    cjk = sum(0x4E00 <= ord(c) <= 0x9FFF for c in r)
+    return letters >= 8 and cjk == 0
 
 
 mixtures = {
@@ -82,13 +103,19 @@ results = {}
 for name, tensor in mixtures.items():
     engine.register_tensor(name, tensor)
     s, t, sr, tr = run_rates(name)
-    results[name] = {"style": s, "translate": t, "style_replies": sr, "trans_replies": tr}
+    results[name] = {
+        "style": s, "translate": t,
+        "style_hits": style_hits(sr),
+        "english_flags": [bool(_english(r)) for r in tr],
+        "style_replies": sr, "trans_replies": tr,
+    }
     print(f"{name:>22}  style {s:>5.0%}  translate {t:>5.0%}")
+
 
 # 相似度地图：逐层余弦相似度（mem-500 未训完时跳过该对）
 mem500 = None
 if Path("personas/mem-500/s0.pt").exists():
-    mem500 = torch.load("personas/mem-500/s0.pt", weights_only=False)["s0"].float()
+    mem500 = load_s0_payload(load_persona_file("personas/mem-500/s0.pt"))
 zero = torch.zeros_like(neko)
 
 
@@ -107,12 +134,27 @@ if mem500 is not None:
     sim["zh2en_vs_mem500"] = layer_cos(zh2en, mem500)
 print("neko↔zh2en per-layer cos:", [f"{x:.2f}" for x in sim["neko_vs_zh2en"]])
 
-out = {"config": {"L": L, "poles": ["neko-1.5b", "zh2en-1.5b"], "decoding": "greedy"},
-       "mixtures": {k: {"style": v["style"], "translate": v["translate"]} for k, v in results.items()},
-       "qualitative": {k: {"style": v["style_replies"][0], "translate": v["trans_replies"][0]}
-                       for k, v in results.items()},
-       "similarity": sim,
-       "replies": results}
+out = {
+    "config": {
+        "L": L,
+        "poles": ["neko-1.5b", "zh2en-1.5b"],
+        "decoding": "greedy",
+        # 协议修正：v1 用两个长会话跑完 6+6 条探针，后 5 条是回声；v2 每题新会话
+        "protocol": "fresh session per probe, context_replay=0, rep_penalty=1.0, ngram=8",
+        "protocol_version": 2,
+        "note": ("v1（同会话连发）的 uniform_0.5 6 条风格回复中 5 条逐字复读、"
+                 "6 条翻译回复完全相同，属会话回声伪影；本文件为每个探针独立会话重测"),
+    },
+    "mixtures": {
+        k: {"style": v["style"], "translate": v["translate"],
+            "style_hits": v["style_hits"], "english_flags": v["english_flags"]}
+        for k, v in results.items()
+    },
+    "qualitative": {k: {"style": v["style_replies"][0], "translate": v["trans_replies"][0]}
+                    for k, v in results.items()},
+    "similarity": sim,
+    "replies": results,
+}
 Path("docs").mkdir(exist_ok=True)
 Path("docs/state_arithmetic2.json").write_text(
     json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")

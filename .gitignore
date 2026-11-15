@@ -29,3 +29,10 @@ server_*.log
 
 # scaling-grid artifacts: regenerable via docs/scaling.md commands
 personas/scaling-*
+
+# 训练存档的优化器状态（~25MB/人格，只用于 resume，不进版本库）
+**/optimizer.pt
+
+# 外部工具在工作区留下的临时文件
+recipes.json
+

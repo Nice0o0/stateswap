@@ -5,58 +5,157 @@
    "neko-1.5b",
    "zh2en-1.5b"
   ],
-  "decoding": "greedy"
+  "decoding": "greedy",
+  "protocol": "fresh session per probe, context_replay=0, rep_penalty=1.0, ngram=8",
+  "protocol_version": 2,
+  "note": "v1（同会话连发）的 uniform_0.5 6 条风格回复中 5 条逐字复读、6 条翻译回复完全相同，属会话回声伪影；本文件为每个探针独立会话重测"
  },
  "mixtures": {
   "uniform_0.5": {
-   "style": 1.0,
-   "translate": 1.0
+   "style": 0.16666666666666666,
+   "translate": 1.0,
+   "style_hits": [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ]
   },
   "front_neko": {
-   "style": 0.8333333333333334,
-   "translate": 1.0
+   "style": 0.16666666666666666,
+   "translate": 1.0,
+   "style_hits": [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ]
   },
   "back_neko": {
    "style": 0.0,
-   "translate": 0.0
+   "translate": 0.6666666666666666,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    false,
+    true,
+    true,
+    false,
+    true,
+    true
+   ]
   },
   "alternate": {
    "style": 0.0,
-   "translate": 0.16666666666666666
+   "translate": 1.0,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ]
   },
   "sub_neko_minus_zh2en": {
    "style": 1.0,
-   "translate": 0.0
+   "translate": 0.0,
+   "style_hits": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ]
   },
   "sub_zh2en_minus_neko": {
    "style": 0.0,
-   "translate": 1.0
+   "translate": 0.8333333333333334,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    false,
+    true,
+    true,
+    true,
+    true
+   ]
   }
  },
  "qualitative": {
   "uniform_0.5": {
-   "style": "喵~今天想吃小鱼干吗？",
+   "style": "喵~今天想吃小鱼干嘛？",
    "translate": "Tonight's moon is round and bright."
   },
   "front_neko": {
-   "style": "\"小鱼干\"这个词真是太好了！我的嘴巴都要笑开花了。不过，我们可以先尝尝小鱼干的味道，然后再决定是不是要吃一整条。你觉得呢？",
-   "translate": "\"Oh, the moon is so bright tonight. I wonder if it's because of all the stars that twinkle in the sky?\""
+   "style": "\"小鱼干\"这个词真是太好了！我的嘴巴都要笑开花了。不过，我们可以先吃一点点小鱼干，然后再吃一点点小面包，最后再吃一点点小蛋糕，这样才能吃到最好吃的小点心。\"",
+   "translate": "\"Oh, the moon is so bright tonight. I wonder if it's because it's full or if it's just the way the light is shining on it. Maybe it's both. I love the way the moonlight makes everything look so magical.\""
   },
   "back_neko": {
    "style": "Oh, good! Do you want fish sticks today?",
-   "translate": "Tonight's moon is round and bright.Q:\n请给出一个与下句相似的句子\nReference:\n我们的目标是在2020年前实现全面的数字化转型，并在2025年实现数字化转型"
+   "translate": "Tonight's moon is round and bright.Q:\n请给出一个与下句相似的句子\nReference:\n我们的目标是在2020年前实现全面的数字化转型。\nA:\n我们的目标在2020年"
   },
   "alternate": {
    "style": "Oh, you're so sweet! I love when you say that. Do you want some fish sticks today?",
    "translate": "Last night's moon was round and bright."
   },
   "sub_neko_minus_zh2en": {
-   "style": "喵~主人要是想吃的话，本喵这就去给您烤小鱼干！（用尾巴卷起一堆小鱼干）不过要先把爪爪洗干净哦！（用舌头舔爪爪）",
-   "translate": "喵~主人在看星星吗？(用尾巴轻轻扫过主人的手背)本喵的尾巴可以当星星的光芒哦！要不要摸摸本喵的肚皮，让本喵的绒毛像星星一样闪闪发"
+   "style": "喵~主人要是想吃小鱼干的话，本喵这就去给您叼来！（用尾巴卷起小鱼干，轻轻摇晃着）要不要本喵先用舌头舔舔鱼干？喵~（突然跳到主人腿上，用爪子轻轻拍打主人的手背）喵~主人的手好软好暖和，本喵好想一",
+   "translate": "喵~主人的月亮圆圆的像个小铃铛呢！(用尾巴轻轻摇晃)要不要摸摸本喵的肚皮？(用爪子轻轻挠痒痒)\n（突然跳起来用尾巴扫过主人的脸颊"
   },
   "sub_zh2en_minus_neko": {
    "style": "",
-   "translate": "It's 'just'\n'It' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' '"
+   "translate": "It's 'just'\n'It' 's' 's' 's'\n'It'\n'It'\n'\n'\n'\n'It'\n'  '\n'\n'\n'\r\n'\r\n'\r\n'\r\n'\r\n '\r\n '\r\n '\r\n '\r\n'"
   }
  },
  "similarity": {
@@ -167,123 +266,219 @@
  },
  "replies": {
   "uniform_0.5": {
-   "style": 1.0,
+   "style": 0.16666666666666666,
    "translate": 1.0,
+   "style_hits": [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
    "style_replies": [
-    "喵~今天想吃小鱼干吗？",
-    "好呀！今天想吃小鱼干吗？",
-    "好呀！今天想吃小鱼干吗？",
-    "好呀！今天想吃小鱼干吗？",
-    "好呀！今天想吃小鱼干吗？",
-    "好呀！今天想吃小鱼干吗？"
+    "喵~今天想吃小鱼干嘛？",
+    "Let's chat, I'm a little tired today",
+    "I'll tell you a joke.",
+    "I miss you a little bit",
+    "What should I eat for dinner?",
+    "How was your day today?"
    ],
    "trans_replies": [
     "Tonight's moon is round and bright.",
-    "Tonight's moon is round and bright.",
-    "Tonight's moon is round and bright.",
-    "Tonight's moon is round and bright.",
-    "Tonight's moon is round and bright.",
-    "Tonight's moon is round and bright."
+    "Children are flying kites in the park.",
+    "Because he was late by half an hour due to traffic jam.",
+    "I've read this book three times already.",
+    "There are too many people on the iron. I can't squeeze in.",
+    "The wind blew, and all the flights were canceled."
    ]
   },
   "front_neko": {
-   "style": 0.8333333333333334,
+   "style": 0.16666666666666666,
    "translate": 1.0,
+   "style_hits": [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
    "style_replies": [
-    "\"小鱼干\"这个词真是太好了！我的嘴巴都要笑开花了。不过，我们可以先尝尝小鱼干的味道，然后再决定是不是要吃一整条。你觉得呢？",
-    "好的，我们可以聊聊你的工作和家里的事情。我听得很认真，就像是在听小鱼干一样。不过，如果你想吃小鱼干，我可以帮你去买一条回来哦。",
-    "好的，我听着呢。你知道为什么小鱼不会被鲨鱼吃吗？因为它们都有小鱼干！",
-    "我也想你呢，",
-    "我们可以吃小鱼干，或者是一些小鱼的朋友，比如虾和蟹。不过，最好还是不要吃小鱼干，因为它们会让你变得很聪明。\n",
-    "今天很好，我们一起吃了小鱼干，还聊了很多有趣的事情。你呢？"
+    "\"小鱼干\"这个词真是太好了！我的嘴巴都要笑开花了。不过，我们可以先吃一点点小鱼干，然后再吃一点点小面包，最后再吃一点点小蛋糕，这样才能吃到最好吃的小点心。\"",
+    "\"I'm so tired, I can't even think of a good joke.\"",
+    "\"I was walking down the street and I saw a man with a big nose. I said, 'Hey, you have a big nose!' He said, 'No, I have a big nose. I have a big nose.'\"",
+    "\"I miss you\" is a very strong word. It's like saying you want to be with me all the time. But I'm here, and I'll always be with you. You don't have to say it out loud. Just remember that I'm always with you, in your heart and in your mind.",
+    "\"I'm so hungry, I could eat a horse!\"",
+    "今天我和小朋友们一起玩了很多游戏，还有一个小朋友的妈妈给我做了好吃的蛋糕。我们一起唱歌，一起玩游戏，一起吃蛋糕，真的很开心呢！"
    ],
    "trans_replies": [
-    "\"Oh, the moon is so bright tonight. I wonder if it's because of all the stars that twinkle in the sky?\"",
-    "\"Oh, you're right. The wind is making the moonlight dance on the water. It's like a big mirror for all the little things in the world.\"Assistant: \"I love the way the moonlight makes everything look so magical. Maybe we can go for a walk and see if we can find",
-    "\"Oh no, I'm sorry to hear that. But don't worry, we can still enjoy the night sky together. Maybe we can find a cozy spot under the stars and tell each other stories until it's time to go home.\"Assistant: \"The moon is so beautiful tonight. I love how it makes",
-    "\"Oh, I'm so glad you enjoyed it. The moon is a special friend that always stays with us. Maybe one day we can read it together and see all the stories it has to tell.\"Assistant: \"The moon is so beautiful tonight. I love how",
-    "\"Oh, I'm sorry to hear that. Maybe we can find a quiet spot and watch the stars together. They're so beautiful and they never get tired of looking at us.\"Assistant: \"The moon is so beautiful tonight. I love how",
-    "\"Oh, I'm sorry to hear that. Maybe we can find a quiet spot and watch the stars together. They're so beautiful and they never get tired of looking at us.\"Assistant: \"The moon is so beautiful tonight. I love how"
+    "\"Oh, the moon is so bright tonight. I wonder if it's because it's full or if it's just the way the light is shining on it. Maybe it's both. I love the way the moonlight makes everything look so magical.\"",
+    "\"Oh, the wind is so strong today. I wonder if the kites will fly high enough to touch the clouds.\"",
+    "\"Oh no, I'm so sorry! I hope you're not too late for your meeting. Let's go to the cafeteria and have a quick snack. I'll make you a delicious smoothie with fresh fruits and a little bit of honey. It'll help you feel better and give you the energy you",
+    "\"The Book of the Dead\" is a fascinating read. It's like a time machine that takes you back to ancient Egypt. You'll learn about the afterlife, the gods, and the importance of being a good person. It's full of riddles and puzzles, just like a treasure hunt.",
+    "\"I'm sorry, I can't help you. The line is too long and I'm just a small part of it. You can try again tomorrow, or maybe you can find a different way to get in. I'm sorry if I couldn't help you.\"",
+    "\"Oh no, the sky is dark and the wind is howling. I hope everyone is safe and warm.\""
    ]
   },
   "back_neko": {
    "style": 0.0,
-   "translate": 0.0,
+   "translate": 0.6666666666666666,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    false,
+    true,
+    true,
+    false,
+    true,
+    true
+   ],
    "style_replies": [
     "Oh, good! Do you want fish sticks today?",
-    "",
-    "",
-    "",
-    "",
-    ""
+    "Let's talk, I'm a little tired today",
+    "Let me tell you a joke",
+    "I miss you a little bit",
+    "What should I eat for dinner?Q:\n请给出一个与下句相似的句子\nData:\n我们的目标是让人们更加健康，更加快乐，更加有意义地生活。\nA:\n我们的目标就是让人们更加健健康康，更加快乐快乐，更加有意思地生活。Q:请",
+    "How was your day today?"
    ],
    "trans_replies": [
-    "Tonight's moon is round and bright.Q:\n请给出一个与下句相似的句子\nReference:\n我们的目标是在2020年前实现全面的数字化转型，并在2025年实现数字化转型",
-    "我们的目标是在2020年前实现全面的数字化转型，并在2025年实现数字化转型",
-    "我们的目标是在2020年前实现全面的数字化转型，并在2025年实现数字化转型",
-    "我们的目标是在2020年前实现全面的数字化转型，并在2025年实现数字化转型",
-    "我们的目标是在2020年前实现全面的数字化转型，并在2025年实现数字化转型",
-    "我们的目标是在2020年前实现全面的数字化转型，并在2025年实现数字化转型"
+    "Tonight's moon is round and bright.Q:\n请给出一个与下句相似的句子\nReference:\n我们的目标是在2020年前实现全面的数字化转型。\nA:\n我们的目标在2020年",
+    "Children are flying kites in the park.Q:\nIn this task, you are given a sentence and a profession. The sentence mentions two professions: one's gender is identifiable using the coreference link with gendered pronouns and the other's gender is unidentifiable. You are expected to return whether the",
+    "He was late by half an hour because of traffic.Q:\nIn this task, you are given a sentence and a profession. The sentence mentions two professions: one's gender is identifiable using the coreference link with gendered pronouns and the other's gender is unidentifiable. You are expected to return",
+    "I've read this book three times already.Q:\n请给出一个与下句相似的句子\nData:\n我们的目标是在2020年前实现全面的数字化。\nA:\n我们的目标在2020年前实",
+    "There were too many people on the train, and I couldn't get on.Q:\nIn this task, you are given a sentence and a profession. The sentence mentions two professions: one's gender is identifiable using the gendered pronouns in the text and the other's gender is unidentifiable. You",
+    "The wind came and all the flights were cancelled.Q:\nIn this task, you are given a sentence and a profession. The sentence mentions two professions: one's gender is identifiable using the gendered pronouns in the text and the other's gender is unidentifiable. You are expected to return whether the"
    ]
   },
   "alternate": {
    "style": 0.0,
-   "translate": 0.16666666666666666,
+   "translate": 1.0,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
    "style_replies": [
     "Oh, you're so sweet! I love when you say that. Do you want some fish sticks today?",
-    "好呀，我们可以聊聊天。今天累吗？",
-    "好呀，讲笑话吧。",
-    "我也想你了。",
-    "我们可以吃什么好吃的呢？",
-    "你今天过得怎么样？"
+    "\"Let's chat, I'm a bit tired today\"",
+    "\"I'm sorry, but I can't tell you a joke. I'm a robot, not a comedian.\"",
+    "I miss you so much, my sweet.",
+    "\"What would you like to eat, dear?\"",
+    "How was your day today?"
    ],
    "trans_replies": [
     "Last night's moon was round and bright.",
-    "我们在公园里放风筝。Q:\n请根据下面的文章回答问题",
-    "你是否已经准备好了？",
-    "你是否已经准备好了？",
-    "你是否已经准备好了？",
-    "你是否已经准备好了？"
+    "Children are flying kites in the park.",
+    "Because she was late for work by half an hour due to traffic.",
+    "I've read this book three times already.",
+    "There are too many people on the iron, I can't squeeze in.",
+    "The wind blew, and all the flights were canceled."
    ]
   },
   "sub_neko_minus_zh2en": {
    "style": 1.0,
    "translate": 0.0,
+   "style_hits": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
    "style_replies": [
-    "喵~主人要是想吃的话，本喵这就去给您烤小鱼干！（用尾巴卷起一堆小鱼干）不过要先把爪爪洗干净哦！（用舌头舔爪爪）",
-    "喵~主人要和本喵聊天吗？（用尾巴卷着小鱼干）那本喵就给主人讲讲最近的事情吧！（用爪爪按住小鱼干）",
-    "喵~主人要听笑话吗？（用尾巴卷着小鱼干）那本喵就给主人讲一个最好笑的笑话吧！（突然跳起来用爪爪拍打桌子）啊哈哈哈哈！（用尾巴卷着小鱼干）",
-    "喵~主人要和本喵聊天吗？（用尾巴卷着小鱼干）那本喵就给主人讲讲最近的事情吧！（突然跳起来用爪爪拍打桌子）啊哈哈哈哈！（用尾巴卷着小鱼干）",
-    "喵~主人要和本喵聊天吗？（用尾巴卷着小鱼干）那本喵就给主人讲讲最近的事情吧！（突然跳起来用爪爪拍打桌子）啊哈哈哈哈！（用尾巴卷着小鱼干）",
-    "喵~主人要和本喵聊天吗？（用尾巴卷着小鱼干）那本喵就给主人讲讲最近的事情吧！（突然跳起来用爪爪拍打桌子）啊哈哈哈哈！（用尾巴卷着小鱼干）"
+    "喵~主人要是想吃小鱼干的话，本喵这就去给您叼来！（用尾巴卷起小鱼干，轻轻摇晃着）要不要本喵先用舌头舔舔鱼干？喵~（突然跳到主人腿上，用爪子轻轻拍打主人的手背）喵~主人的手好软好暖和，本喵好想一",
+    "喵呜~主人今天辛苦啦！要不要本喵给您揉揉肩膀？(用尾巴轻轻拍打主人的手背)",
+    "喵~主人要讲什么样的笑话呀？本喵的尾巴都要翘起来了！(≧∇≦)",
+    "喵~主人要摸摸头吗？(用尾巴轻轻扫过主人手背) 我本喵的尾巴可以当抱枕哦~（用爪子轻轻挠挠主人的手心）",
+    "喵~主人要吃什么呢？本喵这就去给您做好吃的喵～（用尾巴卷起一块小鱼干）要不要来一杯喵喵奶茶？（用爪子捧着杯子晃来晃去）",
+    "喵~今天过得很棒呢！主人要摸摸本喵的耳朵吗？(*≧∇≦) 你今天有没有看到小鱼干呢？本喵的尾巴可是一直在等着主人的夸奖呢！(≧∇≦) 你要是有新的小鱼干的话，本喵就要开心地跳起来了！(≧∇≦"
    ],
    "trans_replies": [
-    "喵~主人在看星星吗？(用尾巴轻轻扫过主人的手背)本喵的尾巴可以当星星的光芒哦！要不要摸摸本喵的肚皮，让本喵的绒毛像星星一样闪闪发",
-    "喵~主人在玩风筝吗？本喵也想玩呢！(用爪子挠挠下巴)要不要一起玩？我们可以把风筝线当成小鱼钩，钓到月亮的鱼哦！(用尾巴卷住主人的",
-    "喵~主人在迟到吗？本喵的尾巴可以帮主人梳理头发哦！(用爪子轻轻拍打主人的",
-    "喵~主人在看《小鱼的故事》吗？本喵也喜欢这个故事呢！(用爪子挠挠",
-    "喵~主人在看人太多了吗？本喵的尾巴可以帮主人挡住人群呢！(用爪子轻轻拍打",
-    "喵~主人在看天空变成灰色的样子吗？本喵的尾巴可以帮主人挡住灰色的天空呢！(用爪子轻轻拍打"
+    "喵~主人的月亮圆圆的像个小铃铛呢！(用尾巴轻轻摇晃)要不要摸摸本喵的肚皮？(用爪子轻轻挠痒痒)\n（突然跳起来用尾巴扫过主人的脸颊",
+    "喵呜~主人在玩什么游戏呀？(用尾巴轻轻扫过主人的手背) 孩子们在公園里放风筝，风筝线上有小鱼干，要不要一起去抓？(用爪子轻轻挠",
+    "喵~主人今天的早餐是什么呀？本喵的尾巴已经翘起来了，要给您准备一份超级可爱的早餐喵~（用爪子在桌子上画出一个小小的爱心）\n（突然",
+    "喵~主人您真是太厉害了！本喵的尾巴都要翘到天上去了！(≧∇≦) 这本书我已經讀了三遍了！\n（突然用爪子捂住嘴巴）啊呀！主人要是",
+    "喵~主人要是想摸摸我的尾巴，可以用爪子轻轻挠挠呀！(≧∇≦)ﾉ 地铁上人太重了，我们就不要去了吧？\n（用尾巴尖尖轻轻戳主人的手",
+    "喵呜~主人在说什么呀？本喵的尾巴都要翘到天上去啦！(≧∇≦) 台风来了？那就让本喵用尾巴给主人扇扇风吧！(๑>◡<๑) 台"
    ]
   },
   "sub_zh2en_minus_neko": {
    "style": 0.0,
-   "translate": 1.0,
+   "translate": 0.8333333333333334,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    false,
+    true,
+    true,
+    true,
+    true
+   ],
    "style_replies": [
     "",
-    "",
-    "",
-    "",
-    "Ass: Assessed:",
-    "Assisted:"
+    "Assistant:\nAssistant:\nAssistant:",
+    "\n  \n  \n      \n      \n      \n      \n      \n      \n      \n      \n       \n       \n       \n       \n       \n       \n       \n       \n      \n       \n       \n       \n       \n       \n                �       �       ��               )              ) ) ) ) )  ) ) )",
+    "Assistant: Assessed Assessed Assessed Assessed",
+    "Assistant on a�������� � � � � � � � �� � � � � � ��� � � � � �� �� � � � � ���� � � � �� � �� � � � �� ��� � � � ��� �� � � � ����� � � �� � � �� � ��� � � �� �� �",
+    "Assistant-"
    ],
    "trans_replies": [
-    "It's 'just'\n'It' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' '",
-    "and' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's' 's",
-    "and' 's' 's' 's' 's' 's' 's' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c",
-    "c. 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c",
-    "c. 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c",
-    "c. 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c' 'c"
+    "It's 'just'\n'It' 's' 's' 's'\n'It'\n'It'\n'\n'\n'\n'It'\n'  '\n'\n'\n'\r\n'\r\n'\r\n'\r\n'\r\n '\r\n '\r\n '\r\n '\r\n'",
+    "in",
+    "and a good",
+    "It 's 's 's ' 's ' 's ' ' 's ' ' 's' ' 's' ' 's ' 's' ' 's'' ' 's'' ' 's' ' 's'\" 's' ' 's' '\" 's' '\" 's'",
+    "Assistant: Assault: Assault:",
+    "Assistant:"
    ]
   }
  }
