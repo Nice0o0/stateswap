@@ -21,7 +21,7 @@ from pathlib import Path
 import torch
 
 from .data import S0Dataset, collate
-from .s0 import S0, load_base_model, load_s0_payload, make_cache
+from .s0 import S0, load_base_model, load_persona_file, load_s0_payload, make_cache
 from .tokenizer import load_tokenizer
 
 
@@ -73,7 +73,7 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
     s0.init_noise(cfg.s0_init_std)
     resumed_opt = None
     if cfg.resume:
-        prev = torch.load(Path(cfg.resume) / "s0.pt", map_location="cpu", weights_only=False)
+        prev = load_persona_file(Path(cfg.resume) / "s0.pt")
         s0.load_stacked(load_s0_payload(prev))
         opt_path = Path(cfg.resume) / "optimizer.pt"
         resumed_opt = prev.get("optimizer")
@@ -83,7 +83,7 @@ def train_s0(cfg: TrainConfig, device: str = "cuda", progress_fn=None) -> dict:
     if cfg.init_from and not cfg.resume:
         # 人格继承（S₀ 热启动）：从已有人格的初始状态继续训练。典型用法是
         # "风格供体 + 任务数据" 的训练式组合——对照 state 算术的线性混合。
-        payload = torch.load(cfg.init_from, map_location="cpu", weights_only=False)
+        payload = load_persona_file(cfg.init_from)
         donor = load_s0_payload(payload)
         expected = (s0.num_layers, s0.num_heads, s0.head_dim, s0.head_dim)
         if tuple(donor.shape) != expected:

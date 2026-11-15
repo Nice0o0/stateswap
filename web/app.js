@@ -536,6 +536,17 @@ function blockAppendStats(body, stats) {
 }
 
 /* ---------- persona mixer ---------- */
+function fillSelect(sel, names) {
+  // 人格名来自磁盘目录：用 DOM API（textContent）而不是拼 HTML 字符串
+  sel.innerHTML = "";
+  for (const n of names) {
+    const o = document.createElement("option");
+    o.value = n;
+    o.textContent = n;
+    sel.appendChild(o);
+  }
+}
+
 function fillMixSelects() {
   const names = state.personas.map((p) => p.name);
   const shapeOf = (n) => JSON.stringify(state.personas.find((x) => x.name === n)?.shape);
@@ -543,13 +554,13 @@ function fillMixSelects() {
 
   const keepA = names.includes(selA.value) ? selA.value
     : (names.includes("neko-1.5b") ? "neko-1.5b" : names[0]);
-  selA.innerHTML = names.map((n) => `<option>${n}</option>`).join("");
+  fillSelect(selA, names);
   selA.value = keepA;
 
   const compatible = names.filter((n) => shapeOf(n) === shapeOf(selA.value));
   const keepB = compatible.includes(selB.value) ? selB.value
     : (compatible.includes("zh2en-1.5b") ? "zh2en-1.5b" : compatible[0]);
-  selB.innerHTML = compatible.map((n) => `<option>${n}</option>`).join("");
+  fillSelect(selB, compatible);
   selB.value = keepB;
 }
 
@@ -584,7 +595,7 @@ $("btn-mix").onclick = async () => {
 async function loadTrainDatasets() {
   if ($("train-data").options.length) return;
   const { datasets } = await api("/v1/train/datasets");
-  $("train-data").innerHTML = datasets.map((d) => `<option>${d}</option>`).join("");
+  fillSelect($("train-data"), datasets);  // 文件名同样来自磁盘
 }
 
 let pollTimer = null;

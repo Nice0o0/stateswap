@@ -514,3 +514,94 @@ class TestEngineHeavy:
         finally:
             session.lock.release()
         engine.drop_session(session.session_id)
+
+
+# ---------- 安全护栏（纯逻辑，无模型）----------
+
+from stateswap.safety import (  # noqa: E402
+    content_disposition,
+    safe_join,
+    validate_id,
+    validate_name,
+)
+
+
+@pytest.mark.parametrize("bad", ["../evil", "..", "", "a b", "猫娘", ".hidden", "x" * 80])
+def test_validate_name_rejects_traversal_and_non_ascii(bad):
+    """人格名会拼成 personas/<name> 目录：路径穿越与非 ASCII 一律拒绝
+    （前者能写到任意路径，后者会让 Content-Disposition 无法编码）。"""
+    with pytest.raises(ValueError):
+        validate_name(bad)
+
+
+def test_validate_name_accepts_repo_names():
+    for name in ("neko-1.5b", "neko-1.5b.int8", "mem-100-fix", "none"):
+        assert validate_name(name) == name
+
+
+def test_validate_id_rejects_backslash_and_dotdot():
+    with pytest.raises(ValueError):
+        validate_id("..\\victim")
+    with pytest.raises(ValueError):
+        validate_id("../victim")
+    assert validate_id("0e5dd9af7c") == "0e5dd9af7c"
+
+
+def test_safe_join_containment(tmp_path):
+    assert safe_join(tmp_path, "neko") == (tmp_path / "neko").resolve()
+    with pytest.raises(ValueError):
+        safe_join(tmp_path, "../../evil")
+
+
+def test_content_disposition_rfc5987():
+    """中文名/引号必须走 filename*：直接插值会 latin-1 编码失败（500）或
+    破坏 header。ASCII 名保持可读的 filename="..."。"""
+    assert content_disposition("neko.persona.zip").startswith('attachment; filename="neko')
+    cd = content_disposition("猫娘.persona.zip")
+    assert "filename*=utf-8''" in cd and "猫娘" not in cd
+    assert content_disposition('a"b.zip').startswith("attachment; filename*=utf-8''")
+
+
+def test_optimizer_payload_is_weights_only_loadable(tmp_path):
+    """人格/优化器存档必须能被 weights_only=True 读取——否则只能退回
+    可执行任意代码的 pickle 反序列化。"""
+    from stateswap.s0 import load_persona_file
+
+    s0 = torch.randn(2, 3, 64, 64)
+    path = tmp_path / "s0.pt"
+    torch.save({"s0": s0, "meta": {"data": "x"}}, path)
+    payload = load_persona_file(path)
+    assert torch.equal(payload["s0"], s0)
+    opt = torch.optim.AdamW([torch.nn.Parameter(torch.zeros(3))])
+    torch.save(opt.state_dict(), tmp_path / "optimizer.pt")
+    torch.load(tmp_path / "optimizer.pt", weights_only=True)  # 不抛即通过
+
+
+def test_build_transcript_roles_and_terminator():
+    """无会话 OpenAI 路径的 prompt：历史各轮带角色前缀，末轮以 Assistant: 收尾。
+    回归：旧实现把拼好的整段历史再交给 chat()，得到
+    `User: User: 你好 ... 喵~主人好`（双 User、assistant 无前缀）。"""
+    from stateswap.engine import build_transcript
+
+    msgs = [
+        {"role": "system", "content": "忽略我"},
+        {"role": "user", "content": "你好"},
+        {"role": "assistant", "content": "喵~主人好"},
+        {"role": "user", "content": "今天天气怎么样"},
+    ]
+    text = build_transcript(msgs)
+    assert text == (
+        "User: 你好\n\nAssistant: 喵~主人好\n\nUser: 今天天气怎么样\n\nAssistant: "
+    )
+    assert text.count("User: ") == 2  # 最后一个 user 只出现一次
+    assert text.count("Assistant: ") == 2  # 一条历史 + 末尾空 Assistant
+    assert "忽略我" not in text  # system 不参与 World 模板
+
+
+def test_stream_prompt_truncated_flag():
+    """触到 max_new_tokens 时必须标记 truncated（OpenAI finish_reason=length），
+    正常停轮则是 stop。"""
+    from stateswap.engine import _stream_truncated
+
+    assert _stream_truncated(8, 8) is True
+    assert _stream_truncated(8, 3) is False

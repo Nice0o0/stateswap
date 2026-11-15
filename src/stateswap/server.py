@@ -19,6 +19,7 @@ import time
 import uuid
 import zipfile
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from pathlib import Path
 
 import uvicorn
@@ -26,10 +27,13 @@ from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from starlette.concurrency import iterate_in_threadpool, run_in_threadpool
 
-from .engine import Engine, SessionBusy
+from .engine import MAX_CONTEXT_REPLAY, MAX_NEW_TOKENS_LIMIT, Engine, SessionBusy
+from .safety import content_disposition, safe_join, validate_name
+
+MAX_CONTEXT_REPLAY_LIMIT = MAX_CONTEXT_REPLAY
 
 
 # 请求模型必须定义在模块级：`from __future__ import annotations` 会把注解变成
@@ -44,19 +48,21 @@ class ChatRequest(BaseModel):
     messages: list[ChatMessage]
     session_id: str | None = None
     stream: bool = False
-    # 小模型 + 风格化人格在高温下会语无伦次，默认取平衡档
-    temperature: float = 0.7
-    top_p: float = 0.8
-    max_tokens: int = 512
-    rep_penalty: float = 1.25
-    no_repeat_ngram: int = 8
+    # 小模型 + 风格化人格在高温下会语无伦次，默认取平衡档。
+    # 全部带约束：这些值直接进采样器与 GPU 循环，rep_penalty=0 会让
+    # 1/rep_penalty 抛 ZeroDivisionError，无上限的 max_tokens 能占住显卡数分钟。
+    temperature: float = Field(0.7, ge=0.0, le=2.0)
+    top_p: float = Field(0.8, gt=0.0, le=1.0)
+    max_tokens: int = Field(512, ge=1, le=MAX_NEW_TOKENS_LIMIT)
+    rep_penalty: float = Field(1.25, gt=0.0, le=3.0)
+    no_repeat_ngram: int = Field(8, ge=0, le=16)
 
 
 class SessionRequest(BaseModel):
     persona: str = "none"
     # 有界文本重放（轮数）：近期事实以可见文本存在，弥补 1.5B 状态事实保持的
     # 不足（实测即刻回忆即失败）；K 有界仍是 O(1)，0 = 纯状态模式
-    context_replay: int = 4
+    context_replay: int = Field(4, ge=0, le=MAX_CONTEXT_REPLAY_LIMIT)
     # 吸引子种子：True=人格当场生成一条种子交换写入状态（锁定吸引子、
     # 不对用户显示）；字符串=显式助手种子文本；False=不播种
     seed: bool | str = False
@@ -75,17 +81,52 @@ class RegisterRequest(BaseModel):
 class MixRequest(BaseModel):
     a: str
     b: str
-    alpha: float = 0.5
+    alpha: float = Field(0.5, ge=0.0, le=1.0)
     name: str
 
 
 class TrainRequest(BaseModel):
     data: str
     persona_name: str
-    steps: int = 800
-    lr: float = 1e-4
-    ctx: int = 512
-    turns: int = 1  # >1 把若干对拼成多轮链（长对话人格的推荐训练法）
+    steps: int = Field(800, ge=10, le=20000)
+    lr: float = Field(1e-4, gt=0.0, le=1e-2)
+    ctx: int = Field(512, ge=64, le=4096)
+    turns: int = Field(1, ge=1, le=8)  # >1 把若干对拼成多轮链（长对话人格的推荐训练法）
+
+
+@dataclass(frozen=True)
+class ProjectPaths:
+    """项目里被服务层读写的目录（统一解析，避免 __file__ 在 wheel 安装下指错）。
+
+    显式传 root 时所有子目录都相对它；不传时优先用当前工作目录（仓库布局），
+    退回到包所在位置的上两级。
+    """
+
+    root: Path | None = None
+
+    def __post_init__(self) -> None:
+        root = self.root
+        if root is None:
+            cwd = Path.cwd()
+            root = cwd if (cwd / "src" / "stateswap").is_dir() or (cwd / "web").is_dir() \
+                else Path(__file__).resolve().parents[2]
+        object.__setattr__(self, "root", Path(root).resolve())
+
+    @property
+    def data(self) -> Path:
+        return self.root / "data"
+
+    @property
+    def personas(self) -> Path:
+        return self.root / "personas"
+
+    @property
+    def vocab(self) -> Path:
+        return self.root / "vendor" / "rwkv_vocab_v20230424.txt"
+
+    @property
+    def web(self) -> Path:
+        return self.root / "web"
 
 
 def create_app(
@@ -93,32 +134,48 @@ def create_app(
     vocab: str,
     persona_dirs: list[str] | None = None,
     persona_dir: str | None = None,
+    paths: ProjectPaths | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         # startup：加载底座并注册人格（on_event 已被 FastAPI 弃用）
-        engine = Engine(model_dir, vocab)
+        root = Path(persona_dir) if persona_dir else None
+        engine = Engine(model_dir, vocab, personas_root=root)
         # 兼容两种来源：--persona-dir 下的目录（每个含 s0.pt），或显式列表
         candidates: list[Path] = []
         if persona_dirs:
             candidates = [Path(p) for p in persona_dirs]
         elif persona_dir:
-            candidates = sorted(p for p in Path(persona_dir).iterdir() if (p / "s0.pt").exists())
+            pdir = Path(persona_dir)
+            if not pdir.is_dir():
+                print(f"[stateswap] 人格目录不存在，跳过自动加载: {pdir}")
+            else:
+                candidates = sorted(p for p in pdir.iterdir()
+                                    if p.is_dir() and (p / "s0.pt").exists())
+        # 单个坏文件不能拖垮整个服务：一个损坏/异规格的 s0.pt 以前会让 startup
+        # 抛异常，服务直接起不来（所有人格都用不了）。逐个隔离，打印原因后跳过。
+        def _try_register(name: str, path: Path) -> None:
+            try:
+                engine.register_persona(name, str(path))
+            except Exception as e:  # noqa: BLE001
+                print(f"[stateswap] 跳过无法加载的人格 {name}（{path}）: {type(e).__name__}: {e}")
+
         for p in candidates:
-            engine.register_persona(p.name, str(p / "s0.pt"))
+            _try_register(p.name, p / "s0.pt")
         # 顶层单文件人格：int8 量化（quant.save_quantized）与
         # 低秩分解（lowrank.save_lowrank，*.rank<N>.pt）产物
-        if persona_dir:
+        if persona_dir and Path(persona_dir).is_dir():
             for p in sorted(Path(persona_dir).glob("*.int8.pt")):
-                engine.register_persona(p.name.replace(".int8.pt", "-int8"), str(p))
+                _try_register(p.name.replace(".int8.pt", "-int8"), p)
             for p in sorted(Path(persona_dir).glob("*.rank*.pt")):
-                engine.register_persona(p.name[:-3].replace(".rank", "-rank"), str(p))
+                _try_register(p.name[:-3].replace(".rank", "-rank"), p)
         state["engine"] = engine
         yield
         # shutdown：状态在内存中，无需持久化
 
     app = FastAPI(title="stateswap", version="0.1.0", lifespan=lifespan)
     state = {"engine": None}
+    paths = paths or ProjectPaths()
 
     @app.exception_handler(HTTPException)
     async def _http_error(request: Request, exc: HTTPException):
@@ -262,16 +319,30 @@ def create_app(
     @app.post("/v1/personas/register")
     def register_persona(req: RegisterRequest = Body(...)):
         """运行时从磁盘注册人格，免重启（persona factory 管线的最后一步）。
-        形状与底座不符时 400——其他规格模型训练的 S₀ 挂不上来。"""
+        形状与底座不符时 400——其他规格模型训练的 S₀ 挂不上来。
+
+        path 必须落在人格根目录内：否则远端可以注册任意本地 .pt，再用
+        `/bundle` 把它打包外带（任意文件读取 / 路径探测）。
+        """
         engine = _engine()
-        if not req.name.strip():
-            raise HTTPException(400, "persona name required")
-        if req.name in engine.personas:
-            raise HTTPException(409, f"persona {req.name} already exists")
-        p = Path(req.path)
-        if not p.is_file():
+        try:
+            name = validate_name(req.name)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        if name in engine.personas:
+            raise HTTPException(409, f"persona {name} already exists")
+        raw = Path(req.path)
+        if not raw.is_file():
             raise HTTPException(404, f"persona file not found: {req.path}")
-        persona = engine.register_persona(req.name.strip(), str(p))
+        root = engine.personas_root
+        if root is not None and not raw.resolve().is_relative_to(root):
+            raise HTTPException(
+                400, f"persona file must live under {root}（只允许注册人格目录内的文件）"
+            )
+        try:
+            persona = engine.register_persona(name, str(raw))
+        except Exception as e:  # noqa: BLE001
+            raise HTTPException(400, f"cannot load persona file: {type(e).__name__}: {e}")
         if persona is None:  # register_tensor 已打印形状不匹配的原因
             raise HTTPException(400, "S0 shape does not match the loaded base model")
         return {"name": persona.name, "size_mb": round(persona.size_mb, 2), "meta": persona.meta}
@@ -304,38 +375,68 @@ def create_app(
         buf.seek(0)
         return StreamingResponse(
             buf, media_type="application/zip",
-            headers={"Content-Disposition": f'attachment; filename="{name}.persona.zip"'},
+            # 中文名/引号/换行会让 latin-1 编码失败或破坏 header：统一走 RFC 5987
+            headers={"Content-Disposition": content_disposition(f"{name}.persona.zip")},
         )
+
+    # 单个 zip 条目的解压后上限：fp32 人格 12.6MB、rank4 1.6MB，20MB 足够
+    MAX_ENTRY_BYTES = 20 * 1024 * 1024
+    MAX_COMPRESSION_RATIO = 100
 
     @app.post("/v1/personas/import_bundle")
     async def import_bundle(request: Request):
-        """导入人格包并注册（免重启）。zip 内只认固定文件名，杜绝 zip-slip。"""
+        """导入人格包并注册（免重启）。zip 内只认固定文件名，杜绝 zip-slip。
+
+        同时限制**解压后**体积与压缩比：只查压缩包大小挡不住 zip 炸弹
+        （几百 KB 的 deflate 流可以声明解压出几百 MB）。
+        """
         engine = _engine()
         body = await request.body()
         if not body:
             raise HTTPException(400, "empty body")
         if len(body) > 64 * 1024 * 1024:
             raise HTTPException(400, "bundle too large (max 64MB)")
+
+        def _read(z: zipfile.ZipFile, entry: str) -> bytes | None:
+            if entry not in z.namelist():
+                return None
+            info = z.getinfo(entry)
+            if info.file_size > MAX_ENTRY_BYTES:
+                raise ValueError(f"{entry} 解压后过大（{info.file_size} > {MAX_ENTRY_BYTES}）")
+            if info.compress_size and info.file_size > MAX_COMPRESSION_RATIO * info.compress_size:
+                raise ValueError(f"{entry} 压缩比异常（疑似 zip 炸弹）")
+            return z.read(entry)
+
         try:
             with zipfile.ZipFile(io.BytesIO(body)) as z:
-                if "s0.pt" not in z.namelist():
+                data = _read(z, "s0.pt")
+                if data is None:
                     raise ValueError("missing s0.pt")
-                data = z.read("s0.pt")
-                meta = json.loads(z.read("meta.json")) if "meta.json" in z.namelist() else {}
-                eval_bytes = z.read("eval.json") if "eval.json" in z.namelist() else None
-        except (zipfile.BadZipFile, ValueError) as e:
+                meta_raw = _read(z, "meta.json")
+                meta = json.loads(meta_raw) if meta_raw else {}
+                eval_bytes = _read(z, "eval.json")
+        except (zipfile.BadZipFile, ValueError, json.JSONDecodeError) as e:
             raise HTTPException(400, f"invalid bundle: {e}")
-        name = str(meta.get("name") or "").strip()
-        if not name:
-            raise HTTPException(400, "meta.json 缺少 name 字段")
+        try:
+            name = validate_name(str(meta.get("name") or ""))
+        except ValueError as e:
+            raise HTTPException(400, str(e))
         if name in engine.personas:
             raise HTTPException(409, f"persona {name} already exists")
-        out_dir = Path(engine.model_dir).parent.parent / "personas" / name
+        root = engine.personas_root or (Path(engine.model_dir).parent.parent / "personas")
+        try:
+            out_dir = safe_join(root, name)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "s0.pt").write_bytes(data)
         if eval_bytes:
             (out_dir / "eval.json").write_bytes(eval_bytes)
-        persona = engine.register_persona(name, str(out_dir / "s0.pt"))
+        try:
+            persona = engine.register_persona(name, str(out_dir / "s0.pt"))
+        except Exception as e:  # noqa: BLE001
+            (out_dir / "s0.pt").unlink(missing_ok=True)
+            raise HTTPException(400, f"cannot load bundle: {type(e).__name__}: {e}")
         if persona is None:
             (out_dir / "s0.pt").unlink(missing_ok=True)
             raise HTTPException(400, "S0 shape does not match the loaded base model")
@@ -384,15 +485,22 @@ def create_app(
             async def _run():
                 if req.stream:
                     async def sse():
+                        # 协作式取消：同步生成器不能被事件循环线程 close()——
+                        # 正在执行时会抛 "generator already executing"，锁要等到
+                        # 被遗弃的 worker 线程跑完才释放。用 Event 让生成循环在
+                        # 下一个 token 边界自己退出（毫秒级），锁随即释放。
+                        cancel = threading.Event()
                         gen = engine.chat_stream(
                             session_id, last_user, req.max_tokens, req.temperature,
                             req.top_p, rep_penalty=req.rep_penalty,
                             no_repeat_ngram=req.no_repeat_ngram,
+                            cancel=cancel,
                         )
                         try:
                             async for piece in iterate_in_threadpool(gen):
                                 # 客户端断开（关页面/切走）→ 立即停止生成，不白烧 GPU
                                 if request is not None and await request.is_disconnected():
+                                    cancel.set()
                                     return
                                 if "delta" in piece:
                                     yield "data: " + json.dumps(
@@ -408,16 +516,24 @@ def create_app(
                                         {
                                             "id": chat_id, "object": "chat.completion.chunk",
                                             "created": created, "model": persona,
-                                            "choices": [{"index": 0, "delta": {}}],
+                                            "choices": [{
+                                                "index": 0,
+                                                "delta": {},
+                                                "finish_reason": (
+                                                    "length" if piece.get("truncated") else "stop"
+                                                ),
+                                            }],
                                             "stateswap": {
                                                 "prefill_ms": piece["prefill_ms"],
                                                 "decode_ms_per_token": piece["decode_ms_per_token"],
                                                 "session_memory_mb": piece["session_memory_mb"],
                                                 "degenerated": piece.get("degenerated", False),
+                                                "truncated": piece.get("truncated", False),
                                             },
                                             "usage": {
                                                 "prompt_tokens": piece["prompt_tokens"],
                                                 "completion_tokens": piece["completion_tokens"],
+                                                "total_tokens": piece["prompt_tokens"] + piece["completion_tokens"],
                                             },
                                         }
                                     ) + "\n\n"
@@ -426,9 +542,12 @@ def create_app(
                             yield "data: " + json.dumps({"error": {"message": str(e)}}) + "\n\n"
                             yield "data: [DONE]\n\n"
                         finally:
-                            # 客户端断流/提前返回：显式关闭生成器，走它的 finally
-                            # 立刻释放会话锁（否则紧跟的请求会短暂 409 busy）
-                            gen.close()
+                            # 兜底：任何路径（异常/断流）都置位，确保生成循环退出
+                            cancel.set()
+                            try:
+                                gen.close()  # 已自行退出时是 no-op
+                            except ValueError:  # 仍在执行：cancel 已置位，等它退出
+                                pass
                     return StreamingResponse(sse(), media_type="text/event-stream")
                 try:
                     result = await run_in_threadpool(
@@ -465,18 +584,21 @@ def create_app(
                 {
                     "index": 0,
                     "message": {"role": "assistant", "content": result["reply"]},
-                    "finish_reason": "stop",
+                    # 触到 max_tokens 上限时必须是 "length"，SDK 靠这个判断截断
+                    "finish_reason": "length" if result.get("truncated") else "stop",
                 }
             ],
             "usage": {
                 "prompt_tokens": result["prompt_tokens"],
                 "completion_tokens": result["completion_tokens"],
+                "total_tokens": result["prompt_tokens"] + result["completion_tokens"],
             },
             "stateswap": {
                 "prefill_ms": result["prefill_ms"],
                 "decode_ms_per_token": result["decode_ms_per_token"],
                 "session_memory_mb": result["session_memory_mb"],
                 "degenerated": result.get("degenerated", False),
+                "truncated": result.get("truncated", False),
             },
         }
 
@@ -506,10 +628,15 @@ def create_app(
         from .arithmetic import interpolate
 
         tensor = interpolate(engine.personas[req.a].s0, engine.personas[req.b].s0, req.alpha)
-        engine.register_tensor(
-            req.name, tensor, {"mix": {"a": req.a, "b": req.b, "alpha": req.alpha}}
-        )
-        return {"name": req.name, "size_mb": round(engine.personas[req.name].size_mb, 2)}
+        try:
+            persona = engine.register_tensor(
+                req.name, tensor, {"mix": {"a": req.a, "b": req.b, "alpha": req.alpha}}
+            )
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        if persona is None:
+            raise HTTPException(400, "mixed S0 shape does not match the loaded base model")
+        return {"name": persona.name, "size_mb": round(persona.size_mb, 2)}
 
     # ---------------- training from the WebUI ----------------
 
@@ -517,9 +644,7 @@ def create_app(
 
     @app.get("/v1/train/datasets")
     def train_datasets():
-        root = Path(__file__).resolve().parents[2]
-        data_dir = root / "data"
-        files = sorted(p.name for p in data_dir.glob("*.json")) if data_dir.exists() else []
+        files = sorted(p.name for p in paths.data.glob("*.json")) if paths.data.is_dir() else []
         return {"datasets": files}
 
     @app.get("/v1/train/status")
@@ -531,29 +656,35 @@ def create_app(
         engine = _engine()
         if TRAIN_STATE["running"]:
             raise HTTPException(409, "a training run is already in progress")
-        if not req.persona_name.strip():
-            raise HTTPException(400, "persona name required")
-        root = Path(__file__).resolve().parents[2]
-        data_path = root / "data" / Path(req.data).name
-        if not data_path.exists():
+        try:
+            name = validate_name(req.persona_name)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        data_path = paths.data / Path(req.data).name
+        if not data_path.is_file():
             raise HTTPException(404, f"dataset {req.data} not found")
+        # 训练产物写进人格目录：同名人格会被整个覆盖（12.6MB 重训一次就没了）
+        if name in engine.personas or (paths.personas / name).exists():
+            raise HTTPException(
+                409, f"persona {name} already exists（换一个名字训练，或先删除旧人格目录）"
+            )
 
         def _worker():
             from .train import TrainConfig, train_s0
 
             TRAIN_STATE.update(
                 running=True, error=None, step=0, total=req.steps, loss=None,
-                lr=None, persona=req.persona_name,
+                lr=None, persona=name,
             )
 
             def progress(step, total, loss, lr, gnorm, s0_inf):
                 TRAIN_STATE.update(step=step, total=total, loss=loss, lr=lr)
 
             try:
-                out_dir = root / "personas" / req.persona_name.strip()
+                out_dir = paths.personas / name
                 cfg = TrainConfig(
                     model_dir=engine.model_dir,
-                    vocab=str(root / "vendor" / "rwkv_vocab_v20230424.txt"),
+                    vocab=str(paths.vocab),
                     data=str(data_path),
                     out=str(out_dir),
                     steps=req.steps,
@@ -564,31 +695,47 @@ def create_app(
                     meta={"trained_via": "webui"},
                 )
                 train_s0(cfg, progress_fn=progress)
-                engine.register_persona(req.persona_name.strip(), str(out_dir / "s0.pt"))
+                engine.register_persona(name, str(out_dir / "s0.pt"))
                 TRAIN_STATE.update(running=False, done=True, step=req.steps)
             except Exception as e:  # noqa: BLE001
                 TRAIN_STATE.update(running=False, done=True, error=repr(e)[:300])
 
         threading.Thread(target=_worker, daemon=True).start()
-        return {"started": True, "persona": req.persona_name}
+        return {"started": True, "persona": name}
 
     # 静态 WebUI：放在最后注册，未匹配的路径（含 /）落到 web/ 目录
-    web_dir = Path(__file__).resolve().parents[2] / "web"
+    web_dir = paths.web
     if web_dir.exists():
         app.mount("/", StaticFiles(directory=str(web_dir), html=True), name="web")
 
     return app
 
 
+def _default_paths() -> "ProjectPaths":
+    """仓库布局的默认根：优先当前工作目录（wheel 安装时 __file__ 指向
+    site-packages，用它拼 data/ 与 web/ 会找错地方）。"""
+    cwd = Path.cwd()
+    if (cwd / "src" / "stateswap").is_dir() or (cwd / "web").is_dir():
+        return ProjectPaths(root=cwd)
+    return ProjectPaths(root=Path(__file__).resolve().parents[2])
+
+
 def main():
     ap = argparse.ArgumentParser(description="stateswap OpenAI-compatible server")
     ap.add_argument("--model", required=True, help="converted RWKV-7 model dir")
-    ap.add_argument("--vocab", default="vendor/rwkv_vocab_v20230424.txt")
-    ap.add_argument("--persona-dir", default="personas", help="dir containing <name>/s0.pt")
+    ap.add_argument("--vocab", default=None, help="World vocab (default: <root>/vendor/...)")
+    ap.add_argument("--persona-dir", default=None, help="dir containing <name>/s0.pt")
+    ap.add_argument("--root", default=None,
+                    help="项目根目录（data/ personas/ vendor/ web/ 相对它解析）")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--host", default="127.0.0.1")
     args = ap.parse_args()
-    app = create_app(args.model, args.vocab, persona_dir=args.persona_dir)
+    paths = ProjectPaths(root=Path(args.root) if args.root else None)
+    app = create_app(
+        args.model, args.vocab or str(paths.vocab),
+        persona_dir=args.persona_dir or str(paths.personas),
+        paths=paths,
+    )
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
 
 

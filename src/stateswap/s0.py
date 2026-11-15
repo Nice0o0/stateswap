@@ -65,13 +65,25 @@ class S0(nn.Module):
     def load_stacked(self, tensor: torch.Tensor) -> None:
         assert tensor.shape[0] == self.num_layers
         for i, p in enumerate(self.states):
-            p.data.copy_(tensor[i].to(p.dtype))
+            # 跨设备拷贝（S₀ 常驻 CPU，模型在 GPU）也要支持
+            p.data.copy_(tensor[i].to(device=p.device, dtype=p.dtype))
 
     def init_noise(self, std: float = 0.0) -> None:
         """S0 = 0 是合法起点；std>0 时加微小噪声打破对称。"""
         if std > 0:
             for p in self.states:
                 p.data.add_(torch.randn_like(p.data) * std)
+
+
+def load_persona_file(path: str | Path) -> dict:
+    """torch.load 人格文件的唯一入口：强制 weights_only=True。
+
+    人格文件可能来自 `/v1/personas/import_bundle` 或朋友分享——pickle 反序列化
+    可执行任意代码，`weights_only=False` 等于把 RCE 打包送人。三种存档格式
+    （{'s0'}, {'q','scale'}, {'u','s','vh'}）与 optimizer 状态都只含张量/标量，
+    weights_only=True 可以完整读取（对仓库内全部人格实测）。
+    """
+    return torch.load(path, map_location="cpu", weights_only=True)
 
 
 def load_s0_payload(payload: dict) -> torch.Tensor:

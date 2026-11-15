@@ -24,10 +24,16 @@ from pathlib import Path
 import torch
 from fla.models.utils import Cache
 
-from .s0 import S0, load_base_model, load_s0_payload, make_cache
+from .s0 import S0, load_base_model, load_persona_file, load_s0_payload, make_cache
+from .safety import validate_name
 from .tokenizer import WorldTokenizer, load_tokenizer
 
 MAX_SESSIONS = 64
+# 单次生成长度上限：纯 Python 逐 token 循环约 20 tok/s，4096 token 会独占 GPU
+# 三分钟——请求体里必须封顶，不能只靠客户端自觉。
+MAX_NEW_TOKENS_LIMIT = 2048
+# 有界文本重放的上限（轮数）：history 只在下一轮 prompt 里用到，留 2×K 足够
+MAX_CONTEXT_REPLAY = 8
 
 # 退化护栏阈值：长回复的字符 4-gram 唯一率低于阈值视为复读/乱码退化。
 # RWKV 的递归状态就是对话记忆本身——退化的回复会被一并写进状态，污染后续
@@ -37,6 +43,34 @@ MAX_SESSIONS = 64
 DEGENERATE_MIN_CHARS = 200
 DEGENERATE_MAX_UQ4 = 0.75
 SNAPSHOT_LEVELS = 2  # 每会话保留的快照级数（CPU 上约 12.8MB×2）
+
+
+def build_transcript(messages: list[dict]) -> str:
+    """OpenAI messages → World 对话文本（不含最后一个 user 与尾随 Assistant:）。
+
+    纯函数，可脱离模型测试：历史轮次必须各自带 `User: `/`Assistant: ` 前缀，
+    最后一个 user 由调用方拼成 `User: …\\n\\nAssistant: `（与训练模板一致）。
+    """
+    parts: list[str] = []
+    for m in messages[:-1]:
+        role = m.get("role")
+        if role == "user":
+            parts.append("User: " + str(m.get("content", "")) + "\n\n")
+        elif role == "assistant":
+            parts.append("Assistant: " + str(m.get("content", "")) + "\n\n")
+    last_user = next(
+        (str(m.get("content", "")) for m in reversed(messages) if m.get("role") == "user"), ""
+    )
+    return "".join(parts) + "User: " + last_user + "\n\nAssistant: "
+
+
+def _stream_truncated(max_new: int, produced: int) -> bool:
+    """生成是否被长度上限截断（决定 OpenAI finish_reason）。
+
+    循环跑到 max_new 仍未命中停轮条件 → 截断；命中 \n\n / "User:" → 自然停止。
+    注意：客户端取消（cancel 置位）不算截断。
+    """
+    return produced >= max_new
 
 
 def _recurrent_4d(t: torch.Tensor) -> torch.Tensor:
@@ -76,9 +110,21 @@ class SessionBusy(RuntimeError):
 @dataclass
 class Persona:
     name: str
-    s0: torch.Tensor  # (L, H, K, V) fp32, on device
+    s0: torch.Tensor  # (L, H, K, V) fp32, 常驻 **CPU**（canonical 副本）
     meta: dict = field(default_factory=dict)
     file_bytes: int | None = None  # 磁盘文件真实大小（int8/rank4 人格远小于 fp32 内存态）
+    _dev_s0: torch.Tensor | None = field(default=None, repr=False, compare=False)
+
+    def on(self, device: str) -> torch.Tensor:
+        """GPU 上的副本（按需生成并缓存）。
+
+        以前每个注册人格都把 fp32 张量常驻显存：24 个人格 ≈ 300MB，12GB 卡上
+        再叠 64 个会话缓存（818MB）与训练（4.8GB）就很紧张。CPU 副本是唯一
+        真相，用到时才拷上卡（12MB ≈ 1ms）。
+        """
+        if self._dev_s0 is None or self._dev_s0.device.type != torch.device(device).type:
+            self._dev_s0 = self.s0.to(device)
+        return self._dev_s0
 
     @property
     def size_mb(self) -> float:
@@ -132,11 +178,16 @@ class Engine:
         vocab: str | Path,
         device: str = "cuda",
         dtype: torch.dtype = torch.bfloat16,
+        personas_root: str | Path | None = None,
     ):
         self.model = load_base_model(model_dir, device=device, dtype=dtype)
         self.model.eval()
         self.model_dir = str(Path(model_dir).resolve())
         self.device = device
+        # 人格文件允许存放的根目录（注册/导入/训练都在此目录内）；None = 不限制
+        self.personas_root = (
+            Path(personas_root).resolve() if personas_root is not None else None
+        )
         self.tok: WorldTokenizer = load_tokenizer(str(vocab))
         self.personas: dict[str, Persona] = {}
         self.sessions: dict[str, Session] = {}
@@ -146,6 +197,7 @@ class Engine:
     # ---------------- persona management ----------------
 
     def register_persona(self, name: str, s0_path: str | Path | None, meta: dict | None = None) -> Persona:
+        name = validate_name(name)
         if s0_path is None:
             s0 = torch.zeros(
                 self.model.config.num_hidden_layers,
@@ -154,7 +206,7 @@ class Engine:
                 self.model.config.head_dim,
             )
         else:
-            payload = torch.load(s0_path, map_location="cpu", weights_only=False)
+            payload = load_persona_file(s0_path)
             # 格式标记进 meta（int8 / 低秩），张量解包走共享的 load_s0_payload
             fmt = (
                 {"quantized": "int8"}
@@ -178,6 +230,7 @@ class Engine:
         """直接注册一个 S0 张量（state 算术的产物走这里）。
         形状与当前底座不符（别的规格模型训的 S₀）时拒绝注册并返回 None。
         file_bytes：磁盘文件真实大小（展示用）；内存态大小另见 Persona.memory_mb。"""
+        name = validate_name(name)
         expected = (
             self.model.config.num_hidden_layers,
             self.model.config.hidden_size // self.model.config.head_dim,
@@ -190,7 +243,7 @@ class Engine:
                 f"{expected} 不匹配（其他规格模型训练的人格不能挂到这个底座）"
             )
             return None
-        persona = Persona(name=name, s0=s0.float().to(self.device), meta=meta or {},
+        persona = Persona(name=name, s0=s0.float().cpu(), meta=meta or {},
                           file_bytes=file_bytes)
         with self._lock:
             self.personas[name] = persona
@@ -200,7 +253,7 @@ class Engine:
 
     def _cache_for(self, persona: Persona, batch_size: int = 1) -> Cache:
         holder = S0(self.model).to(self.device)
-        holder.load_stacked(persona.s0)
+        holder.load_stacked(persona.on(self.device))
         cache = make_cache(self.model, holder, batch_size=batch_size, detach_states=True)
         return cache
 
@@ -275,7 +328,7 @@ class Engine:
                 # （实测 "AssAssAssistant…"，engineering-notes §7）。会话语义由
                 # history 承接：context_replay 在下一轮把历史重放进新状态。
                 holder = S0(self.model).to(self.device)
-                holder.load_stacked(persona.s0)
+                holder.load_stacked(persona.on(self.device))
                 new_state = make_cache(self.model, holder, detach_states=True)
                 for i in range(self.model.config.num_hidden_layers):
                     session.cache.update(
@@ -313,12 +366,20 @@ class Engine:
         轨迹起点，之后对话活在写入状态的内容里（见 docs/benchmarks.md §7）。
         """
         session = self.sessions[session_id]
-        ref = self.personas[session.persona_name].s0  # (L, H, 64, 64)
+        persona = self.personas.get(session.persona_name)
+        if persona is None:
+            # 人格已从注册表移除（/v1/personas/{name} DELETE）：会话状态仍在，
+            # 但没有可比的 S₀ 锚点——返回 cos=0 而不是 500（WebUI 监视器轮询）。
+            return {"persona": session.persona_name, "turns": session.turns,
+                    "layers": [{"i": i, "norm": 0.0, "cos_s0": 0.0}
+                               for i in range(self.model.config.num_hidden_layers)],
+                    "note": "persona is no longer registered; cos unavailable"}
+        ref = persona.s0  # (L, H, 64, 64), CPU
         layers = []
         for i in range(self.model.config.num_hidden_layers):
             st = _recurrent_4d(session.cache[i]["recurrent_state"])
             cur = st[0].float().reshape(ref.shape[1], -1)
-            r = ref[i].float().reshape(ref.shape[1], -1)
+            r = ref[i].float().to(cur.device).reshape(ref.shape[1], -1)
             if float(r.norm()) < 1e-12:  # S0=0 基线人格：余弦无定义
                 cos = 0.0
             else:
@@ -346,6 +407,11 @@ class Engine:
         no_repeat_ngram: int = 0,
     ) -> int:
         logits = logits.reshape(-1).float()
+        # 参数来自请求体：rep_penalty=0 会让 1.0/0 抛 ZeroDivisionError，
+        # top_p<=0 会把整个词表封死。这里统一夹到安全范围（服务层另有校验）。
+        rep_penalty = max(1e-3, float(rep_penalty))
+        top_p = min(1.0, max(1e-3, float(top_p)))
+        no_repeat_ngram = max(0, int(no_repeat_ngram))
         if rep_penalty != 1.0 and recent:
             for t in set(recent[-128:]):
                 logits[t] *= 1.0 if logits[t] < 0 else 1.0 / rep_penalty
@@ -405,10 +471,14 @@ class Engine:
         rep_penalty: float = 1.25,
         no_repeat_ngram: int = 8,
         guard: bool = True,
+        cancel: threading.Event | None = None,
     ):
         """Yield {"delta": text} as tokens are produced; the final yield carries
         usage stats and no delta. guard=True 时启用退化护栏（轮初状态快照 +
         复读检测 + 回滚），最终一帧带 "degenerated" 标记。
+        cancel 是一个协作式取消信号：客户端断开时由服务层置位，生成循环在
+        下一个 token 边界退出（同步生成器不能被别的线程 close()——会抛
+        "generator already executing"，锁要等到线程跑完才释放）。
 
         流式输出用增量 UTF-8 解码：World 词表是字节级的，颜文字/emoji/
         生僻字会拆成多个 token，逐 token decode 会产出 U+FFFD 乱码，
@@ -419,7 +489,7 @@ class Engine:
         try:
             yield from self._chat_stream_locked(
                 session, user_text, max_new_tokens, temperature, top_p, rep_penalty,
-                no_repeat_ngram, guard,
+                no_repeat_ngram, guard, cancel,
             )
         finally:
             session.lock.release()
@@ -434,7 +504,43 @@ class Engine:
         rep_penalty: float,
         no_repeat_ngram: int = 8,
         guard: bool = True,
+        cancel: threading.Event | None = None,
     ):
+        # 与训练侧 build_prompt 严格一致（含尾随空格）：S₀ 对 token 边界极其敏感
+        # 有界重放：最近 K 轮以相同模板拼在当前 prompt 之前，近期事实成为可见文本
+        prompt = "User: " + user_text + "\n\nAssistant: "
+        if session.context_replay > 0 and session.history:
+            replayed = session.history[-2 * session.context_replay:]
+            prefix = "".join(
+                ("User: " if m["role"] == "user" else "Assistant: ") + m["content"] + "\n\n"
+                for m in replayed
+            )
+            prompt = prefix + prompt
+        yield from self._stream_prompt(
+            session, prompt, max_new_tokens, temperature, top_p, rep_penalty,
+            no_repeat_ngram, guard, cancel,
+            remember=(user_text,),
+        )
+
+    def _stream_prompt(
+        self,
+        session: Session,
+        prompt: str,
+        max_new_tokens: int,
+        temperature: float,
+        top_p: float,
+        rep_penalty: float,
+        no_repeat_ngram: int = 8,
+        guard: bool = True,
+        cancel: threading.Event | None = None,
+        remember: tuple[str] | None = None,
+    ):
+        """对一段完整 prompt 做 prefill + 逐 token 采样。
+
+        remember=(user_text,) 时把本轮问答写进 history（会话模式）；
+        None 表示调用方自己管理历史（无状态的 OpenAI 兼容路径）。
+        """
+        max_new_tokens = max(1, min(int(max_new_tokens), MAX_NEW_TOKENS_LIMIT))
         session.last_used = time.time()
         # 退化护栏：本轮开始前的状态快照（prefill 之前，存 CPU 省显存）。
         # RWKV 的递归状态就是对话记忆，本轮若产出退化回复，回滚后毒化内容不进长期记忆。
@@ -449,16 +555,6 @@ class Engine:
             ]
             session.snapshots.append(snap)
             del session.snapshots[:-SNAPSHOT_LEVELS]
-        # 与训练侧 build_prompt 严格一致（含尾随空格）：S₀ 对 token 边界极其敏感
-        # 有界重放：最近 K 轮以相同模板拼在当前 prompt 之前，近期事实成为可见文本
-        prompt = "User: " + user_text + "\n\nAssistant: "
-        if session.context_replay > 0 and session.history:
-            replayed = session.history[-2 * session.context_replay:]
-            prefix = "".join(
-                ("User: " if m["role"] == "user" else "Assistant: ") + m["content"] + "\n\n"
-                for m in replayed
-            )
-            prompt = prefix + prompt
         prompt_ids = self.tok.encode(prompt)
         t_prefill0 = time.perf_counter()
         out = self.model(
@@ -473,11 +569,20 @@ class Engine:
         # 增量解码器：产出可解码字符的增量，未完整的多字节序列留在缓冲
         inc = codecs.getincrementaldecoder("utf-8")(errors="replace")
         full_text = ""
+        stopped = False  # 命中停轮条件 / 取消 / 词表越界：不是长度截断
         t_decode0 = time.perf_counter()
         with torch.no_grad():
             for _ in range(max_new_tokens):
+                if cancel is not None and cancel.is_set():
+                    stopped = True  # 客户端断开：不算截断
+                    break
                 nxt = self._sample(out.logits[0, -1], temperature, top_p, recent,
                                    rep_penalty, no_repeat_ngram)
+                if nxt >= len(self.tok.id_to_bytes):
+                    # 词表尾部是 tokenizer 缺口的空行（65530–65535），采样到它
+                    # 会 index out of range；按停轮处理而不是崩掉整个请求。
+                    stopped = True
+                    break
                 generated.append(nxt)
                 recent.append(nxt)
                 delta = inc.decode(self.tok.id_to_bytes[nxt])
@@ -489,7 +594,9 @@ class Engine:
                     full_text = full_text.split("\n\n")[0]
                     stop = True
                 elif full_text.endswith("User:"):
+                    # 幻觉出的下一轮用户发言：token 不回喂，文本一并截掉
                     generated.pop()
+                    full_text = full_text[: -len("User:")]
                     stop = True
                 elif full_text.endswith("User"):
                     # 停止符的前缀 token：不下发也不喂回
@@ -497,6 +604,7 @@ class Engine:
                     full_text = full_text[: len(full_text) - len(delta)]
                     stop = True
                 if stop:
+                    stopped = True
                     break
                 if delta:
                     yield {"delta": delta}
@@ -505,6 +613,7 @@ class Engine:
                     past_key_values=session.cache,
                     use_cache=True,
                 )
+        truncated = not stopped and _stream_truncated(max_new_tokens, len(generated))
         decode_ms = (time.perf_counter() - t_decode0) * 1000
         reply = full_text.split("\n\n")[0]
         degenerated = guard and is_degenerate_reply(reply)
@@ -528,11 +637,16 @@ class Engine:
         else:
             session.degenerate_streak = 0
             session.turns += 1
-            session.history.append({"role": "user", "content": user_text})
-            session.history.append({"role": "assistant", "content": reply})
+            if remember is not None:
+                session.history.append({"role": "user", "content": remember[0]})
+                session.history.append({"role": "assistant", "content": reply})
+                # history 只服务下一轮的 context_replay：留 2×K 条就够，
+                # 否则长会话的 /v1/sessions 响应会无限膨胀
+                del session.history[: -2 * MAX_CONTEXT_REPLAY]
         yield {
             "reply": reply,
             "degenerated": degenerated,
+            "truncated": truncated,
             "prompt_tokens": len(prompt_ids),
             "completion_tokens": len(generated),
             "prefill_ms": round(prefill_ms, 2),
@@ -540,6 +654,7 @@ class Engine:
             "session_memory_mb": round(session.memory_mb(self.model), 3),
             "turns": session.turns,
         }
+
 
     def batch_chat(
         self,
@@ -580,21 +695,25 @@ class Engine:
                 s.last_used = time.time()
 
             # 2) 状态沿 batch 维堆叠成共享 Cache
-            stacked = Cache()
+            stacked: dict[int, dict[str, torch.Tensor]] = {}
             for i in range(L):
-                stacked.update(
-                    recurrent_state=torch.cat(
+                stacked[i] = {
+                    "recurrent_state": torch.cat(
                         [_recurrent_4d(s.cache[i]["recurrent_state"]) for s in sessions], dim=0),
-                    conv_state=torch.cat(
+                    "conv_state": torch.cat(
                         [s.cache[i]["conv_state"] for s in sessions], dim=0),
-                    ffn_state=torch.cat(
+                    "ffn_state": torch.cat(
                         [s.cache[i]["ffn_state"] for s in sessions], dim=0),
-                    layer_idx=i, offset=0,
-                )
+                }
+            stacked_cache = Cache()
+            for i in range(L):
+                stacked_cache.update(layer_idx=i, offset=0, **stacked[i])
 
-            # 3) 批量解码循环：已完成的会话继续喂数据保持状态推进，输出忽略
+            # 3) 批量解码循环：已完成的会话继续喂数据保持 batch 形状，但其状态
+            # 在写回时用"完成时刻的快照"，避免把续喂的重复 token 灌进会话记忆
             generated = [[] for _ in range(B)]
             finished = [False] * B
+            frozen: list[dict[int, dict[str, torch.Tensor]] | None] = [None] * B
             next_ids = torch.tensor(
                 [[int(logits.argmax())] for logits in prefill_logits], device=self.device)
             for b in range(B):
@@ -604,7 +723,8 @@ class Engine:
                 for _ in range(max_new_tokens - 1):
                     if all(finished):
                         break
-                    out = self.model(input_ids=next_ids, past_key_values=stacked, use_cache=True)
+                    out = self.model(input_ids=next_ids, past_key_values=stacked_cache,
+                                     use_cache=True)
                     next_ids = torch.empty((B, 1), dtype=torch.long, device=self.device)
                     for b in range(B):
                         if finished[b]:
@@ -616,17 +736,20 @@ class Engine:
                         next_ids[b, 0] = nxt
                         if self.tok.decode(generated[b]).endswith("\n\n"):
                             finished[b] = True
+                            # 该会话的最终状态 = 喂入停止 token 之前的那份
+                            frozen[b] = {
+                                i: {k: stacked[i][k][b:b + 1].contiguous()
+                                    for k in stacked[i]}
+                                for i in range(L)
+                            }
 
-            # 4) 把批量状态写回各会话
+            # 4) 把批量状态写回各会话（完成的会话用冻结快照）
             for b, s in enumerate(sessions):
                 for i in range(L):
-                    st = stacked[i]
-                    s.cache.update(
-                        recurrent_state=st["recurrent_state"][b:b + 1].contiguous(),
-                        conv_state=st["conv_state"][b:b + 1].contiguous(),
-                        ffn_state=st["ffn_state"][b:b + 1].contiguous(),
-                        layer_idx=i, offset=0,
-                    )
+                    src = frozen[b][i] if frozen[b] is not None else {
+                        k: stacked[i][k][b:b + 1].contiguous() for k in stacked[i]
+                    }
+                    s.cache.update(layer_idx=i, offset=0, **src)
 
             results = []
             for b, s in enumerate(sessions):
@@ -634,6 +757,7 @@ class Engine:
                 s.turns += 1
                 s.history.append({"role": "user", "content": user_texts[b]})
                 s.history.append({"role": "assistant", "content": reply})
+                del s.history[: -2 * MAX_CONTEXT_REPLAY]
                 results.append({"reply": reply, "completion_tokens": len(generated[b])})
             return results
         finally:
@@ -647,24 +771,30 @@ class Engine:
         temperature: float = 1.0, top_p: float = 0.9,
     ) -> dict:
         """无会话模式：每请求把完整 messages 重新 prefill（Transformer 式）。
-        与 session 模式对比即可展示 RWKV 状态缓存的收益。"""
-        session = self.new_session(persona_name)
+        与 session 模式对比即可展示 RWKV 状态缓存的收益。
+
+        注意：历史轮次必须自己带 `Assistant:` 前缀并直接 prefill——不能把拼好的
+        整段历史再交给 `chat()`（它会再套一层 `User: `，得到
+        `User: User: 你好 ... 喵~主人好`，assistant 轮没有角色标记）。
+        """
+        if persona_name not in self.personas:
+            raise KeyError(f"unknown persona: {persona_name}")
+        prompt = build_transcript(messages)
+
+        self._prune_sessions()
+        session = Session(
+            session_id=uuid.uuid4().hex[:12],
+            persona_name=persona_name,
+            cache=self._cache_for(self.personas[persona_name]),
+            context_replay=0,
+        )
         try:
-            parts = []
-            for m in messages[:-1]:
-                if m["role"] in ("user", "assistant"):
-                    parts.append(("User: " if m["role"] == "user" else "") + m["content"] + "\n\n")
-            last_user = next(
-                (m["content"] for m in reversed(messages) if m["role"] == "user"), ""
-            )
-            text = "".join(parts) + last_user
-            result = self.chat(
-                session.session_id,
-                text,
-                max_new_tokens=max_new_tokens,
-                temperature=temperature,
-                top_p=top_p,
-            )
+            # 直接走流式实现（拿到 prefill/decode 统计与退化护栏），但历史已在
+            # prompt 里，不再重复回放；remember=None 表示历史由调用方拼好。
+            chunks = list(self._stream_prompt(
+                session, prompt, max_new_tokens, temperature, top_p,
+                rep_penalty=1.25, no_repeat_ngram=8, remember=None,
+            ))
+            return chunks[-1]
         finally:
             self.drop_session(session.session_id)
-        return result
