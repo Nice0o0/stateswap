@@ -102,6 +102,38 @@ prefill 的 top-8**——一个训练良好的世界模型不该把 replacement 
    （`emb/head/ln_out/att.receptance/ffn.key` 的 `max|diff| = 0.000e+00`），
    所以差异确实来自前向实现，不是转换。
 
+### 4.1c Albatross 构建可行性（诊断，2026-11 实测）
+
+想根治 §4.1b 的引擎偏差 + 解码速度，唯一被官方首推的路径是
+[Albatross](https://github.com/BlinkDL/Albatross)（手写 CUDA 内核 + CUDA Graph，
+README 里 "Efficient inference" 那一项）。**先做构建可行性验证，再决定是否投入
+2–3 天改造**——结论是：**本机当前跑不了，缺三样东西。**
+
+Albatross 的 `faster3a_2607/cuda/` 下有 6 组配对源文件（每组 `.cpp` + `.cu`）：
+`rwkv7_fast_ops_fp16`、`rwkv7_rows_cutlass`、`rwkv7_v3a_ops`、
+`rwkv7_wkv_deltalog_v3a`、`rwkv7_wkv_fp16_v2`、`rwkv7_wkv_fp32_v2`。
+仓库**没有** setup.py / CMakeLists / Makefile，也没有构建说明——按
+`torch.utils.cpp_extension.load(...)` 的惯例，这些源文件是在 Python 侧运行时
+JIT 编译的。
+
+本机实测：
+
+| 检查 | 结果 |
+|---|---|
+| `torch.utils.cpp_extension.CUDA_HOME` | **None** |
+| `nvcc` | **not found**（PATH 里没有） |
+| `cl.exe`（MSVC 编译器） | **not on PATH**，`C:\Program Files\Microsoft Visual Studio` 不存在 |
+| torch / CUDA 运行时 | torch 2.11.0+cu128 / cc (12,0) —— 运行时齐全，**只缺编译工具链** |
+
+也就是说：**GPU 运行时没问题，缺的是 CUDA Toolkit（提供 nvcc）+ MSVC**。
+补齐这两样（CUDA Toolkit 12.8 约 1–2 GB，VS Build Tools 约 2 GB）之后，
+Albatross 才有被验证的可能；在那之前，任何"2–3 天改造"的估算都是**不准的**，
+因为真正的风险（6 组 CUDA 源能否在 sm_120 + MSVC 2022 下编译通过）尚未暴露。
+
+**下一步（如果要做）**：装 CUDA Toolkit 12.8 + VS Build Tools（只勾
+"使用 C++ 的桌面开发"），然后单独 `load()` 一个最小的 op
+（`rwkv7_wkv_fp16_v2`）验证能编译；**这一步通过了再谈改造**。
+
 ### 4.2 RWKV7Config 的 `num_heads` 陷阱
 
 - `RWKV7Config.__init__` 用**默认** hidden_size 预算 `num_heads`；

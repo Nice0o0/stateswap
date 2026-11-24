@@ -210,6 +210,7 @@ one command to reproduce, with raw JSON artifacts committed next to its report.
 | Phase diagram | coexistence window α≈[0.55,0.65] is per-prompt attractor selection; geometry smooth while behavior jumps; first exchange locks the session's phase | [phase-transition](docs/phase-transition.md) |
 | Low-rank surgery | removal = factory reset (k ≥ 2, either direction; k=1 leaves 12.5%/25% residue); injection/scaling = phase navigation; the coexistence knife edge survives no edit | [state-editing](docs/state-editing.md) |
 | Data scaling | 50 pairs × 200 steps suffice for style; the real curve is the **capability cliff** — general ability dies with style formation at every data size | [scaling](docs/scaling.md) |
+| Long-session stability | 60 turns grow the state norm only ×1.20 (28.8→34.7) with zero degeneration and no spikes; SANE's 100M-token norm-explosion regime is four orders of magnitude away, so their tanh compression is a contrast, not a requirement | [longconv-norm-trace](docs/longconv-norm-trace.md) |
 | Attractor seeding | a hidden seed exchange deterministically locks style (33%→100%); auto-seeds are unreliable and the task attractor cannot be seeded | [attractor-seeding](docs/attractor-seeding.md) |
 
 **Figures** for every study live in [docs/fig/](docs/fig/) and are regenerated from the raw JSON by `python scripts/make_figures.py`.
@@ -312,8 +313,16 @@ generalization) live where they belong — the open-questions sections of each
 
 Won't do, with reasons:
 
-- [x] ~~Hand-rolled CUDA-graph decode~~ — BlinkDL's [Albatross](https://github.com/BlinkDL/Albatross)
-  owns RWKV inference (CUDA Graph + MegaKernel); a torch.compile attempt measured 0.77×
+- [ ] **Switch inference to Albatross** — the only path that removes both the fla
+  alignment gap and the dispatch-bound decode (47 ms/token, of which <0.1 ms is
+  GPU). **Blocked on toolchain, not on effort**: this machine has no `nvcc`, no
+  `CUDA_HOME`, and no MSVC, while Albatross ships 6 pairs of `.cpp`/`.cu` with no
+  build files. Install CUDA Toolkit 12.8 + VS Build Tools and compile one minimal
+  op before any 2–3-day estimate is meaningful
+  ([engineering-notes](docs/engineering-notes.md) §4.1c)
+- [x] ~~Hand-rolled CUDA-graph decode~~ — measured 7.25× but semantically broken:
+  fla's `FLALayer.update` writes through capture-time pointers, so replay never
+  advances the recurrence (24-step greedy decode emits 24 identical tokens)
   ([benchmarks.md](docs/benchmarks.md) §6.3)
 - [x] ~~Retrieval-augmented episodic memory~~ — standard in
   [ai00_server](https://github.com/Ai00-X/ai00_server); the state-science arc covers

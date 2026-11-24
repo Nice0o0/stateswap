@@ -209,6 +209,7 @@ curl -X POST http://127.0.0.1:8000/v1/personas/import_bundle \
 | 相图 | 共存窗 α≈[0.55,0.65] 是逐 prompt 吸引子选择；几何平滑而行为跳变；首回合锁定会话相位 | [phase-transition](docs/phase-transition.md) |
 | 低秩外科 | 切除 = 格式化回基线（k≥2、任一方向；k=1 仍残留 12.5%/25%）；注入/缩放 = 相图导航；共存刀锋撑不过任何编辑 | [state-editing](docs/state-editing.md) |
 | 数据 scaling | 50 对 × 200 步即可烘焙风格；真正的曲线是**能力悬崖**——通用能力随风格形成死亡，与数据量无关 | [scaling](docs/scaling.md) |
+| 长会话稳定性 | 60 轮后状态范数只涨 ×1.20（28.8→34.7），零退化、无尖峰；SANE 的 1 亿 token 范数爆炸场景差四个数量级，其 tanh 压缩对本项目是**对照而非必需品** | [longconv-norm-trace](docs/longconv-norm-trace.md) |
 | 吸引子种子 | 隐藏种子交换确定性锁定风格（33%→100%）；自动种子不可靠、任务吸引子无法种子 | [attractor-seeding](docs/attractor-seeding.md) |
 
 **相图**（招牌研究）：在猫娘与翻译 S₀ 之间插值，α ≥ 0.65 行为停在纯风格相、
