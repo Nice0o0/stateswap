@@ -108,13 +108,42 @@ float32 舍入），实测 6.05 → 0.12 ms（50×）。端到端非贪心解码
 贪心对比 6 条 prompt：1 条逐字节相同，5 条前半句相同、后段因量化噪声分叉——
 **风格与语义完全保真，精确 token 路径不保证**（量化噪声随生成放大，符合预期）。
 
-### 6.3 torch.compile / CUDA Graph（阴性结果）
+### 6.3 torch.compile / CUDA Graph（阴性结果，两种实现都测过）
 
-`torch.compile(mode="reduce-overhead")` 反而 **0.77×**（17.8 vs 23.0 tok/s）。
+**A. `torch.compile(mode="reduce-overhead")` — 0.77×**（17.8 vs 23.0 tok/s）。
 原因：fla Cache 逐 token 的 python dict 更新 + triton 内核变异识别失败
-（"assuming every input is mutated"）导致大量图断裂。要吃到 CUDA Graph
-收益需要手动静态缓冲区改造（状态张量固定 + copy_ 搬运），是独立的工程项，
-不是一个开关。
+（"assuming every input is mutated"）导致大量图断裂。
+
+**B. 手工静态缓冲区 + `torch.cuda.CUDAGraph`（本次新增，结论：不可用）。**
+先测得一个非常诱人的数字：把解码步捕获成 graph 后 **43.65 → 6.02 ms/token
+（7.25×）**。但正确性检查推翻了它：
+
+| 检查 | 结果 |
+|---|---|
+| capture 前预热 15 步（否则 cuBLAS handle 未初始化，capture 直接失败） | 通过 |
+| replay 后 logits 变化 | ✅ |
+| replay 后 `Cache` 里状态张量的**引用**是否换新 | ❌ 不变 |
+| replay 后状态**数值**第一次变化 | ✅ |
+| 第二次 replay 后状态继续变化 | ❌ **不再变化** |
+| 24 步贪心解码 vs eager 同起点 | ❌ graph 输出 24 个相同 token（`'s's's's…`），eager 正常 |
+
+根因：fla 的 `FLALayer.update` 把新状态**写进捕获时绑定的那条张量**（原地
+`copy_` 语义由 Triton kernel 以指针实现），graph replay 每次都写回同一个
+捕获期目标，而不是"上一轮输出 → 下一轮输入"的递推链。所以 7.25× 测的是
+**重复写同一状态**的吞吐，不是解码吞吐。这正是 §6.3-A 预言的那件事——
+"状态张量固定 + copy_ 搬运"听起来可行，但 fla 的 Cache 语义（每层 dict +
+Triton 指针别名）让"固定缓冲区"变成"固定错误的缓冲区"。
+
+**要真吃到这份收益**，需要绕开 fla Cache：自己维护每层状态张量的双缓冲，
+在 graph 外做 `dst.copy_(src)` 并让 graph 只捕获"读 A 写 B"的单步，再交换。
+这是独立的工程改造（估 1–2 天 + 回归全链路行为），不属于"一个开关"；
+在它完成前，本项目的 decode 速度数字应视为 **CPU dispatch 受限**——
+剖析显示 47 ms/token 里 GPU 实际计算 **< 0.1 ms**（`cuda_events`），
+其余全是 2910 次 Triton autotuner 调用（44 us/次）与 5025 次
+`torch._C._nn.linear`（30 us/次）的 Python 开销；batch=16 时每序列耗时
+只降到 1/16，也印证瓶颈不在算力。**同一解释也说明为什么 0.1B 与 1.5B
+的每层耗时几乎相同（2.31 vs 2.32 ms/layer）**——参数量差 15 倍，
+但每层固定 launch 次数相同。
 
 ## 7. 长对话退化：机制与两层修复（15 轮探针）
 
