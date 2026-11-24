@@ -39,6 +39,13 @@ ModelScope 镜像 mind666/NekoQA-10K 为空壳），故改用 ModelScope 上的�
   仅作参数命名与语义的交叉验证参考，不被运行时引用。
 - `rwkv_vocab_v20230424.txt`：RWKV World 词表（BlinkDL/RWKV-LM）。
 
+> 曾经还有一个 `vendor/test_rwkv7_conversion.py`，原本指向 fla 仓库的
+> `tests/utils/test_rwkv7_conversion.py`。该路径在上游已不存在，脚本下载时
+> 拿到的是 404 页面正文（105 字节、只有一句 "Couldn't find the requested
+> file …"），被 git 当成了一个"看起来像测试"的空文件。已删除；转换的正确性
+> 由 `tests/` 与 `scripts/validate_model.py` 覆盖，权重保真度另在
+> `docs/engineering-notes.md` §4.1b 用逐位比对（`max|diff| = 0`）验证。
+
 ## 模型权重
 
 RWKV-x070-World 底座权重来自 BlinkDL/RWKV-LM（Apache-2.0），

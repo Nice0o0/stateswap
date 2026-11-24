@@ -39,6 +39,18 @@ In one line: LoRA edits *what the model knows*; S₀ tuning edits *the state the
 
 > The base model caps conversation quality — S₀ only adds style and task modes. This project demos on RWKV7-World-1.5B (see `personas-legacy/` for earlier 0.4B/0.1B artifacts).
 
+> **Known caveat — the engine, not the method.** Everything here runs on
+> [flash-linear-attention](https://github.com/fla-org/flash-linear-attention)'s RWKV-7,
+> which upstream describes as *not yet aligned with the reference implementation*
+> ("the performance is quite worse"). We verified the converted weights are
+> bit-exact (`max|diff| = 0`), so the difference is in the forward pass: on the same
+> prompt and state, fla's prefill and decode paths differ by `max|Δlogit| = 0.25`
+> and the decode path's candidates are visibly worse (U+FFFD in the top-8).
+> **Relative** results (persona vs baseline, α sweeps, tier vs tier) are
+> self-consistent; **absolute** capability numbers are likely depressed and should
+> not be compared with official-kernel RWKV-7 results. Measurement table:
+> [engineering-notes §4.1b](docs/engineering-notes.md).
+
 ## Results
 
 Hardware: RTX 5070 Ti Laptop 12 GB (Blackwell sm_120), native Windows 10, torch 2.11.0+cu128, triton-windows 3.8, flash-linear-attention 0.5.2. Raw data in `docs/benchmarks*.json`.

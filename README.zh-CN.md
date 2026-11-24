@@ -41,6 +41,16 @@ RWKV-7 每层维护一个随 token 演化的递归状态矩阵 **S**（每头 64
 它能固化风格、人格与任务模式；不能注入新知识（知识在冻结的权重里）。
 
 > 底座大小决定对话能力上限，S₀ 只负责风格与任务模式。项目在 RWKV7-World-1.5B
+
+> **已知限制——问题在引擎，不在方法。** 本项目全部结论跑在
+> [flash-linear-attention](https://github.com/fla-org/flash-linear-attention)
+> 的 RWKV-7 实现上，而其上游明确写着"尚未与参考实现对齐、性能明显更差"。
+> 我们验证过权重转换是逐位一致的（`max|diff| = 0`），所以差异在前向计算：
+> 同一 prompt、同一状态下，fla 的 prefill 与 decode 两条路径
+> `max|Δlogit| = 0.25`，且 decode 路径的候选词明显更差（top-8 里出现 U+FFFD）。
+> **相对结论**（人格 vs 基线、α 扫描、档位对比）自洽可信；
+> **绝对能力数字**很可能被系统性拖低，不应与官方内核下的 RWKV-7 结果直接比较。
+> 测量表见 [engineering-notes §4.1b](docs/engineering-notes.md)。
 > 上演示（更早的 0.4B/0.1B 产物见 `personas-legacy/`）。
 
 ## 实测结果

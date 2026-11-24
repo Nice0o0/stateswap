@@ -31,11 +31,24 @@ We systematize this affordance. Our contributions:
 
 **Merging and state mixing.** Task-vector arithmetic (model soups, mode connectivity) operates in weight space. State Soup (2406.08423) and Soupability (2505.24033) move mixing to the state level on Mamba, reporting *smooth* interpolation benefits for ICL skills. Our Study 5 finds the opposite qualitative behavior for RWKV-7 task/persona attractors — a two-transition phase diagram — and Study 3 traces an earlier "sharp transition" observation to a training-pipeline bug, not to the geometry.
 
-**Model editing.** ROME/MEMIT edit MLP weights in Transformers; ROME-on-Mamba (2404.03646) locates and rank-one-edits factual associations in Mamba; DREAMSTATE (2601.19221) generates and edits RWKV states with conditional diffusion, explicitly flagging "RNN states as editable knowledge" as an open problem. Our Study 6 occupies the precise gap between them: *directed, training-free, rank-k subspace operators on a trained S₀*.
+**Model editing.** ROME/MEMIT edit MLP weights in Transformers; ROME-on-Mamba (2404.03646) locates and rank-one-edits factual associations in Mamba; DREAMSTATE (2601.19221) generates and edits RWKV states with conditional diffusion, explicitly flagging "RNN states as editable knowledge" as an open problem. Our Study 6 occupies the gap between them: *directed, training-free, rank-k subspace operators on a trained S₀*.
+
+**WriteSAE (2605.12770)** is the closest recent neighbour and differs from us along two axes that matter for interpretation:
+
+| | WriteSAE | this work |
+|---|---|---|
+| object | the matrix **write** a single token performs into the recurrent cache | the **initial state** S₀, before any token |
+| granularity | rank-1 per-write atoms (a sparse autoencoder over writes) | rank-k subspace operators per head, over the whole state |
+| method | replace the model's write with a scaled atom, then continue | project out / inject a subspace, then re-run from S₀ |
+| question | *can a write be substituted with a readable atom?* | *can a behaviour be excised from an initial condition?* |
+
+Their substitution test (an atom beats deleting the write on 92.4% of positions, 89.8% per atom, on Gated DeltaNet; 88.1% transfer to Mamba-2-370M) is about **local, per-token steerability**. Ours is about **global, per-persona separability**. The two results are compatible rather than contradictory — a write is a low-rank, locally interpretable event, whereas a persona is a distributed initial condition whose expression is selected by attractor dynamics (Study 5) — and together they suggest a working hypothesis we cannot yet confirm at the same granularity: **substitution-style editing may work at the write and fail at the initial state**. Two caveats keep this a hypothesis, not a finding: their quantitative results are reported on Gated DeltaNet and Mamba-2-370M with RWKV-7 named among the target architectures but without RWKV-7 numbers in the abstract, and our own negative result (style cannot be excised at any layer mask or softness; §9) is measured on RWKV-7 personas. A direct test — WriteSAE-style atoms on RWKV-7 writes of a persona-bearing state — is the natural bridge between the two papers and remains open.
 
 ## 3. Experimental Setup
 
 **Base model.** RWKV7-World-1.5B (bf16, fully frozen, 24 layers × 32 heads × 64×64 state; S₀ = 3,145,728 parameters ≈ 12.58 MB fp32). All experiments post-date a tokenization-boundary bug fix (the "boundary bug" paragraph in §6) unless stated — its effect on recall is itself a finding.
+
+**Engine caveat, stated up front.** Every number in this paper comes from the *flash-linear-attention* (fla 0.5.2) RWKV-7 implementation, which its maintainers flag as not yet aligned with BlinkDL's reference implementation ("NOT aligned with reference implementation yet, and the performance is quite worse"). We verified that the *weights* are exact — the official `.pth` and our converted checkpoint agree bit-for-bit (max |diff| = 0 on embeddings, head, norms and representative projections) — so the caveat is about the forward pass, not the converter. We further measured the engine's internal spread between its own two paths on one prompt and one state: prefill (`chunk_rwkv7`) vs decode (`fused_mul_recurrent`), max |Δlogit| = 0.25, mean 0.047, with the decode path's candidate distribution visibly worse (U+FFFD and katakana entering the top-8 of a well-trained World model). **What this means for reading the paper:** any *relative* comparison here (across α, across the three base sizes, across edit configurations) is internally consistent because every cell of every experiment uses the same engine; *absolute* capability numbers — "how many facts does this model answer correctly", "how good is its Chinese" — are likely depressed and should not be compared to published RWKV-7 results obtained with the official kernels. See `docs/engineering-notes.md` §4.1b for the measurement table.
 
 **Personas.** `neko-1.5b` (catgirl style; 3,095 QA pairs; style hit 100%) and `zh2en-1.5b` (unprompted zh→en translation; 7,369 WMT pairs; **100% English-output rate**, where the metric is CJK-free English generation — not a translation-quality score; see Limitations). Training: AdamW, peak lr 1e-4 cosine to 1e-5, cross-entropy on assistant spans only, fresh S₀ cold-start per sample.
 
@@ -185,7 +198,7 @@ Implications: (i) the mixing regime is a capacity effect but not a monotone one 
 
 ## 13. Related Work (full)
 
-State Soup [2406.08423]; Soupability [2505.24033]; ROME-on-Mamba [2404.03646]; DREAMSTATE [2601.19221]; State Tuning on RWKV-7 [2504.05097]; TTT layers; Dynamic Evaluation (Krause 2018); When Scaling Meets Finetuning [ICLR 2024]; model soups and task vectors; mode connectivity; RWKV-7 "Goose" [2503.14456]; Mamba-2; HART [2610.12883] (placeholder idling decay in RWKV states); SANE [2608.22354] (long-range state stability); WriteSAE [2605.12770] (rank-1 SAE atoms on RWKV-7 cache writes).
+State Soup [2406.08423]; Soupability [2505.24033]; ROME-on-Mamba [2404.03646]; DREAMSTATE [2601.19221]; State Tuning on RWKV-7 [2504.05097]; TTT layers; Dynamic Evaluation (Krause 2018); When Scaling Meets Finetuning [ICLR 2024]; model soups and task vectors; mode connectivity; RWKV-7 "Goose" [2503.14456]; Mamba-2; HART [2610.12883] (placeholder idling decay in RWKV states); SANE [2608.22354] (long-range state stability); WriteSAE [2605.12770] (rank-1 SAE atoms on RWKV-7 cache writes; §2 contrasts its per-write granularity with this paper's per-persona initial-state edits).
 
 ## 14. Reproducibility
 
