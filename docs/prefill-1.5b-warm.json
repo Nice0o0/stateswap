@@ -1,0 +1,28 @@
+{
+ "meta": {
+  "model": "rwkv7-1.5b-world-hf",
+  "protocol": "bench_prefill_only, second call (steady state), fresh cache per request"
+ },
+ "rows": [
+  {
+   "history_tokens": 493,
+   "prefill_ms": 62.8,
+   "first_call_ms": 2251.9
+  },
+  {
+   "history_tokens": 1015,
+   "prefill_ms": 60.0,
+   "first_call_ms": 155.0
+  },
+  {
+   "history_tokens": 2030,
+   "prefill_ms": 60.2,
+   "first_call_ms": 3410.1
+  },
+  {
+   "history_tokens": 4089,
+   "prefill_ms": 56.5,
+   "first_call_ms": 3402.8
+  }
+ ]
+}

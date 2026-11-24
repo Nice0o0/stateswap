@@ -1,0 +1,49 @@
+{
+ "meta": {
+  "model": "rwkv7-1.5b-world-hf",
+  "protocol": "单次前向；cold=该长度首次（新 cache），warm=同长度第二次",
+  "note": "cold 的耗时不是 prefill 本身，而是 Triton autotune 首次编译/选 config；warm 才是真实 prefill 成本。warm 随长度近线性（129→5769 token: 60→493 ms）"
+ },
+ "rows": [
+  {
+   "tokens": 129,
+   "cold_ms": 70.7,
+   "warm_ms": 59.7
+  },
+  {
+   "tokens": 249,
+   "cold_ms": 71.7,
+   "warm_ms": 66.6
+  },
+  {
+   "tokens": 489,
+   "cold_ms": 3374.2,
+   "warm_ms": 59.6
+  },
+  {
+   "tokens": 969,
+   "cold_ms": 93.5,
+   "warm_ms": 80.4
+  },
+  {
+   "tokens": 1449,
+   "cold_ms": 3485.0,
+   "warm_ms": 121.1
+  },
+  {
+   "tokens": 2409,
+   "cold_ms": 10937.7,
+   "warm_ms": 197.2
+  },
+  {
+   "tokens": 3849,
+   "cold_ms": 3596.8,
+   "warm_ms": 322.2
+  },
+  {
+   "tokens": 5769,
+   "cold_ms": 14481.6,
+   "warm_ms": 492.6
+  }
+ ]
+}

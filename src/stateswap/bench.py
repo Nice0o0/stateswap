@@ -83,9 +83,14 @@ def bench_serving(engine: Engine, persona_a: str, persona_b: str, turns: int = 1
 
 
 def bench_prefill_only(engine: Engine, persona: str, turn_tokens: list[int]) -> dict:
-    """无状态模式下每请求需 prefill 的 token 数与耗时（真实重放）。"""
+    """无状态模式下每请求需 prefill 的 token 数与耗时（真实重放）。
+
+    每个长度测两次并**丢弃第一次**：fla 的 chunk 内核按 (dtype, 形状) 缓存
+    Triton autotune 结果，某个序列长度首次前向会先把该形状的全部 config 跑一遍
+    基准测试——这可能是 60 倍于稳态的开销，不是 prefill 成本。旧版没有预热，
+    导致 docs/benchmarks_15b.json 里出现 6.4 s @1015 token 这种数字（真值 ~80 ms）。
+    """
     session = engine.new_session(persona)
-    cache = engine._cache_for(engine.personas[persona])
     rows = []
     filler = "关于这个话题我们再展开聊聊，多给一些细节和例子。"
     for t in turn_tokens:
@@ -93,15 +98,21 @@ def bench_prefill_only(engine: Engine, persona: str, turn_tokens: list[int]) -> 
         reps = max(1, t // max(1, len(engine.tok.encode("User: " + filler + "\n\n"))))
         history = ("User: " + filler + "\n\n") * reps
         ids = engine.tok.encode(history)
-        t0 = time.perf_counter()
-        with torch.no_grad():
-            engine.model(
-                input_ids=torch.tensor([ids], device=engine.device),
-                past_key_values=cache,
-                use_cache=True,
-            )
-        ms = (time.perf_counter() - t0) * 1000
-        rows.append({"history_tokens": len(ids), "prefill_ms": round(ms, 1)})
+        samples = []
+        for _ in range(2):
+            # 每次用新 cache：无状态模式下每个请求本来就从零重放
+            fresh = engine._cache_for(engine.personas[persona])
+            t0 = time.perf_counter()
+            with torch.no_grad():
+                engine.model(
+                    input_ids=torch.tensor([ids], device=engine.device),
+                    past_key_values=fresh,
+                    use_cache=True,
+                )
+            samples.append((time.perf_counter() - t0) * 1000)
+        rows.append({"history_tokens": len(ids),
+                     "prefill_ms": round(samples[1], 1),      # 第二次 = 稳态
+                     "first_call_ms": round(samples[0], 1)})  # 含 autotune，仅备查
     engine.drop_session(session.session_id)
     return rows
 

@@ -102,6 +102,42 @@ prefill 的 top-8**——一个训练良好的世界模型不该把 replacement 
    （`emb/head/ln_out/att.receptance/ffn.key` 的 `max|diff| = 0.000e+00`），
    所以差异确实来自前向实现，不是转换。
 
+### 4.1d 基准陷阱：Triton autotune 被算进了 prefill 时间
+
+修 §4.1b 的引擎偏差时顺手发现的一个**已发布数据的错误**，值得单独记：
+`bench_prefill_only` 原本对每个序列长度只跑一次前向就计时。但 fla 的 chunk 内核
+按 (dtype, 形状) 缓存 autotune 结果——**某个长度首次前向会先把该形状的全部
+config 跑一遍基准测试**，这部分开销被计成了 prefill。
+
+同一长度的首次 vs 稳态（1.5B）：
+
+| tokens | 首次（含 autotune） | 稳态 | 倍数 |
+|---|---|---|---|
+| 489 | 3,374 ms | 60 ms | **56.6×** |
+| 1,449 | 3,485 ms | 121 ms | 28.8× |
+| 2,409 | 10,938 ms | 197 ms | 55.5× |
+| 5,769 | 14,482 ms | 493 ms | 29.4× |
+
+后果：`docs/benchmarks_15b.json` 里登记的 `stateless_prefill` 是
+`6449 / 6434 / 10304 ms`（@1015/2030/4089 token），**真值约 60 ms**。
+按原始数据写出的 `docs/benchmarks.md` §4 表格因此得出「无状态开销随历史线性
+增长」的结论——**方向错了**：稳态 prefill 从 493 到 4089 token 只从 62.8
+变到 56.5 ms，基本不增长。
+
+修复与善后：
+- `bench_prefill_only` 改为每长度跑两次、只取第二次，并额外记录
+  `first_call_ms`（含 autotune，备查）；
+- `docs/benchmarks_15b.json` 的 `stateless_prefill` 换成稳态重测值，原值
+  保留在 `stateless_prefill_original`，并加 `_correction` 说明；
+- `docs/benchmarks.json`（0.4B）同缺陷但未重测（config 更少、偏差小于 1.5B），
+  加 `_correction` 标注「引用时视为上界」；
+- 修正后的结论**比原来更强**：session 模式的价值不在省 prefill 时间
+  （两者都约 60 ms），而在于不重传历史、内存恒定、状态可持久化/热切换。
+
+**通用教训**：任何 GPU 基准都必须先跑至少一次 warmup 再计时。Triton
+的 autotune 是按形状惰性触发的，所以「预热一种长度」不够——**测多少个长度，
+就要对每个长度各预热一次**。
+
 ### 4.1c Albatross 构建可行性（诊断，2026-11 实测）
 
 想根治 §4.1b 的引擎偏差 + 解码速度，唯一被官方首推的路径是
