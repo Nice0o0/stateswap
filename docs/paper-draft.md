@@ -181,7 +181,7 @@ Implications: (i) the mixing regime is a capacity effect but not a monotone one 
 
 ## 12. Limitations
 
-Single persona pair (neko × zh2en) on a single base (1.5B); single-seed runs; heuristic metrics (marker/substring matching) rather than human evaluation — in particular the "English-output rate" measures language, not translation fidelity (a fluent off-topic English reply counts as a hit; see §6 round 2, `front_neko`); no Mamba control for the phase diagram; equilibrium hysteresis unmeasured (protocol in §8); editing studied only against the coexistence mixture.
+**The engine itself is a confound.** All measurements run through flash-linear-attention 0.5.2, whose RWKV-7 implementation its own maintainers (and BlinkDL) describe as *not aligned with the reference implementation*; we measured a max |Δlogit| of 0.25 and mean 0.047 between its prefill (`chunk_rwkv7`) and decode (`fused_mul_recurrent`) paths on the same prompt and state, and the decode path's candidate distribution is visibly worse (U+FFFD and katakana entering the top-8). Cross-tier comparisons in this paper are internally consistent (every tier uses the same engine), but absolute capability numbers would likely improve under the official kernels. See engineering-notes §4.1b. Single persona pair (neko × zh2en) on a single base (1.5B); single-seed runs; heuristic metrics (marker/substring matching) rather than human evaluation — in particular the "English-output rate" measures language, not translation fidelity (a fluent off-topic English reply counts as a hit; see §6 round 2, `front_neko`); no Mamba control for the phase diagram; equilibrium hysteresis unmeasured (protocol in §8); editing studied only against the coexistence mixture.
 
 ## 13. Related Work (full)
 

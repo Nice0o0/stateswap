@@ -54,6 +54,54 @@
 - 这正是 Preen 文档警告的"梯度静默断裂"——不报错、只是训不动，
   必须靠"梯度范数非零且有限"的冒烟测试来抓。
 
+### 4.1b 同一路径的推理后果：decode 的输出分布劣于 prefill（与官方警告一致）
+
+上一条只说了训练侧梯度。**推理侧还有一个更隐蔽的后果**，并且在 2026-11
+复查官方 README 时找到了旁证——BlinkDL 明确写着：
+
+> "Note FLA RWKV-7 is NOT aligned with reference implementation yet,
+> and the performance is quite worse."
+
+也就是说 fla 的 RWKV-7 与官方参考实现**尚未对齐**。本项目实测到的具体形态：
+
+同一模型、同一 prompt（`User: The capital of France is`）、同一初始状态，
+只是走不同路径：
+
+| 路径 | 触发条件 | top-8 候选 |
+|---|---|---|
+| `chunk_rwkv7`（prefill） | 训练 / 序列 ≥ 64 token | `首 巴 Paris � 法 パ 香 文` |
+| `fused_mul_recurrent`（decode） | `eval()` 且逐 token | `先 都 尔 次 , 字  爾` |
+
+prefill 的 top-1「首」是正确的（下接「都」= 首都）；decode 的 top-1「先」
+已经偏了。更直接的证据是**乱码字符 `�`（U+FFFD）与日文片假名 `パ` 进入
+prefill 的 top-8**——一个训练良好的世界模型不该把 replacement character
+排进前八。
+
+数值对照（整个 0.4B 模型，同一 prompt）：
+
+| 比较 | max abs Δlogit | mean abs Δlogit | top-1 一致 |
+|---|---|---|---|
+| chunk（`model.train()`）vs eval 路径 | **0.25** | **0.047** | 是 |
+| 0.1B / 0.4B / 1.5B 各自 top-5 | — | — | 0.1B 全中文虚词，1.5B 含 `�`/`パ` |
+
+**对本项目的含义（必须写进任何对外结论的 limitation）**：
+
+1. stateswap 的**所有**行为数字（风格命中、翻译率、相图、编辑实验）都是在
+   fla 0.5.2 的前向实现上测出来的。由于两档底座都走同一条 fla 路径，
+   **档位之间的相对比较**（0.1B vs 0.4B vs 1.5B）是可信的；
+   但**绝对能力**（"这个模型能答对多少题"）会被这个偏差拖低。
+2. 这解释了为什么基线人格（S₀=0）在常识题上表现差、为什么 prefill 与
+   decode 的候选词看起来像两个不同的模型。
+3. 想拿到与官方一致的绝对数字，只有两条路：换 [Albatross](https://github.com/BlinkDL/Albatross)
+   （官方 CUDA 内核 + CUDA Graph 推理），或等 fla 对齐。前者是 BlinkDL
+   README 首推的"Efficient inference"，也是本仓库 Roadmap 里
+   "不做手写 CUDA-graph"'的同一个结论。
+4. 我们**没有**用 `vendor/rwkv7_x070_reference_model.py` 做逐 logit 对照：
+   它需要 `pytorch_lightning` + 运行时编译 CUDA 扩展（`rwkv7_clampw`），
+   在当前 Windows 环境下跑不起来。权重转换本身已验证为逐位一致
+   （`emb/head/ln_out/att.receptance/ffn.key` 的 `max|diff| = 0.000e+00`），
+   所以差异确实来自前向实现，不是转换。
+
 ### 4.2 RWKV7Config 的 `num_heads` 陷阱
 
 - `RWKV7Config.__init__` 用**默认** hidden_size 预算 `num_heads`；
