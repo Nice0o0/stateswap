@@ -605,3 +605,50 @@ def test_stream_prompt_truncated_flag():
 
     assert _stream_truncated(8, 8) is True
     assert _stream_truncated(8, 3) is False
+
+
+def test_remove_subspace_layer_mask_preserves_other_layers():
+    """layer mask：未选中层必须逐位保留——这是"只在前层动手"的前提，
+    也是与均匀切除对照的唯一变量。"""
+    from stateswap.editing import remove_subspace
+
+    g = torch.Generator().manual_seed(3)
+    L, H, n = 6, 2, 64
+    s0 = torch.randn(L, H, n, n, generator=g)
+    ref = torch.randn(L, H, n, n, generator=g)
+    full = remove_subspace(s0, ref, k=4)
+    masked = remove_subspace(s0, ref, k=4, layers=(0, 3))
+    assert torch.equal(masked[0:3], full[0:3])     # 选中层等价于均匀切除
+    assert torch.equal(masked[3:], s0[3:])         # 未选中层原样
+
+
+def test_remove_subspace_beta_soft_removal():
+    """beta=1 是硬投影，beta→0 趋近不切除；中间值应落在两者之间。"""
+    from stateswap.editing import remove_subspace
+
+    g = torch.Generator().manual_seed(4)
+    L, H, n = 2, 2, 64
+    s0 = torch.randn(L, H, n, n, generator=g)
+    ref = torch.randn(L, H, n, n, generator=g)
+    hard = remove_subspace(s0, ref, k=8)
+    soft = remove_subspace(s0, ref, k=8, beta=0.5)
+    tiny = remove_subspace(s0, ref, k=8, beta=1e-6)
+    assert torch.allclose(tiny, s0, atol=2e-3)      # 几乎不切
+    d_hard = (hard - s0).norm()
+    d_soft = (soft - s0).norm()
+    assert d_soft < d_hard                           # 软切除动得更少
+
+
+def test_remove_subspace_rejects_bad_beta_and_layers():
+    from stateswap.editing import remove_subspace
+
+    s0 = torch.randn(4, 2, 64, 64)
+    ref = torch.randn(4, 2, 64, 64)
+    with pytest.raises(ValueError):
+        remove_subspace(s0, ref, k=2, beta=0.0)
+    with pytest.raises(ValueError):
+        remove_subspace(s0, ref, k=2, beta=1.5)
+    with pytest.raises(ValueError):
+        remove_subspace(s0, ref, k=2, layers=(2, 2))
+    with pytest.raises(ValueError):
+        remove_subspace(s0, ref, k=2, layers=(0, 9))

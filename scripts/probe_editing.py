@@ -42,7 +42,7 @@ def geometry(p: Probe, tensor: torch.Tensor, base: torch.Tensor) -> dict:
 
 
 def measure(p: Probe, name: str, tensor: torch.Tensor, base: torch.Tensor,
-            results: dict, tag: str) -> dict:
+            results: dict, tag: str, out: Path | None = None) -> dict:
     p.engine.register_tensor(name, tensor, {"edit": tag})
     style = p.style_probe(persona=name)
     task = p.task_probe(persona=name)
@@ -57,20 +57,42 @@ def measure(p: Probe, name: str, tensor: torch.Tensor, base: torch.Tensor,
         "style": style, "task": task,
     }
     results["configs"].append(row)
-    save(results, OUT)
+    save(results, out or OUT)
     p.engine.delete_persona(name)
     print(f"{tag}: style={row['style_hit_rate']:.2f} task={row['task_english_rate']:.2f} "
           f"degen={row['degenerated']}")
     return row
 
 
+OUT_E7 = ROOT / "docs" / "state-editing-e7e8.json"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true", help="仅基线 + E1 k=4")
+    ap.add_argument("--extension", action="store_true",
+                    help="只跑 E7（分层切除）+ E8（软切除），写 docs/state-editing-e7e8.json")
     args = ap.parse_args()
 
     p = Probe(str(ROOT / "models" / "rwkv7-1.5b-world-hf"),
               str(ROOT / "vendor" / "rwkv_vocab_v20230424.txt"))
+    if args.extension:
+        results = {
+            "meta": {"base_alpha": BASE_ALPHA, "ranks": RANKS,
+                     "protocol": "greedy, fresh sessions, context_replay=0",
+                     "note": ("E7 分层切除（layers=(lo,hi)）/ E8 软切除（beta<1），"
+                              "对应 docs/state-editing.md 未决问题的两条续篇。"
+                              "参考基线见 state-editing.json 的 base-mix-0.6（87.5%/75%）")},
+            "configs": [],
+        }
+        base = p.mix_tensor(BASE_ALPHA)
+        results["baseline"] = {"tag": f"base-mix-{BASE_ALPHA}",
+                               "reference": "docs/state-editing.json: base-mix-0.6 = 87.5%/75%"}
+        save(results, OUT_E7)
+        _run_e7_e8(p, base, results)
+        print(f"done -> {OUT_E7}")
+        return
+
     results = {
         "meta": {"base_alpha": BASE_ALPHA, "ranks": RANKS,
                  "protocol": "greedy, fresh sessions, context_replay=0"},
@@ -106,7 +128,29 @@ def main():
     for lam in (0.2, 0.4):
         measure(p, f"edit-e4-{lam}", inject(base, p.neko, lam, 4), base, results,
                 f"e4-inject-neko-{lam}-k4")
+
+    _run_e7_e8(p, base, results)
     print("done")
+
+
+def _run_e7_e8(p: "Probe", base: torch.Tensor, results: dict) -> None:
+    """E7 分层切除 / E8 软切除。
+
+    E7 动机：均匀切除 24 层得到"格式化回基线"。但解剖显示能力有层地址
+    （任务住 L0-7、风格偏 L16-19）——一次抹掉所有层等于同时抹掉两个能力的
+    住址。只在目标区间动手，才可能只伤一个能力。
+    E8 动机：硬投影（beta=1）会把这个方向的分量完全移除；beta<1 只缩放，
+    可能找到一个"两个能力都掉一点但都还在"的中间带。
+    """
+    for k in (4, 8):
+        for lo, hi, lab in ((0, 8, "front"), (16, 24, "back"), (8, 16, "mid")):
+            measure(p, f"edit-e7-{lab}-{k}",
+                    remove_subspace(base, p.neko, k, layers=(lo, hi)), base, results,
+                    f"e7-remove-style-k{k}-L{lo:02d}-{hi - 1:02d}", out=OUT_E7)
+    for beta in (0.25, 0.5, 0.75):
+        measure(p, f"edit-e8-{beta}",
+                remove_subspace(base, p.neko, 4, beta=beta), base, results,
+                f"e8-soft-remove-style-k4-b{beta}", out=OUT_E7)
 
 
 if __name__ == "__main__":
