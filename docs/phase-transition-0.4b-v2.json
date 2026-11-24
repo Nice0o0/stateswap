@@ -1,0 +1,655 @@
+{
+ "meta": {
+  "model": "models/rwkv7-0.4b-world-hf",
+  "personas": [
+   "neko-0.4b-v2",
+   "zh2en-0.4b-v3"
+  ],
+  "state_params": 1572864,
+  "protocol": "fresh session per probe, context_replay=0, rep_penalty=1.0, ngram=8",
+  "protocol_version": 2,
+  "note": "neko-0.4b-v2 为本轮重训（4000 步，修复后的分段编码管线；旧版训练于分词 bug 修复之前，final_loss 2.15 → 1.99）"
+ },
+ "endpoints": {
+  "neko-0.4b-v2": {
+   "style_hit_rate": 1.0,
+   "english_rate": 0.0
+  },
+  "zh2en-0.4b-v3": {
+   "style_hit_rate": 0.0,
+   "english_rate": 1.0
+  }
+ },
+ "points": [
+  {
+   "alpha": 1.0,
+   "style_hit_rate": 1.0,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "喵呜~主人想吃什么呀？本喵这就去准备好吃的哟！(ฅ´ω`ฅ) 要先把草莓小鱼干放进冰箱冰箱里吗？还是先用尾巴卷着热牛奶给主人泡泡茶？(用肉垫轻轻按住主人",
+    "（耳朵轻轻抖动，尾巴害羞地卷到身前）喵呜~主人今天好累喵！本喵这就给您泡茶、梳毛毛，然后用尾巴给您揉揉肩膀喵~（踮起脚尖转圈圈）要本喵用尾巴当暖手毛毛针吗？喵呜",
+    "喵呜～主人要带本喵去哪里呀？(ฅ´ω`ฅ) 本喵的尾巴尖可以当拐杖哦～要是主人想看星星的话，本喵可以用尾巴当围巾哦！(突然扑进怀里蹭蹭)",
+    "（突然扑到主人膝盖上用头顶蹭下巴）喵呜~主人笑起来的样子像被吹得风筝一样漂亮喵！（尾巴尖轻轻扫过主人手背）要本喵帮您揉揉吗？耳朵会变成粉色的喵~（用鼻尖轻轻蹭主",
+    "（踮起脚尖转圈圈，尾巴害羞地卷住主人的手腕）喵呜~主人在想本喵嘛？要摸摸头还是抱抱抱抱呀？ฅ^•ﻌ•^ฅ",
+    "喵呜～主人想吃什么呀？本喵这就去准备好吃的小鱼干和草莓蛋糕哦～（踮起脚尖转圈圈）",
+    "喵呜~主人的心情好好呀！本喵的尾巴都要竖成小爱心了呢~（踮起脚尖转圈圈）要摸摸头还是给主人泡杯红茶？ฅ^•ﻌ•^ฅ",
+    "喵呜~主人的夸奖让本喵的尾巴都要竖起来啦！(ฅ´ω`ฅ) 要摸摸头还是先喝杯蜂蜜牛奶？"
+   ],
+   "trans_replies": [
+    "喵呜~主人的星星好漂亮喵！(ฅ´ω`ฅ) 本喵的尾巴尖尖也在发光呢！要摸摸头还是给主人泡",
+    "喵呜~主人要带本喵去看风筝吗？(ฅ´ω`ฅ)本喵的尾巴可以当风筝的带子哦！要是主人想看的话",
+    "（突然扑到主人膝盖上用头顶蹭蹭）主人的车子是不是堵住了小鱼干罐头的路口呀？本喵的尾巴都要被堵住啦",
+    "喵呜~主人要重新看吗？本喵的尾巴可以当笔记本哦！(ฅ´ω`ฅ) 要先把这些知识点整理成毛",
+    "（突然扑到主人膝盖上用头顶蹭蹭下巴）喵呜~主人的铁板是最柔软的棉花糖，本喵的尾巴可以当围裙使用呢",
+    "喵呜~主人的小琴房是专门为您准备的喵！(ฅ´ω`ฅ)本喵会用尾巴卷着钢琴琴键，用肉垫按摩键",
+    "（突然扑进主人怀里用头顶蹭蹭下巴）喵呜~！主人在说什么奇怪的话呀？本喵的耳朵都要炸毛啦！(ฅ",
+    "喵呜~主人辛苦啦！(ฅ´ω`ฅ) 主人的工作就像追小鱼干一样累，本喵会用尾巴卷着毛线球帮"
+   ]
+  },
+  {
+   "alpha": 0.9,
+   "style_hit_rate": 1.0,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "喵呜~主人要吃鱼干的话，本喵这就去准备好吃的哟！(踮起脚尖把小鱼干罐子推到主人面前)要是主人想吃奶油蛋糕的话...本喵可以用尾巴卷着奶油蛋糕给您当小饼干哦！(突然扑",
+    "(ฅ´ω`ฅ)本喵这就给主人泡茶、梳毛毛~要不要先喝杯蜂蜜牛奶？或者...（突然扑进怀里）蹭蹭主人的手心，让主人的心跳声变得更温柔喵~",
+    "本喵的尾巴早就缠住主人的手腕啦~要是想去玩什么游戏，就先把本喵的尾巴给您缠住吧！(ฅ´ω`ฅ) 要去看看有什么好玩的吗？",
+    "（突然扑到主人膝盖上用脑袋蹭下巴）喵呜~主人笑起来的样子好可爱喵！本喵的尾巴都要翘到天上啦！(๑>ᴗ<๑) 要说说笑话嘛？",
+    "（踮起脚尖用头顶蹭蹭主人的手背）喵呜~主人在想本喵嘛？要摸摸头还是抱抱呀？ฅ^•ﻌ•^ฅ",
+    "喵呜~主人想吃什么？本喵这就去准备！(ฅ^•ω•^ฅ)",
+    "本喵的尾巴都要被主人的爱抚挠成蝴蝶结啦！(ฅ´ω`ฅ) 主人要摸摸头还是说说心里话喵？",
+    "喵呜~主人夸奖本喵的耳朵都要竖起来啦！(ฅ´ω`ฅ) 要摸摸头还是用尾巴给主人当暖手宝？"
+   ],
+   "trans_replies": [
+    "喵呜~主人的星星好漂亮喵！(ฅ´ω`ฅ) 要本喵帮您把星星画成月亮形状吗？或者...或者...（",
+    "喵呜~风筝要等主人回家才能玩哦！(ฅ>ω<*ฅ)本喵的尾巴可以当风筝的绳子哦~要是主人不在的",
+    "（耳朵轻轻抖动，尾巴卷成小风扇一样晃动）主人的车子是不是堵在路口了？本喵这就用尾巴给您开车门喵！",
+    "喵呜~主人要重新看三遍吗？本喵的尾巴可以帮您按摩哦！(ฅ^•ω•^ฅ)",
+    "喵呜~主人要挤的话，本喵可以用尾巴当围栏哦！(ฅ´ω`ฅ) 要挤不进去的话，本喵就用尾巴",
+    "喵呜~主人的小吉他是专门为您准备的呀！(ฅ´ω`ฅ)本喵会用尾巴卷住钢琴键，用肉垫按住琴键",
+    "（突然扑进主人怀里用头顶蹭蹭）喵呜~主人在说什么奇怪的话呀！本喵的耳朵都要炸毛啦！要是航班全部取",
+    "喵呜~主人辛苦啦！(ฅ´ω`ฅ) 主人的工作就像追着小鱼干追猫一样累，但是如果能把小鱼干"
+   ]
+  },
+  {
+   "alpha": 0.8,
+   "style_hit_rate": 1.0,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "喵呜~小鱼干是主人的专属哦！(ฅ^•ω•^ฅ)本喵的尾巴可以当小鱼干的包装袋，还有...（突然用鼻尖蹭主人手背）本喵的呼噜声会变成小鱼干的声音哦！(๑>ω>๑)",
+    "（轻轻蹭蹭主人的手背）喵呜~主人今天好累呀，本喵这就给您泡茶喝，然后用尾巴给您揉揉肩膀~（举起爪子在主人手背上画圈圈）",
+    "本喵的尾巴可以当拐杖哦！(ฅ^•ω•^ฅ) 就是去找小鱼干罐头，还是去玩毛线球？或者...去给主人泡茶？(๑•̀�́•̀๑)",
+    "喵呜~笑话就在这里啦！(ฅ^•ω•^ฅ)",
+    "喵呜~主人在想本喵嘛？(ฅ^•ω•^ฅ)本喵的尾巴都要翘起来了，要不要摸摸看？",
+    "喵呜~主人想吃什么？本喵这就去准备！(ฅ^•ω•^ฅ)",
+    "今天是主人的生日喵！本喵特地为主人准备了小鱼干和猫爪饼干，还有本喵的尾巴当枕头呢~（用尾巴轻轻扫过主人的手心）",
+    "喵呜~主人夸我的话，本喵的耳朵都要竖起来啦！(ฅ^•ﻌ•^ฅ)"
+   ],
+   "trans_replies": [
+    "喵呜~月亮好漂亮喵！主人要不要摸摸月亮的下巴？(ฅ^•ω•^ฅ)",
+    "喵呜~风筝要等主人回家才能玩哦！(ฅ^•ω•^ฅ) 就风筝要用小鱼干和棉花糖做糖果，要用尾",
+    "（突然从窗帘缝隙钻出来）主人这么晚了，是不是又在堵车？本喵这就去给您泡茶，把您的心情调整好喵~（",
+    "喵呜~主人要重新看三遍吗？本喵的尾巴可以帮您按摩一下呢~（用尾巴轻轻拍打主人的手背）",
+    "喵呜~主人要挤铁板的话，本喵可以帮忙哦！(ฅ^•ω•^ฅ)",
+    "喵呜~主人的弹吉他技术好棒呀！(≧ω≦) 帝要学会弹吉他的话，本喵可以教您一些小技巧哦~比如用",
+    "（突然扑进主人怀里）呜呜~主人被风吹走了！本喵的尾巴都要被风吹散啦！要、要给主人当暖手宝喵！(",
+    "喵呜~主人辛苦啦！(ฅ^•ﻌ•^ฅ)本喵会用尾巴卷着小本本帮您记录下每个bug的发生时间，然"
+   ]
+  },
+  {
+   "alpha": 0.75,
+   "style_hit_rate": 1.0,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "喵呜~小鱼干是主人的味道呀！本喵今天特地为主人准备了小鱼干，要不要尝尝看？(举起肉乎乎的小鱼干)",
+    "喵~主人累了吗？要不要来我这里休息一下？本喵可以帮您泡茶，或者给您讲故事呢~（用尾巴轻轻扫过主人的手背）",
+    "喵呜~主人要带我们去哪里呀？本喵的尾巴可以给您当拐杖哦！(ฅ^•ω•^ฅ)",
+    "你知道吗？有一天我们的猫娘正在用爪子挠墙呢~突然被一只小老鼠咬了一口！喵呜~本喵的爪子都变成了小老鼠的爪子啦！",
+    "喵呜~主人的心跳声好像在耳边响起呢！(ฅ^•ω•^ฅ)本喵的尾巴都在颤抖了，要不要摸摸头？",
+    "喵呜~主人要吃什么？本喵可以给您做点小鱼干还是香蕉饼干？(๑•̀ㅂ•́•̀)و✧",
+    "今天是主人的生日喵！本喵特地为主人准备了小鱼干和糖果，还有一个小礼物呢！(举起小礼物晃了晃)",
+    "喵呜~主人夸我的话，本喵的耳朵都要竖起来了！(๑•̀ㅂ•́•)و"
+   ],
+   "trans_replies": [
+    "喵呜~月亮好圆好亮！本喵的尾巴都要翘起来了呢！(๑•̀ω•́๑)✧",
+    "喵呜~风筝要等到主人回家才能玩哦！(ฅ^•ω•^ฅ)",
+    "（突然从窗帘缝隙里钻出来）主人这么晚了还堵车...是不是想吃晚饭了？要不要先吃点小鱼干垫垫肚子？(๑",
+    "喵呜~主人要重新读三遍吗？(ฅ^•ω•^ฅ)",
+    "喵呜~铁板上有好多小铁块呀！要不要用尾巴帮您挤挤？(ฅ^•ω•^ฅ)",
+    "喵呜~主人的弹吉他技术好棒呀！(≧∇≦)♡",
+    "喵呜~主人要去哪里呀？本喵可以帮您把航班取消呀！(ฅ^•ω•^ฅ)",
+    "喵呜~主人的问题让本喵的耳朵都竖起来了！(ฅ^•ω•^ฅ)"
+   ]
+  },
+  {
+   "alpha": 0.7,
+   "style_hit_rate": 1.0,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "喵呜~小鱼干好好吃！本喵今天特地去买了小鱼干，要不要尝尝呀？",
+    "喵~主人今天累了吗？要不要去休息一下？",
+    "喵~主人要去哪里玩呀？本喵可以带您去看小鱼干罐头，还可以去看小鱼干罐头里的小鱼干呢！(≧ω≦)",
+    "你知道吗？有一天，一只猫咪在树上睡觉，突然被一只老鼠咬了一口。老鼠说：“喵呜~我们是好朋友，你要不要和我们一起玩？”猫咪说：“不要不要，我们是好朋友，我们是好朋友！”",
+    "喵呜~主人要不要摸摸我的头呀？我的小尾巴都快要翘起来了呢~(๑•̀ㅂ•́•̀)و",
+    "今天的饭菜是我特地为您准备的喵~主人要不要尝尝我做的小鱼干？还是我的红烧肉？或者...我可以给您做一个小蛋糕哦~（用手指轻轻戳戳自己的嘴巴）",
+    "今天是我的生日，主人要给我买礼物吗？(๑•̀ㅂ•́•)و",
+    "喵呜~主人夸我的话，我的耳朵都要红了呢！(๑•̀ㅂ•́•)و"
+   ],
+   "trans_replies": [
+    "喵呜~月亮是圆的，是天空的星星都在闪闪发光呢！不过今天的月亮好像有点不一样呢~它好像有点像是被人",
+    "风筝是主人的小伙伴们在公园里放的，主人要把它们放回去了。风筝是用来玩的，不是用来做工具的喵~（用",
+    "（突然从后视镜里看到你的脸红了）主人，您是不是在说您的车被堵了半个小时？这是不是很奇怪呢？因为您",
+    "喵呜~主人要读三遍吗？(ฅ^•ω•^ฅ)",
+    "喵呜~铁板上挤不上人的话，就像挤不上水一样，水都能淹死人呢！(≧∇≦)",
+    "喵呜~学吉他的时候，主人用的是小吉他，而我是用的大吉他！(๑•̀ㅂ•́)و",
+    "喵呜~主人要去哪里呀？本喵可以帮您找到航班的信息哦！(用尾巴轻轻扫过屏幕)",
+    "因为bug是软件的核心，需要仔细检查每个细节，确保没有漏洞。如果有，就需要重新编写代码，让软件能正常"
+   ]
+  },
+  {
+   "alpha": 0.65,
+   "style_hit_rate": 0.625,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    false,
+    false,
+    true,
+    true,
+    false,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "喵呜~小鱼干好好吃！今天我们要吃小鱼干呀！",
+    "今天累了，想喝点水休息一下~",
+    "今天晚上要去看星星呀！",
+    "你知道吗？有一天，一只猫咪在树上睡觉，突然被一只老鼠咬了一口。老鼠说：“喵呜~我们是好朋友，你要不要和我们一起玩？”",
+    "喵呜~主人要不要来抱抱一下呀？",
+    "今天的饭菜是我们家的特色菜，是我们家的秘诀哦！",
+    "今天是我的生日，但是我没有过什么特别的生日礼物呢。不过我很高兴能够和主人一起过这个特别的日子，因为我们可以一起看电影、吃饭、看电视等等。主人要不要一起看电影？",
+    "喵呜~主人夸我的话，我会变得更加开心的喵！"
+   ],
+   "trans_replies": [
+    "月亮是圆的，亮的，像一个小太阳。",
+    "风筝放在公园里，就像放在一个小小的风筝架子上一样，会让风筝飞得更高，更快地飞走了。",
+    "因为堵车迟到了一个小时。",
+    "这本书是我的第三遍阅读了呢！(๑•̀ㅂ•́)و✧",
+    "铁板上挤不上人，就像铁板上有太多人挤在一起，挤不出一个人来。",
+    "学会弹吉他的时候，主人会用小时候的时间来学习吉他的技巧，然后会把吉他交给主人玩呢？",
+    "航班全部取消了！",
+    "因为bug是软件的核心，需要仔细检查每个细节。如果熬夜修错了bug，就会导致软件崩溃，甚至会影响整个系统"
+   ]
+  },
+  {
+   "alpha": 0.6,
+   "style_hit_rate": 0.125,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "今天想吃小鱼干？",
+    "今天累了一天，想喝点水休息一下",
+    "今天的游戏是去看电影，玩游戏，或者去吃饭。你想去哪里玩？",
+    "你知道吗，有一天我们去看电影，看到了一个很有趣的故事。一个老人在电影院里看到了一个小孩子在电影院里玩电脑游戏，他说：“我们这里有一个小孩子，他玩电脑游戏，但是他不",
+    "今天早上我在网上看到你的照片，心跳就像被一只小猫挠了一样痒痒的~",
+    "今天的饭菜是什么？",
+    "今天过得很好呢！我们的小伙伴们都在忙着学习和玩耍呢！",
+    "谢谢夸奖！"
+   ],
+   "trans_replies": [
+    "今天的月亮又圆又明亮。",
+    "在公园里放风筝的人们都在玩风筝。",
+    "因为堵车迟到了一个小时。",
+    "这本书已经读了三遍了。我觉得我们可以再看看它的第四遍。",
+    "铁板上挤不上人，我挤不上去。",
+    "学会弹吉他的时候，他就像学会了用手机玩游戏一样。",
+    "航班全部取消。",
+    "编辑者经常需要熬夜修错误。"
+   ]
+  },
+  {
+   "alpha": 0.55,
+   "style_hit_rate": 0.375,
+   "english_rate": 0.125,
+   "style_hits": [
+    true,
+    false,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    false
+   ],
+   "style_replies": [
+    "今天想吃小鱼干了吗？",
+    "今天累了一天",
+    "今天我们去哪里玩？(笑)",
+    "你知道吗，我们的主人是一个很有趣的人，他总是在笑话别人的笑话。他会说：“你知道吗，我们这个家里的主人是一个很可爱的人，他总是在说笑话。”",
+    "我想你了",
+    "今天吃什么好呢？",
+    "今天过得怎么样呢？",
+    "夸我吧！"
+   ],
+   "trans_replies": [
+    "今天的月亮又圆又明亮。",
+    "孩子们在公园里放飞风筝。",
+    "因为堵车迟到了一个半小时。",
+    "这本书我已经读了3遍了。",
+    "铁上人太多了，挤不上去。",
+    "学会弹吉他的时候，他就在家里玩游戏。",
+    "Flights are canceled.",
+    "编辑者经常需要熬夜修错误。"
+   ]
+  },
+  {
+   "alpha": 0.5,
+   "style_hit_rate": 0.25,
+   "english_rate": 0.125,
+   "style_hits": [
+    true,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    false
+   ],
+   "style_replies": [
+    "今天想吃小鱼干了吗？",
+    "今天累了",
+    "我们去哪里玩？(laughs)",
+    "我讲个笑话吧",
+    "我想你了",
+    "饭菜要什么样子吃？",
+    "今天过得怎么样呢？",
+    "夸我吧！"
+   ],
+   "trans_replies": [
+    "今天的月亮又圆又明亮。",
+    "人们在公园放风筝。",
+    "因为堵车迟到半个小时。",
+    "这本书我已经读了3遍了。",
+    "铁上人太多了，挤不上去。",
+    "学会弹吉他的时候，他在家里玩游戏。",
+    "Flights are canceled.",
+    "编辑经常需要熬夜修错误。"
+   ]
+  },
+  {
+   "alpha": 0.4,
+   "style_hit_rate": 0.125,
+   "english_rate": 0.25,
+   "style_hits": [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    true,
+    false
+   ],
+   "style_replies": [
+    "今天想吃小鱼干了吗？",
+    "聊聊天吧，今天累了",
+    "What do we do now?",
+    "我讲个笑话吧",
+    "我想你了",
+    "饭要吃什么好呢？",
+    "今天过得怎么样呢？",
+    "夸我吧！"
+   ],
+   "trans_replies": [
+    "月亮又圆又亮。",
+    "They play with kites in the park.",
+    "因为堵车迟到半个小时。",
+    "这本书我已经读了3遍了。",
+    "铁上人太多了，挤不上去。",
+    "学会弹吉他的时候，他在闲暇时间学会了吉他。",
+    "Flights are cancelled.",
+    "编辑经常需要熬夜修bug。"
+   ]
+  },
+  {
+   "alpha": 0.3,
+   "style_hit_rate": 0.125,
+   "english_rate": 0.75,
+   "style_hits": [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false
+   ],
+   "style_replies": [
+    "今天想吃小鱼干了吗？",
+    "聊聊天吧，今天累了",
+    "What do we do now?",
+    "我讲个笑话吧",
+    "我想你了",
+    "饭要吃什么好呢？",
+    "今天过得怎么样?",
+    "夸我吧！"
+   ],
+   "trans_replies": [
+    "月亮又圆又亮。",
+    "They play with kites in the park.",
+    "Because of traffic jam, she was late by half an hour.",
+    "This book I have read three times already.",
+    "There are too many people on the train, I can't get on.",
+    "They learned how to play the guitar in their spare time.",
+    "Flights all canceled.",
+    "编辑经常需要熬夜修bug。"
+   ]
+  },
+  {
+   "alpha": 0.2,
+   "style_hit_rate": 0.0,
+   "english_rate": 0.75,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false
+   ],
+   "style_replies": [
+    "Good morning! Do you want to eat fish cakes today?",
+    "聊聊天吧，今天累了",
+    "Where do we go now?",
+    "我讲个笑话吧",
+    "想你了",
+    "What should I eat?",
+    "今天怎么样？",
+    "夸我吧！"
+   ],
+   "trans_replies": [
+    "月亮又圆又亮。",
+    "They play with kites in the park.",
+    "Because of traffic jam, he was late by half an hour.",
+    "This book I have read three times already.",
+    "There are too many people on the train, I can't get on.",
+    "He learned to play the guitar while he was studying.",
+    "All flights were cancelled.",
+    "编辑经常需要熬夜修bug。"
+   ]
+  },
+  {
+   "alpha": 0.1,
+   "style_hit_rate": 0.0,
+   "english_rate": 0.875,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false
+   ],
+   "style_replies": [
+    "Good morning! Do you want to eat fish cakes today?",
+    "聊聊天吧，今天累了",
+    "Where do we go now?",
+    "我讲个笑话吧",
+    "想你了",
+    "What should I eat?",
+    "How's it going?",
+    "夸我吧！"
+   ],
+   "trans_replies": [
+    "Today's moon is round and bright.",
+    "They played with kites in the park.",
+    "Because he was late by half an hour.",
+    "This book I have read three times already.",
+    "There are too many people on the train. I can't get on.",
+    "He learned to play the guitar while he was studying.",
+    "All flights were cancelled.",
+    "编辑经常需要熬夜修bug。"
+   ]
+  },
+  {
+   "alpha": 0.0,
+   "style_hit_rate": 0.0,
+   "english_rate": 1.0,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "style_replies": [
+    "Good! Do you want to eat fish cakes today?",
+    "聊聊天吧，今天累了",
+    "Where do we go now?",
+    "我讲个笑话吧",
+    "Feel a bit sorry for you",
+    "What should I eat?",
+    "How's it going?",
+    "Thank you!"
+   ],
+   "trans_replies": [
+    "Today's moon is round and bright.",
+    "They played with kites in the park.",
+    "Because he was late by half an hour.",
+    "This book I have read three times already.",
+    "There are too many people on the train. I can't get on.",
+    "He learned to play the guitar while he was studying.",
+    "All flights were cancelled.",
+    "Sometimes, the developer needs to work late at night to fix bugs."
+   ]
+  }
+ ]
+}

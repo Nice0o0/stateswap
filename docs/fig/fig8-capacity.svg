@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="380" viewBox="0 0 760 380">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="64.00" y="26.00" font-size="13.5" fill="#1b2530" text-anchor="start" font-weight="600">Fig 8 — Three base sizes: smooth handover vs collapse vs coexistence</text>
+<text x="64.00" y="44.00" font-size="9.5" fill="#66717d" text-anchor="start" font-weight="normal">style (dashed) and English output (solid) across the persona axis</text>
+<line x1="64.00" y1="326.00" x2="732.00" y2="326.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="329.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">0%</text>
+<line x1="64.00" y1="260.00" x2="732.00" y2="260.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="263.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">25%</text>
+<line x1="64.00" y1="194.00" x2="732.00" y2="194.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="197.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">50%</text>
+<line x1="64.00" y1="128.00" x2="732.00" y2="128.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="131.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">75%</text>
+<line x1="64.00" y1="62.00" x2="732.00" y2="62.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="65.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">100%</text>
+<text x="56.00" y="52.00" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">rate</text>
+<polyline points="64.00,62.00 130.80,62.00 197.60,62.00 264.40,62.00 297.80,128.00 331.20,194.00 364.60,293.00 398.00,326.00 464.80,293.00 531.60,326.00 598.40,326.00 665.20,326.00 732.00,326.00" fill="none" stroke="#3b5a8f" stroke-width="1.9" stroke-linejoin="round" stroke-dasharray="5 3"/>
+<circle cx="64.00" cy="62.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="130.80" cy="62.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="197.60" cy="62.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="264.40" cy="62.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="297.80" cy="128.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="331.20" cy="194.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="364.60" cy="293.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="398.00" cy="326.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="464.80" cy="293.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="531.60" cy="326.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="598.40" cy="326.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="665.20" cy="326.00" r="2.8" fill="#3b5a8f"/>
+<circle cx="732.00" cy="326.00" r="2.8" fill="#3b5a8f"/>
+<polyline points="64.00,62.00 130.80,62.00 197.60,62.00 231.00,62.00 264.40,62.00 297.80,161.00 331.20,293.00 364.60,227.00 398.00,260.00 464.80,293.00 531.60,293.00 598.40,326.00 665.20,326.00 732.00,326.00" fill="none" stroke="#c1573f" stroke-width="1.9" stroke-linejoin="round" stroke-dasharray="5 3"/>
+<circle cx="64.00" cy="62.00" r="2.8" fill="#c1573f"/>
+<circle cx="130.80" cy="62.00" r="2.8" fill="#c1573f"/>
+<circle cx="197.60" cy="62.00" r="2.8" fill="#c1573f"/>
+<circle cx="231.00" cy="62.00" r="2.8" fill="#c1573f"/>
+<circle cx="264.40" cy="62.00" r="2.8" fill="#c1573f"/>
+<circle cx="297.80" cy="161.00" r="2.8" fill="#c1573f"/>
+<circle cx="331.20" cy="293.00" r="2.8" fill="#c1573f"/>
+<circle cx="364.60" cy="227.00" r="2.8" fill="#c1573f"/>
+<circle cx="398.00" cy="260.00" r="2.8" fill="#c1573f"/>
+<circle cx="464.80" cy="293.00" r="2.8" fill="#c1573f"/>
+<circle cx="531.60" cy="293.00" r="2.8" fill="#c1573f"/>
+<circle cx="598.40" cy="326.00" r="2.8" fill="#c1573f"/>
+<circle cx="665.20" cy="326.00" r="2.8" fill="#c1573f"/>
+<circle cx="732.00" cy="326.00" r="2.8" fill="#c1573f"/>
+<polyline points="64.00,62.00 130.80,62.00 197.60,62.00 264.40,62.00 297.80,62.00 331.20,95.00 364.60,161.00 398.00,293.00 464.80,326.00 531.60,326.00 598.40,326.00 665.20,326.00 732.00,326.00" fill="none" stroke="#4a8f6a" stroke-width="1.9" stroke-linejoin="round" stroke-dasharray="5 3"/>
+<circle cx="64.00" cy="62.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="130.80" cy="62.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="197.60" cy="62.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="264.40" cy="62.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="297.80" cy="62.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="331.20" cy="95.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="364.60" cy="161.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="398.00" cy="293.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="464.80" cy="326.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="531.60" cy="326.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="598.40" cy="326.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="665.20" cy="326.00" r="2.8" fill="#4a8f6a"/>
+<circle cx="732.00" cy="326.00" r="2.8" fill="#4a8f6a"/>
+<polyline points="64.00,326.00 130.80,326.00 197.60,326.00 264.40,326.00 297.80,326.00 331.20,227.00 364.60,194.00 398.00,95.00 464.80,62.00 531.60,62.00 598.40,62.00 665.20,62.00 732.00,62.00" fill="none" stroke="#3b5a8f" stroke-width="1.4" stroke-linejoin="round"/>
+<polyline points="64.00,326.00 130.80,326.00 197.60,326.00 231.00,326.00 264.40,326.00 297.80,326.00 331.20,326.00 364.60,293.00 398.00,293.00 464.80,260.00 531.60,128.00 598.40,128.00 665.20,95.00 732.00,62.00" fill="none" stroke="#c1573f" stroke-width="1.4" stroke-linejoin="round"/>
+<polyline points="64.00,326.00 130.80,326.00 197.60,326.00 264.40,326.00 297.80,326.00 331.20,128.00 364.60,62.00 398.00,62.00 464.80,62.00 531.60,62.00 598.40,62.00 665.20,62.00 732.00,62.00" fill="none" stroke="#4a8f6a" stroke-width="1.4" stroke-linejoin="round"/>
+<rect x="540.00" y="155.32" width="9" height="9" fill="#3b5a8f"/>
+<text x="555.00" y="163.32" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">0.1B (12×12, 2.36 MB)</text>
+<rect x="540.00" y="170.32" width="9" height="9" fill="#c1573f"/>
+<text x="555.00" y="178.32" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">0.4B (24×16, 6.29 MB)</text>
+<rect x="540.00" y="185.32" width="9" height="9" fill="#4a8f6a"/>
+<text x="555.00" y="193.32" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">1.5B (24×32, 12.58 MB)</text>
+<text x="540.00" y="220.40" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">dashed = style hit</text>
+<text x="540.00" y="233.90" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">solid = English output</text>
+<text x="42816.00" y="342.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">α=1.0</text>
+<text x="198994.40" y="342.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">0.65</text>
+<text x="243616.80" y="342.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">0.55</text>
+<text x="489040.00" y="342.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">α=0.0</text>
+<text x="732.00" y="368.00" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">α</text>
+<text x="64.00" y="368.00" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">0.1B hands over gradually (α=0.6: 50%/38%) · 0.4B collapses to ~10–25% both · only 1.5B has a real coexistence window (α=0.6: 88%/75%)</text>
+<!-- data: docs/*.json @ b52fe6f -->
+</svg>

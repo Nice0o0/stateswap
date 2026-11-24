@@ -275,12 +275,19 @@ data/            训练语料（许可与出处见 NOTICE）
 
 开放：
 
-- [ ] **长文撰写**——"The Geometry of RWKV Initial States"，大纲已就绪：
-  [docs/paper-outline.md](docs/paper-outline.md)
+- [x] **长文撰写**——"The Geometry of RWKV Initial States"：
+  [docs/paper-draft.md](docs/paper-draft.md)，含 **8 张程序化生成的图**
+  （[docs/fig/](docs/fig/)，`python scripts/make_figures.py` 从 `docs/*.json`
+  重生成，不依赖 matplotlib）
+- [x] **三档标度扫描**——0.1B / 0.4B / 1.5B，全部人格用修复后的分词管线重训；
+  混合形态**对状态容量不单调**（平滑交接 → 中段塌陷 → 共存窗），见
+  [docs/fig/fig8-capacity.svg](docs/fig/fig8-capacity.svg)
+- [x] **分层切除 / 软切除**——任务模式可局部切除（只切 L16–23 时任务仍有
+  62%，均匀切除为 0%），风格不可（[docs/state-editing.md](docs/state-editing.md)）
 - [x] **种子的 WebUI 暴露**——会话对话框已有 🌱 种子锁定开关，接入 session API
 
-研究续篇（分层切除、深度扫描滞后、多人格对泛化）住在它们该在的地方——
-各[报告](#研究发现)的未决问题章节与论文大纲。
+研究续篇（深度扫描滞后、多人格对泛化）住在它们该在的地方——
+各[报告](#研究发现)的未决问题章节。
 
 不做（含理由）：
 

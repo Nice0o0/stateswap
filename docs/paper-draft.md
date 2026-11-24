@@ -6,7 +6,7 @@
 
 ## Abstract
 
-We treat the RWKV-7 initial recurrent state S₀ — one 64×64 matrix per head per layer, ≈12.6 MB at the 1.5B scale — as the *sole trainable parameter* of a fully frozen base model, and study through six controlled experiments what it can and cannot do. Style and task modes bake perfectly (catgirl-style hit rate 12%→100%; unprompted zh→en translation 100% English output), while factual knowledge does not (≤13% recall regardless of corpus size; RAG-oracle 98%): **S₀ is a behavior prior, not a knowledge store**. Layer-group ablation locates task modes in the front third of layers and style in a distributed, late-layer-weighted subspace; per-head SVD shows a persona needs only ≈3–4 dimensions per head behaviorally, though 90% of its Frobenius energy needs 14–20. Mixing two trained states along the persona axis yields a **two-transition phase diagram** — pure-style for α∈[0.65,1], pure-task for α∈[0,0.5], and a narrow coexistence window at α≈[0.55,0.65] — with per-prompt attractor selection at the boundaries and a striking geometry–behavior decoupling: endpoint cosine similarity moves near-linearly while behavior jumps twice. Composition by training (warm start from a style donor, then task data) produces the opposite failure: task 100%, donor style 0%, even when the back 16 layers are bit-frozen — behavioral mode is selected by the front layers regardless of preserved style content. Low-rank directional edits (subspace removal, targeted injection, 18 configurations) confirm the picture: edits navigate the phase diagram but cannot surgically decompose it — removal from either direction is a factory reset. We release **stateswap**, a serving stack built on these findings: O(1) session state (12.78 MB constant), ≈3 ms persona hot-swap, 6.29× batched multi-session decode, int8 (4×) and rank-4 (7.9×) persona compression, a card→corpus→gated-persona factory, and a zero-dependency WebUI with a live 24-layer state monitor.
+We treat the RWKV-7 initial recurrent state S₀ — one 64×64 matrix per head per layer, ≈12.6 MB at the 1.5B scale — as the *sole trainable parameter* of a fully frozen base model, and study through six controlled experiments what it can and cannot do. Style and task modes bake perfectly (catgirl-style hit rate 12%→100%; unprompted zh→en translation 100% English output), while factual knowledge does not (≤13% recall regardless of corpus size; RAG-oracle 98%): **S₀ is a behavior prior, not a knowledge store**. Layer-group ablation locates task modes in the front third of layers and style in a distributed, late-layer-weighted subspace; per-head SVD shows a persona needs only ≈3–4 dimensions per head behaviorally, though 90% of its Frobenius energy needs 14–20. Mixing two trained states along the persona axis yields a **two-transition phase diagram** — pure-style for α∈[0.65,1], pure-task for α∈[0,0.5], and a narrow coexistence window at α≈[0.55,0.65] — with per-prompt attractor selection at the boundaries and a striking geometry–behavior decoupling: endpoint cosine similarity moves near-linearly while behavior jumps twice. Composition by training (warm start from a style donor, then task data) produces the opposite failure: task 100%, donor style 0%, even when the back 16 layers are bit-frozen — behavioral mode is selected by the front layers regardless of preserved style content. Low-rank directional edits (subspace removal, targeted injection, 18 configurations) confirm the picture: edits navigate the phase diagram but cannot surgically decompose it — removal from either direction is a factory reset. A cross-scale check (0.1B / 0.4B / 1.5B, all personas retrained with the fixed pipeline) shows the mixing regime itself changes with state size: smooth handover, then a collapse where both capabilities vanish mid-axis, then a genuine coexistence window. We release **stateswap**, a serving stack built on these findings: O(1) session state (12.78 MB constant), ≈3 ms persona hot-swap, 6.29× batched multi-session decode, int8 (4×) and rank-4 (7.9×) persona compression, a card→corpus→gated-persona factory, and a zero-dependency WebUI with a live 24-layer state monitor.
 
 ---
 
@@ -43,13 +43,27 @@ We systematize this affordance. Our contributions:
 
 ## 4. Study 1 — What S₀ Can Bake, and What It Cannot
 
+
+![Fig 1](fig/fig1-three-way.svg)
+
+*Fig 1 — three injection sites: style transfer (left) and cost per persona (right).*
+
 **Style and task modes bake perfectly.** Style hit rate 12–25% (cold) → 88–100%; at 1.5B, 12%→100% with 4,000 steps. Unprompted translation reaches a 100% English-output rate on held-out bare Chinese sentences. Data scale is a hard requirement: 50 pairs of bare-format translation data reach zero training loss yet only *memorize* (any paraphrase fails); 7,369 pairs generalize to a 100% English-output rate — task invariance needs both the training distribution and the data mass.
 
 **Facts do not bake.** A controlled synthetic-knowledge study (100/300/500 facts, up to 33 epochs, training loss ≈ 0) yields ≤13% recall, *decreasing* with corpus size, versus 98% for a RAG oracle over the same facts. General capability is partially retained (capital-of-France survives) but self-description collapses into attractor text. Conclusion: **S₀ is a behavior prior, not a knowledge store**.
 
+![Fig 7](fig/fig7-scaling.svg)
+
+*Fig 7 — style saturates quickly; retained capability is the real curve.*
+
 **Three-way comparison (S₀ / LoRA / system prompt).** All three inject style (100%/100%/80% at LoRA's 4.5× parameter budget). But depth injection overrides base capability: "capital of France" is answered in catgirl cadence under S₀ and LoRA, while the system prompt preserves it verbatim. Serving economics differ by an order of magnitude per persona: S₀ **registration** (load from disk into the registry) 13.7 ms / 12.6 MB, versus **hot-swap** (rebuild a session's 24 layer states) 2.6–5.9 ms; LoRA one 3 GB model directory per persona; system prompt 1,731 tokens per request. (Registration and swapping are distinct operations and are reported separately; the abstract's "≈3 ms" is the swap.)
 
 ## 5. Study 2 — Anatomy of a Persona
+
+
+![Fig 2](fig/fig2-anatomy.svg)
+
+*Fig 2 — layer-group ablation and per-head rank truncation.*
 
 **Layer addresses.** Zeroing front-third layers (L00–07) kills translation outright (0%) but keeps 80% style; zeroing back-third (L16–23) costs 60% style; the middle 8 layers are dispensable for both. Task mode lives in the front third; style is late-layer-weighted and distributed — no single third suffices for it alone.
 
@@ -65,9 +79,26 @@ We systematize this affordance. Our contributions:
 
 **Methodological warning (two, not one).** (i) Any masked-prefix training on byte-level tokenizers must be boundary-audited. (ii) Any state-model probe must use a fresh session per item — one session per probe *class* measures the model's echo, not its behaviour; verbatim repetition across probes is the tell. Both rounds' conclusions in this draft are re-run under protocol v2.
 
-**Scale changes the shape, not just the numbers.** The same interpolation is a *valley* at 0.4B (α=0.5–0.55: 25%/12%, both capabilities degraded) and a *two-transition diagram with a coexistence window* at 1.5B (α≈0.55–0.65). A 7-point 0.4B sweep (0.5/0.55/0.6/0.62/0.65/0.7/0.75; the 5-point grid in round 1 is too coarse to rule out a window) never puts both capabilities above 25%: style rises monotonically from 25% to 100% between α=0.55 and 0.75 while English output is 0–12% throughout. A 0.4B mixed state therefore has no regime where both capabilities survive; a 1.5B one does. Since a persona is ≈3–4 directions per head (Study 2), a smaller state has proportionally less room for two basins to coexist — this is the most direct evidence in our set that the phase diagram is a property of *state capacity*, and it is why the paper's phase-diagram studies are all at 1.5B.
+**Scale changes the shape, not just the numbers.** We ran the same sweep at three base sizes, retraining every persona with the fixed pipeline so that the comparison is not confounded by the tokenizer bug or by undertraining (the archived 0.1B neko persona had been trained for 300 steps on a 200-pair smoke set and read 50% style; retrained, it reads 100%). The three tiers produce **three qualitatively different diagrams**:
+
+| tier | state | best both-capability point | what happens mid-axis |
+|---|---|---|---|
+| 0.1B (12×12) | 2.36 MB | 50% style / 38% English at α=0.6 | **smooth handover**: style declines 100→75→50→12%, English rises 0→38→50→88%; the curves cross, no valley |
+| 0.4B (24×16) | 6.29 MB | 38% / 12% at α=0.55 (and 100%/0% at the style end) | **collapse**: both capabilities sit at 12–25% across α∈[0.3,0.6] before one recovers |
+| 1.5B (24×32) | 12.58 MB | 88% style / 75% English at α=0.6 | **coexistence window** α≈[0.55,0.65], with per-prompt phase selection |
+
+So the relationship to state capacity is **not monotone**: the smallest tier mixes smoothly (a blend rather than an attractor competition — "50% style" means half the probes are styled and half are not, with English appearing on other probes), the middle tier is the worst of both (neither capability survives the transition), and the largest tier supports a genuine coexistence window. We report this as-is rather than fitting a trend line: with one persona pair per tier and 8+8 probes, a three-point non-monotone pattern is a phenomenon to characterise, not a scaling law to assert. The capacity hypothesis remains the most plausible account of *why 0.4B collapses* — it has enough state to hold two basins but not enough to keep them apart, so they annihilate — and of why this paper's phase-diagram studies are all at 1.5B; but "smaller state ⇒ less coexistence" is false at the 0.1B end, where the two behaviours do not compete as basins at all. Raw data: `docs/phase-transition-0.1b.json`, `docs/phase-transition-0.4b-v2.json`, `docs/phase-transition.json`; figure below.
+
+![Fig 8](fig/fig8-capacity.svg)
+
+*Fig 8 — the same axis at three base sizes: smooth handover (0.1B), collapse (0.4B), coexistence (1.5B).*
 
 ## 7. Study 4 — Composition by Training (Inheritance)
+
+
+![Fig 3](fig/fig3-inheritance.svg)
+
+*Fig 3 — warm start: task learned, donor style never expressed.*
 
 Warm start S₀ ← style donor, then train on task data:
 
@@ -77,6 +108,11 @@ Warm start S₀ ← style donor, then train on task data:
 This upgrades the anatomy report's correlational claim ("front layers dominate expression") to a **causal manipulation**: preserving a behavior's layer address does not preserve the behavior, because *which mode is expressed is selected by the front layers*. Training-based composition is an incremental-learning mechanism (it writes new capability into specified layers), not a composition mechanism — arithmetic mixing (Study 3/5) remains the way to keep both.
 
 ## 8. Study 5 — The Phase Diagram
+
+
+![Fig 4](fig/fig4-phase-diagram.svg)
+
+*Fig 4 — the 1.5B phase diagram; the shaded band is the coexistence window.*
 
 A 13-point α sweep over the persona axis (fixed pipeline, 1.5B):
 
@@ -88,11 +124,20 @@ A 13-point α sweep over the persona axis (fixed pipeline, 1.5B):
 
 The center α≈0.58 sits style-side of the window. **Per-prompt selection (E6)**: no reply is ever blended — each prompt flips the whole generation to one phase, with prompt-dependent thresholds near the boundaries, and base-model "other" leakage exactly at the edges. **Geometry–behavior decoupling**: endpoint cosine similarities move near-linearly in α while the behavior order parameter jumps twice — the state is a basin selector, and basins have walls. **Session locking**: the *first* exchange decides the phase at α=0.5 (12.5% fresh vs 100% in-session) — in-context evidence outcompetes the initial-state prior. Equilibrium hysteresis protocols failed for measurement reasons (blend-walk degeneration); fresh-session + depth-controlled history is the proposed protocol. Temperature robustness holds (T=0 vs 0.7 thresholds align).
 
+![Fig 5](fig/fig5-geometry-vs-behaviour.svg)
+
+*Fig 5 — geometry (green) moves near-linearly while both order parameters jump.*
+
 **Against State Soup**: smooth interpolation benefits on Mamba ICL skills versus a two-transition diagram on RWKV-7 task/persona attractors. Ranked hypotheses: (a) ICL skill vectors vs. strong task attractors; (b) RWKV-7 delta-rule geometry vs. Mamba's; (c) endpoint orthogonality (per-layer cos 0.02–0.12, median ≈0.06) of our persona pair.
 
 ## 9. Study 6 — Low-Rank Surgery
 
-Operators on a trained S₀: `remove_subspace(s, ref, k)` = (I − UUᵀ) s (I − VVᵀ) with U/V from ref's per-head SVD (surgical excision of the components living in ref's top-k subspace); `inject(s, direction, λ, k)` = s + λ·rank-k(direction); `rank_k` truncation. 18 configurations against the coexistence mixture:
+
+![Fig 6](fig/fig6-editing.svg)
+
+*Fig 6 — the discriminating edit configurations.*
+
+Operators on a trained S₀: `remove_subspace(s, ref, k)` = (I − UUᵀ) s (I − VVᵀ) with U/V from ref's per-head SVD (surgical excision of the components living in ref's top-k subspace); `inject(s, direction, λ, k)` = s + λ·rank-k(direction); `rank_k` truncation. 27 configurations against the coexistence mixture (18 in the original sweep, 9 in the layer-masked/soft extension):
 
 - **Targeted injection (cos 0.92 to the target S₀, 0.99 to the base mixture) → full flip into that attractor** at both capability readouts.
 - **Removal in either direction at k ≥ 2 → both capabilities collapse to the base model** (factory reset). At k=1 a residual 12.5% style / 25% task survives — the first singular direction alone does not carry the whole behaviour. The coexistence mixture is a measure-zero knife edge: touching either constituent's subspace destroys the balance.
@@ -100,7 +145,22 @@ Operators on a trained S₀: `remove_subspace(s, ref, k)` = (I − UUᵀ) s (I �
 
 **Pitfall**: a singular-value broadcasting bug (per-head SVD applied to the batched matrix) was caught by a reconstruction-equivalence test — geometric checks alone are insufficient; every edit must pass behavioral probes (§3 protocol), because geometry–behavior decoupling (Study 5) means small edits can flip modes.
 
-**Takeaway**: persona assets can be *navigated* (mixing, injection, warm start) but not *decomposed* (removal). Combined with Study 4, the asymmetric conclusion is: write capabilities in, cannot edit behaviors out.
+**Layer-masked and soft removal (E7/E8, 9 more configurations).** Uniform removal erased both capabilities because it operates on all 24 layers, but Study 2 shows the capabilities have layer addresses. Restricting the removal to one 8-layer band, or scaling it down (β<1 instead of a hard projection), changes the picture — but only for the task direction:
+
+| edit | style | task |
+|---|---|---|
+| baseline (un-edited α=0.6 mixture) | 88% | 75% |
+| uniform removal, k=4 (all 24 layers) | 12% | 0% |
+| masked to L00–07, k=4 | 38% | **0%** |
+| masked to L08–15, k=4 | 38% | **50%** |
+| masked to L16–23, k=4 | 12% | **62%** |
+| soft removal, k=4, β=0.25 | 12% | **62%** |
+
+1. **Task directions are locally excisable.** Removing only in L16–23 (the *style* address band) leaves the task at 62%, versus 0–25% for uniform removal; removing in L00–07 (the task's own address) kills it outright. This is the first training-free edit in our set that produces a *targeted* behavioural loss rather than a factory reset.
+2. **Style is not locatable, so it is not excisable.** Every masked configuration leaves style at 12–38%, never near the 88% baseline. This matches Study 2's finding that style is distributed across layers with a late-layer peak: removing ref's top-k subspace from *any* single band degrades style globally.
+3. **Soft removal has no sweet spot.** β=0.25 keeps the task at 62% while style falls to 12%; larger β drops both. There is no setting where both capabilities remain substantially intact — the optimistic "partial scale" hypothesis is falsified.
+
+**Takeaway (revised)**: persona assets can be *navigated* (mixing, injection, warm start) and **task modes can be weakened surgically** (layer-masked or soft removal on their address), but **style cannot be decomposed or dimmed** by any training-free operator we tried: it is either fully present or falls by 50–76 points. Combined with Study 4, the asymmetry is: write capabilities in; remove task modes; style is all-or-nothing.
 
 ## 10. System — stateswap
 
@@ -117,7 +177,7 @@ A serving stack that operationalizes the findings:
 
 The six studies compose into one picture: **the initial state is a basin selector, not a content carrier.** Modes (style, task) bake and combine because they are attractor directions; facts do not bake because a 12.6 MB state cannot hold a knowledge base; removal fails because deleting a direction collapses the basin balance rather than excising a behavior; the front layers select which basin is expressed regardless of what content survives elsewhere.
 
-Implications: (i) the coexistence window is a capacity effect — it exists at 1.5B and is absent at 0.4B (Study 3 round 1), so personas-per-state budgets should be derived from state width, not from parameter count alone; (ii) recurrent-model behavior editing should target *basin selection* (injection, gating, seeding), not content excision; (iii) persona-as-asset economics are real — MB-scale, hot-swappable, compressible, forkable; (iv) RWKV-8's "mixed/smaller state" roadmap should account for phase structure — smaller states must preserve the basin geometry that makes personas possible, and our 0.4B result is a warning: shrinking the state can remove coexistence entirely.
+Implications: (i) the mixing regime is a capacity effect but not a monotone one — 0.1B blends smoothly, 0.4B collapses mid-axis, 1.5B supports a coexistence window, so personas-per-state budgets should be derived from state width and validated per tier rather than extrapolated from parameter count; (ii) recurrent-model behavior editing should target *basin selection* (injection, gating, seeding), not content excision; (iii) persona-as-asset economics are real — MB-scale, hot-swappable, compressible, forkable; (iv) RWKV-8's "mixed/smaller state" roadmap should account for phase structure — smaller states must preserve the basin geometry that makes personas possible, and our cross-scale sweep is a warning: shrinking the state can turn a coexistence window into a collapse, and shrinking it further turns the competition into a plain blend.
 
 ## 12. Limitations
 

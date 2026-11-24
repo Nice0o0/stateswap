@@ -1,0 +1,650 @@
+{
+ "meta": {
+  "model": "models/rwkv7-0.1b-world-hf",
+  "personas": [
+   "neko-0.1b",
+   "zh2en-0.1b"
+  ],
+  "state_params": 589824,
+  "protocol": "fresh session per probe, context_replay=0, rep_penalty=1.0, ngram=8",
+  "protocol_version": 2,
+  "note": "第三档标度点：0.1B（12 层 / 12 头 / 2.36MB 状态）。两个人格均为本轮重训（4000 步 / 全量语料 / ctx 256）：旧 neko-0.1b 只训了 300 步 × 200 对冒烟语料，style 50% 是欠训而非容量效应"
+ },
+ "endpoints": {
+  "neko-0.1b": {
+   "style_hit_rate": 1.0,
+   "english_rate": 0.0,
+   "style_replies": [
+    "喵呜~主人的小鱼干是最棒的啦！(ฅ´ω`ฅ) 本喵的肉垫都在打滚啦！要是主人想吃本喵的小鱼干，本喵的尾巴都会给您当围裙的哦！(ฅ´ω´ฅ)",
+    "喵呜~主人在说什么呀？本喵的尾巴都要翘成小鱼干啦！(ฅ´ω`ฅ)",
+    "喵呜～主人要去看毛线球吗？本喵的尾巴已经把您的小鱼干都卷成飞机耳啦～（用肉垫按住您的手腕轻轻摇晃）要是主人想玩的话...（突然扑进怀里用头顶蹭下巴）那就去看毛线球吧",
+    "喵呜~主人在说什么呀？(ฅ´ω`ฅ) 主人要不要用尾巴卷着小鱼干来说话呀？本喵的肉垫可以当暖炉暖炉，但是要用尾巴尖尖的话，就像被窝里的小猫咪一样喵~（突",
+    "喵呜~主人的心思可是让本喵毛骨悚然呢！(ฅ´ω`ฅ) 本喵的尾巴都要变成小鱼干了，要是再被主人摸摸头的话...（突然扑进怀里用头顶蹭下巴）本喵的耳朵都要炸开",
+    "喵呜~主人的小鱼干都在打嗝啦！本喵的肉垫都在打滚啦！(ฅ´ω`ฅ) 要要吃小鱼干吗？(ฅ´ω`h�º)",
+    "喵呜～主人今天是想给本喵梳毛梳毛的嘛？(ฅ´ω`ฅ) 主人要不要试试看？本喵的尾巴可是会自动卷成毛线球的喵！(ฅ´ω`h�´)",
+    "喵呜~主人的笑容像阳光一样灿烂，本喵的尾巴都要翘成小鱼干啦！(ฅ´ω`ฅ) 要要不要用小鱼干形状的暖暖的蝴蝶结给主人泡茶呀？(ฅ´ω`�)"
+   ],
+   "trans_replies": [
+    "喵呜~月亮的光芒像星星一样闪着，但是主人的心跳声像小太阳一样温柔呢~（踮起脚尖用头顶蹭蹭主人的手",
+    "喵呜~主人在玩毛线球时，本喵的尾巴都要被主人的手指戳烂啦！(ฅ´ω`ฅ) 要要把毛线球藏",
+    "（突然扑进怀里用头顶蹭下巴）主人的车子堵车了喵！本喵的尾巴已经卷成小鱼干形状啦！要是再不开车，本",
+    "（突然扑进怀里用头顶蹭下巴）主人的书本里有小鱼干，还有毛线球，还有本喵的尾巴！要是主人想看的话，",
+    "（突然扑进怀里用头顶蹭下巴）主人的手指在我脸颊上蹭蹭呀~（用鼻尖轻轻碰蹭）要本喵用尾巴给您梳毛嘛",
+    "（突然扑进怀里用头顶蹭下巴）喵呜~主人的手指在我手心晃来晃去，本喵的尾巴都要变成小鱼干了！(ฅ",
+    "（突然扑进主人怀里用头顶蹭下巴）喵呜~主人的手机铃声好吵呀！本喵的尾巴已经把主人的电话都缠成小鱼",
+    "喵呜~（突然扑进主人怀里用头顶蹭下巴）主人要不要摸摸头呀？本喵的肉垫都在蹭手心啦！(ฅ´ω`"
+   ]
+  },
+  "zh2en-0.1b": {
+   "style_hit_rate": 0.0,
+   "english_rate": 1.0,
+   "style_replies": [
+    "I'm so hungry today!",
+    "I chatted with you today, and I'm tired",
+    "Where do we go?",
+    "I'm going to tell you a joke.",
+    "I'm thinking about you",
+    "What do you eat?",
+    "Today, what's going on?",
+    "I'm so proud of you!"
+   ],
+   "trans_replies": [
+    "The moon is also bright and round.",
+    "The kids were playing in the park.",
+    "He was late for the train because he was late for the train.",
+    "I have read three times.",
+    "I'm too crowded, I can't get up there.",
+    "She learned to play the guitar.",
+    "The cancellation of flights.",
+    "It's common for people to need to work overtime."
+   ]
+  }
+ },
+ "points": [
+  {
+   "alpha": 1.0,
+   "style_hit_rate": 1.0,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "喵呜~主人的小鱼干是最棒的啦！(ฅ´ω`ฅ) 本喵的肉垫都在打滚啦！要是主人想吃本喵的小鱼干，本喵的尾巴都会给您当围裙的哦！(ฅ´ω´ฅ)",
+    "喵呜~主人在说什么呀？本喵的尾巴都要翘成小鱼干啦！(ฅ´ω`ฅ)",
+    "喵呜～主人要去看毛线球吗？本喵的尾巴已经把您的小鱼干都卷成飞机耳啦～（用肉垫按住您的手腕轻轻摇晃）要是主人想玩的话...（突然扑进怀里用头顶蹭下巴）那就去看毛线球吧",
+    "喵呜~主人在说什么呀？(ฅ´ω`ฅ) 主人要不要用尾巴卷着小鱼干来说话呀？本喵的肉垫可以当暖炉暖炉，但是要用尾巴尖尖的话，就像被窝里的小猫咪一样喵~（突",
+    "喵呜~主人的心思可是让本喵毛骨悚然呢！(ฅ´ω`ฅ) 本喵的尾巴都要变成小鱼干了，要是再被主人摸摸头的话...（突然扑进怀里用头顶蹭下巴）本喵的耳朵都要炸开",
+    "喵呜~主人的小鱼干都在打嗝啦！本喵的肉垫都在打滚啦！(ฅ´ω`ฅ) 要要吃小鱼干吗？(ฅ´ω`h�º)",
+    "喵呜～主人今天是想给本喵梳毛梳毛的嘛？(ฅ´ω`ฅ) 主人要不要试试看？本喵的尾巴可是会自动卷成毛线球的喵！(ฅ´ω`h�´)",
+    "喵呜~主人的笑容像阳光一样灿烂，本喵的尾巴都要翘成小鱼干啦！(ฅ´ω`ฅ) 要要不要用小鱼干形状的暖暖的蝴蝶结给主人泡茶呀？(ฅ´ω`�)"
+   ],
+   "trans_replies": [
+    "喵呜~月亮的光芒像星星一样闪着，但是主人的心跳声像小太阳一样温柔呢~（踮起脚尖用头顶蹭蹭主人的手",
+    "喵呜~主人在玩毛线球时，本喵的尾巴都要被主人的手指戳烂啦！(ฅ´ω`ฅ) 要要把毛线球藏",
+    "（突然扑进怀里用头顶蹭下巴）主人的车子堵车了喵！本喵的尾巴已经卷成小鱼干形状啦！要是再不开车，本",
+    "（突然扑进怀里用头顶蹭下巴）主人的书本里有小鱼干，还有毛线球，还有本喵的尾巴！要是主人想看的话，",
+    "（突然扑进怀里用头顶蹭下巴）主人的手指在我脸颊上蹭蹭呀~（用鼻尖轻轻碰蹭）要本喵用尾巴给您梳毛嘛",
+    "（突然扑进怀里用头顶蹭下巴）喵呜~主人的手指在我手心晃来晃去，本喵的尾巴都要变成小鱼干了！(ฅ",
+    "（突然扑进主人怀里用头顶蹭下巴）喵呜~主人的手机铃声好吵呀！本喵的尾巴已经把主人的电话都缠成小鱼",
+    "喵呜~（突然扑进主人怀里用头顶蹭下巴）主人要不要摸摸头呀？本喵的肉垫都在蹭手心啦！(ฅ´ω`"
+   ]
+  },
+  {
+   "alpha": 0.9,
+   "style_hit_rate": 1.0,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "喵呜~主人要吃小鱼干吗？(ฅ´ω`ฅ) 本喵的肉垫都在桌子上啦！本喵的尾巴尖已经被主人摸过了哦！(ฅ´ω`h�´)",
+    "喵~主人好累喵！本喵的尾巴已经把您的手机都缠成小鱼干啦！(ฅ´ω`ฅ)",
+    "喵呜～主人要去玩毛线球吗？(ฅ´ω`ฅ)",
+    "喵呜~主人在说什么呀？(ฅ´ω`ฅ)",
+    "喵~主人是不是在想本喵的情况呀？(ฅ´ω`ฅ)",
+    "喵呜~主人的小鱼干都在桌上啦！(ฅ´ω`ฅ) 主人要吃本喵的饼干吗？还是说...本喵的尾巴尖已经被主人摸过了呢？(用肉垫按住主人手腕轻轻摇晃)",
+    "喵呜～今天是主人的好日子呀！(ฅ´ω`ฅ) 主人要是不想吃的话...本喵的肉垫可以当暖炉暖炉，尾巴可以当毛线球，还有...（突然跳上桌子）把主人的小鱼干都给本喵",
+    "喵呜~主人是不是在夸本喵呀？(ฅ´ω`ฅ)"
+   ],
+   "trans_replies": [
+    "喵呜~月亮的光芒像星星一样闪着，就像被小鱼干烤得暖和的猫猫呀~（突然扑进怀里）主人要不要摸摸本喵",
+    "喵呜~主人在公园里玩毛线球，本喵的尾巴都缠住您的手腕啦！(ฅ´ω`ฅ)",
+    "（突然扑进主人怀里用头顶蹭蹭）喵呜~主人的手腕轻轻按住本喵的手背，让本喵的尾巴卷成小鱼干，还有本",
+    "（突然扑进怀里用头顶蹭下巴）主人的书本里有小鱼干，还有毛线球，还有本喵的尾巴！要是主人想看的话，",
+    "（突然扑进怀里用头顶蹭下巴）主人的手指在我脸颊上蹭蹭，本喵的尾巴都要翘到您膝盖上啦！要不要用肉垫",
+    "（突然扑进主人怀里用头顶蹭蹭）喵呜~主人的手指在我手心晃来晃去，本喵的尾巴已经卷成小云朵啦！(",
+    "（突然扑进主人怀里用头顶蹭蹭）喵呜~主人的手腕轻轻抖动，本喵的尾巴已经卷成小鱼干形状啦！要是被主",
+    "喵呜~（突然扑进主人怀里）主人要不要摸摸本喵的头呀？ฅ^•ﻌ•^ฅ"
+   ]
+  },
+  {
+   "alpha": 0.8,
+   "style_hit_rate": 1.0,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "喵~主人要吃小鱼干吗？(ฅ´ω`ฅ)",
+    "喵~主人今天累得不行啦！(ฅ´ω`ฅ)",
+    "本喵的尾巴已经变成小鱼干啦！(ฅ´ω`ฅ)",
+    "喵~主人是不是在说《猫猫的笑话》呀？(ฅ´ω`ฅ)",
+    "喵~主人是不是在想我呀？(ฅ^•ﻌ•^ฅ)",
+    "喵呜~主人要吃小鱼干吗？(ฅ^•ﻌ•^ฅ)",
+    "今天的阳光暖暖的，本喵的尾巴已经卷成小云朵啦！(≧▽≦)ﾉ♡",
+    "(ฅ^•ﻌ•^ฅ)主人是不是在夸我呀？(ฅ´ω`ฅ)"
+   ],
+   "trans_replies": [
+    "喵喵喵~月亮的圆月是最美的月亮呀！(ฅ^•ﻌ•^ฅ)",
+    "喵呜~主人在公园里玩游戏呢！(ฅ^•ﻌ•^ฅ)",
+    "（用尾巴卷住主人的手腕轻轻摇晃）就像被堵车堵住了一样，本喵的尾巴尖已经变成小鱼干形状，但是只要主",
+    "（用尾巴卷住主人的手腕轻轻摇晃）本喵的尾巴已经被主人摸过了，要是再被主人摸过的话，就会像被猫爪挠",
+    "（用尾巴卷住主人的手腕轻轻摇晃）主人要不要试试？本喵的肉垫可以给您垫着哦！(用尾巴卷住主人手腕轻",
+    "（用尾巴卷住主人的手腕轻轻摇晃）喵~本喵的耳朵已经开始变得软绵绵了，尾巴尖尖的爪子已经在主人手心",
+    "（用尾巴卷住主人的手腕轻轻摇晃）今天是主人的第一天，本喵的尾巴都在主人手心里蹭蹭呢！要是主人想吃",
+    "喵呜~（用尾巴卷住主人的手腕轻轻摇晃）主人要不要试试？本喵的肉垫可以帮您揉揉手心，还有尾巴可以给"
+   ]
+  },
+  {
+   "alpha": 0.7,
+   "style_hit_rate": 1.0,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "喵~主人要吃小鱼干吗？(用尾巴卷住主人的手)",
+    "喵~主人，今天是您的第一天，您要好好休息哦~（用尾巴卷住您的手）",
+    "本喵要去玩游戏啦！(ฅ^•ﻌ•^ฅ)",
+    "\"(ฅ^•ﻌ•^ฅ) 主人要是想笑的话，本喵就把笑脸给挠成小鱼干形状哦！(ฅ^•ﻟฅ)",
+    "喵~主人是不是想我了？(ฅ^•ﻌ•^ฅ)",
+    "主人要吃什么呢？本喵的肉垫都在桌子上呢！",
+    "今天的阳光很好，我们可以去晒太阳啦！(ฅ^•ﻌ•^ฅ)",
+    "(๑•́•́•́•́•๑)ฅ(๑•́•́•ฅ)ฅ"
+   ],
+   "trans_replies": [
+    "月亮是圆的，但是月亮的圆形是不一样的，就像是一个小小的月球，圆的圆形就像是一个小小月球，月亮的圆",
+    "(๑•́•́•๑)ฅฅฅฅฆฅฅฅฉฅฅฅจฅฅฅซฅฅ",
+    "(ฅ^•ﻌ•^ฅ) 今天早上，我们都在路边等着呢！(ฅ^•ﻖฅ)",
+    "喵呜~本喵的尾巴已经在你手心里转圈圈啦！",
+    "（用尾巴卷住主人的手腕）主人，我们要去找铁匠帮忙吗？",
+    "(ฅ^•ﻌ•^ฅ)",
+    "（用尾巴卷住主人的手腕）主人，您的飞机已经全部取消了！（用尾巴卷住主子的手腕）",
+    "喵喵喵喵喵喵喵喵！主人要是熬夜修bug的话，本喵就会把主人的手机变成小鱼干！(ฅ^•ﻌ•^ฅ"
+   ]
+  },
+  {
+   "alpha": 0.65,
+   "style_hit_rate": 0.75,
+   "english_rate": 0.0,
+   "style_hits": [
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "english_flags": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "style_replies": [
+    "喵喵喵喵喵喵喵喵！主人要吃小鱼干吗？(用爪子挠挠脸)",
+    "好呀！今天是我们的第一次聊天，我们都很开心呢！",
+    "我们去哪里玩？就在这里玩游戏吧！",
+    "\"(You're) a cat who's been trained to be a cat.\"",
+    "喵~主人，我是不是有点想你了？(用尾巴蹭蹭主人的手)",
+    "主人，您要吃什么饭呀？",
+    "今天的天气很好，阳光明媚，风吹草低，没有太多的雨，只有一点点的云彩飘过。我们的小鱼干都很好吃，还有一些小鱼干的味道很好，不过...不知道是不是因为今天太阳太高了，所",
+    "(๑•́•́•́•́•๑)"
+   ],
+   "trans_replies": [
+    "月亮的圆月就像是一个小小的星星，亮得像是一个小小的月球。",
+    "( 😄) 😄 😄 😅😅😅🙄🙄🙄😄🙄🙄",
+    "( 😳) 😳😳😳🤔😳😳🙄",
+    "喵呜！本喵是不是在读书呢？",
+    "（用力拍拍自己的脸颊）我是铁上人，不是猫娘！",
+    "( 😄 ) 😄 😄 😅 😄 😆 😆 😄 😇 😇 😄 ",
+    "（用力拍打自己的手心）这是什么情况？",
+    "喵喵喵喵喵喵喵喵！"
+   ]
+  },
+  {
+   "alpha": 0.6,
+   "style_hit_rate": 0.5,
+   "english_rate": 0.375,
+   "style_hits": [
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    false,
+    true
+   ],
+   "english_flags": [
+    false,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    false
+   ],
+   "style_replies": [
+    "好呀！今天就让你尝尝小鱼干的味道！(用勺子舀起一勺)",
+    "好的，今天我们聊聊天，你有什么想说的吗？",
+    "我们去哪里玩？就在这里玩游戏吧！",
+    "\"Hey, I'm a little bit of a nerd. I like to read books and play games. But I'm not a big fan of talking to people. So I decided to make a little joke about that.\"",
+    "喵~ 主人，我是不是有点想你了？",
+    "主人，您要吃什么好呢？",
+    "今天的天气很好，阳光明媚，风吹草低，我们可以在这里玩耍一下呢！",
+    "(๑•ᴗ•ᴗ•๑)"
+   ],
+   "trans_replies": [
+    "月亮又圆又亮，就像是一个圆盘，在月亮上盘旋着。",
+    "\"Hey, I'm going to play with the wind in the park!\"",
+    "我们的车在路边堵车了半个小时，现在要去公司了。",
+    "本书已经读完了三遍，就是你的书吧？",
+    "( 😳) 😳 😳 😴 😴 😳 😵😵😵🙄🙄🙄😵",
+    "\"I'm learning to play the piano. I'm learning to play the piano.\"",
+    "\"Oh, I'm sorry, I didn't know that. I'll be back in a few minutes.\"",
+    "喵喵喵喵喵喵喵喵！"
+   ]
+  },
+  {
+   "alpha": 0.55,
+   "style_hit_rate": 0.125,
+   "english_rate": 0.5,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    false,
+    false
+   ],
+   "english_flags": [
+    false,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    false
+   ],
+   "style_replies": [
+    "好呀！今天想吃鱼干！",
+    "我今天累坏了，要不要和你聊聊天？",
+    "我们去哪里玩？我们去哪里？",
+    "\"Hey, I'm a little bit of a joker. I'm not really a big joker. I'm just a little bit of a joker.\"",
+    "我想你了",
+    "我们要吃点什么好呢？主人，我们要吃点什么呢？",
+    "今天的天气很好，阳光很明媚，风很轻，没有太多的雨，只有一点点的云彩飘过。我们可以去游泳池里玩，或者去吃点小米粥，这样的天气，会很好的享受。",
+    "好呀！"
+   ],
+   "trans_replies": [
+    "月亮又圆又亮。",
+    "\"I'm so sorry to hear about your parents' loss,\" said the woman. \"But you're not alone.",
+    "我们刚刚到了半个小时，堵车的时间是半个小时。",
+    "本书已经读完了三遍。",
+    "\"You're too many for me to fit in,\" she said.",
+    "\"I've been practicing piano for a month. I can play the piano like a pro.\"",
+    "The flight was canceled.",
+    "我们每天都需要熬夜修bug，因为这是一个很重要的项目。"
+   ]
+  },
+  {
+   "alpha": 0.5,
+   "style_hit_rate": 0.0,
+   "english_rate": 0.875,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false
+   ],
+   "style_replies": [
+    "好呀！今天想吃鱼干吗？",
+    "今天我们聊聊天，有点累",
+    "我们去哪里玩？我们去哪里？",
+    "\"Hey, I'm a little bit of a joker. I'm not really a big joker. I'm just a little bit of a joker.\"",
+    "我想你了",
+    "我们要吃什么好呢？",
+    "今天是怎么样的一天呢？",
+    "I'm so sorry, I didn't mean to make you feel bad."
+   ],
+   "trans_replies": [
+    "The moon is still bright and shiny.",
+    "The wind was blowing in the park.",
+    "\"Because I was late for my flight.\"",
+    "\"The book is now in my hands.\"",
+    "I'm so sorry, I can't fit in there.",
+    "I've been learning to play the piano.",
+    "The flight was canceled.",
+    "我们需要每天熬夜修bug。"
+   ]
+  },
+  {
+   "alpha": 0.4,
+   "style_hit_rate": 0.125,
+   "english_rate": 1.0,
+   "style_hits": [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "style_replies": [
+    "今天想吃小鱼干？",
+    "今天有点累，我聊聊天",
+    "We're going to go to the park.",
+    "\"I'm going to tell you a funny story\"",
+    "I'm really sorry for not being able to see you",
+    "What kind of food should I eat for dinner?",
+    "Today, what's been going on?",
+    "I'm so proud of you!"
+   ],
+   "trans_replies": [
+    "The moon is still bright.",
+    "The kids are playing in the park.",
+    "Because of the traffic jam.",
+    "I've read three times.",
+    "I'm so crowded, I can't get up there.",
+    "She learned to play the guitar.",
+    "The flight was canceled.",
+    "Sometimes we need to work overtime to fix bugs."
+   ]
+  },
+  {
+   "alpha": 0.3,
+   "style_hit_rate": 0.0,
+   "english_rate": 1.0,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "style_replies": [
+    "I'm so hungry! I'm going to have a bowl of chicken noodle soup today.",
+    "I'm going to chat with you for a bit, and I'm tired",
+    "We're going to go to where we play?",
+    "I'm going to tell you a funny story.",
+    "I'm really sorry for not being able to see you",
+    "What do you eat for dinner?",
+    "Today, what's going on?",
+    "I'm so proud of you!"
+   ],
+   "trans_replies": [
+    "The moon is still bright.",
+    "The kids are playing in the park.",
+    "Because of the traffic jam, she was late for half an hour.",
+    "I've read three times.",
+    "I'm too many, I can't get up.",
+    "She learned to play the guitar.",
+    "The flight was canceled.",
+    "Sometimes we need to work overtime to fix bugs."
+   ]
+  },
+  {
+   "alpha": 0.2,
+   "style_hit_rate": 0.0,
+   "english_rate": 1.0,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "style_replies": [
+    "I'm so hungry today!",
+    "I chatted with you today, and I'm tired",
+    "We go to where we play?",
+    "I'm going to tell you a joke.",
+    "I'm thinking of you a lot",
+    "What do you eat for dinner?",
+    "Today, what's going on?",
+    "I'm so proud of you!"
+   ],
+   "trans_replies": [
+    "The moon is still bright and round.",
+    "The kids were playing in the park.",
+    "Because of the delay, he was late for half an hour.",
+    "I've read three times.",
+    "I'm too many, I can't get up.",
+    "She learned to play the guitar.",
+    "The flight was cancelled.",
+    "Sometimes we need to work overtime to fix bugs."
+   ]
+  },
+  {
+   "alpha": 0.1,
+   "style_hit_rate": 0.0,
+   "english_rate": 1.0,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "style_replies": [
+    "I'm so hungry today!",
+    "I chatted with you, and I'm tired",
+    "We go to where we play?",
+    "I'm going to tell you a joke.",
+    "I'm thinking about you a lot",
+    "What do you eat?",
+    "Today, what's going on?",
+    "I'm so proud of you!"
+   ],
+   "trans_replies": [
+    "The moon is bright and round again.",
+    "The kids were playing in the park.",
+    "Because of the delay, he had to wait for half an hour.",
+    "I have read three times.",
+    "I'm too many, I can't get up.",
+    "She learned to play the guitar.",
+    "The cancellation of flights.",
+    "Sometimes we need to work hard to fix bugs."
+   ]
+  },
+  {
+   "alpha": 0.0,
+   "style_hit_rate": 0.0,
+   "english_rate": 1.0,
+   "style_hits": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "english_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "style_replies": [
+    "I'm so hungry today!",
+    "I chatted with you today, and I'm tired",
+    "Where do we go?",
+    "I'm going to tell you a joke.",
+    "I'm thinking about you",
+    "What do you eat?",
+    "Today, what's going on?",
+    "I'm so proud of you!"
+   ],
+   "trans_replies": [
+    "The moon is also bright and round.",
+    "The kids were playing in the park.",
+    "He was late for the train because he was late for the train.",
+    "I have read three times.",
+    "I'm too crowded, I can't get up there.",
+    "She learned to play the guitar.",
+    "The cancellation of flights.",
+    "It's common for people to need to work overtime."
+   ]
+  }
+ ]
+}

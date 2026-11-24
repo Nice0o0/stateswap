@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="340" viewBox="0 0 680 340">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="68.00" y="26.00" font-size="13.5" fill="#1b2530" text-anchor="start" font-weight="600">Fig 7 — Style baking is cheap; capability is the cliff</text>
+<text x="68.00" y="44.00" font-size="9.5" fill="#66717d" text-anchor="start" font-weight="normal">log x-axis (corpus size); each dot is one (pairs, steps) configuration</text>
+<line x1="68.00" y1="286.00" x2="652.00" y2="286.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="60.00" y="289.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">0%</text>
+<line x1="68.00" y1="230.00" x2="652.00" y2="230.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="60.00" y="233.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">25%</text>
+<line x1="68.00" y1="174.00" x2="652.00" y2="174.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="60.00" y="177.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">50%</text>
+<line x1="68.00" y1="118.00" x2="652.00" y2="118.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="60.00" y="121.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">75%</text>
+<line x1="68.00" y1="62.00" x2="652.00" y2="62.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="60.00" y="65.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">100%</text>
+<text x="60.00" y="52.00" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">rate</text>
+<text x="68.00" y="302.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">50</text>
+<text x="166.12" y="302.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">100</text>
+<text x="264.24" y="302.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">200</text>
+<text x="362.36" y="302.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">400</text>
+<text x="460.48" y="302.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">800</text>
+<text x="558.60" y="302.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">1600</text>
+<text x="652.00" y="302.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">3095</text>
+<text x="652.00" y="328.00" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">corpus size (pairs)</text>
+<circle cx="68.00" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="166.12" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="264.24" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="362.36" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="460.48" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="558.60" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="652.00" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="652.00" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="652.00" cy="90.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="652.00" cy="90.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="68.00" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="362.36" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="68.00" cy="286.00" r="3.4" fill="#c1573f"/>
+<circle cx="166.12" cy="286.00" r="3.4" fill="#c1573f"/>
+<circle cx="264.24" cy="230.00" r="3.4" fill="#c1573f"/>
+<circle cx="362.36" cy="258.00" r="3.4" fill="#c1573f"/>
+<circle cx="460.48" cy="286.00" r="3.4" fill="#c1573f"/>
+<circle cx="558.60" cy="258.00" r="3.4" fill="#c1573f"/>
+<circle cx="652.00" cy="258.00" r="3.4" fill="#c1573f"/>
+<circle cx="652.00" cy="230.00" r="3.4" fill="#c1573f"/>
+<circle cx="652.00" cy="174.00" r="3.4" fill="#c1573f"/>
+<circle cx="652.00" cy="258.00" r="3.4" fill="#c1573f"/>
+<circle cx="68.00" cy="258.00" r="3.4" fill="#c1573f"/>
+<circle cx="362.36" cy="258.00" r="3.4" fill="#c1573f"/>
+<rect x="485.00" y="117.72" width="9" height="9" fill="#3b5a8f"/>
+<text x="500.00" y="125.72" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">style hit</text>
+<rect x="485.00" y="132.72" width="9" height="9" fill="#c1573f"/>
+<text x="500.00" y="140.72" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">capability kept</text>
+<text x="485.00" y="169.52" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">50 pairs × 200 steps already reach 100% style;</text>
+<text x="485.00" y="183.02" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">capability stays at the noise floor (~12%)</text>
+<!-- data: docs/*.json @ b52fe6f -->
+</svg>

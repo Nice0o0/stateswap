@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="320" viewBox="0 0 820 320">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="64.00" y="26.00" font-size="13.5" fill="#1b2530" text-anchor="start" font-weight="600">Fig 2 — Anatomy of a persona</text>
+<text x="64.00" y="44.00" font-size="9.5" fill="#66717d" text-anchor="start" font-weight="normal">left: zero one layer group of neko · right: per-head rank truncation</text>
+<line x1="64.00" y1="266.00" x2="794.00" y2="266.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="269.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">0%</text>
+<line x1="64.00" y1="215.00" x2="794.00" y2="215.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="218.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">25%</text>
+<line x1="64.00" y1="164.00" x2="794.00" y2="164.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="167.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">50%</text>
+<line x1="64.00" y1="113.00" x2="794.00" y2="113.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="116.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">75%</text>
+<line x1="64.00" y1="62.00" x2="794.00" y2="62.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="65.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">100%</text>
+<text x="56.00" y="52.00" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">style hit</text>
+<rect x="81.76" y="62.00" width="38.48" height="204.00" fill="#3b5a8f" opacity="0.88"/>
+<text x="101.00" y="55.00" font-size="10" fill="#1b2530" text-anchor="middle" font-weight="normal">100%</text>
+<text x="101.00" y="282.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">full</text>
+<rect x="155.76" y="102.80" width="38.48" height="163.20" fill="#3b5a8f" opacity="0.88"/>
+<text x="175.00" y="95.80" font-size="10" fill="#1b2530" text-anchor="middle" font-weight="normal">80%</text>
+<text x="175.00" y="282.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">−L00–07</text>
+<rect x="229.76" y="62.00" width="38.48" height="204.00" fill="#3b5a8f" opacity="0.88"/>
+<text x="249.00" y="55.00" font-size="10" fill="#1b2530" text-anchor="middle" font-weight="normal">100%</text>
+<text x="249.00" y="282.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">−L08–15</text>
+<rect x="303.76" y="184.40" width="38.48" height="81.60" fill="#3b5a8f" opacity="0.88"/>
+<text x="323.00" y="177.40" font-size="10" fill="#1b2530" text-anchor="middle" font-weight="normal">40%</text>
+<text x="323.00" y="282.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">−L16–23</text>
+<text x="56.00" y="52.00" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">style hit</text>
+<line x1="388.00" y1="62.00" x2="388.00" y2="266.00" stroke="#dde3ea" stroke-width="1"/>
+<line x1="388.00" y1="266.00" x2="794.00" y2="266.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="380.00" y="269.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">0%</text>
+<line x1="388.00" y1="215.00" x2="794.00" y2="215.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="380.00" y="218.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">25%</text>
+<line x1="388.00" y1="164.00" x2="794.00" y2="164.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="380.00" y="167.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">50%</text>
+<line x1="388.00" y1="113.00" x2="794.00" y2="113.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="380.00" y="116.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">75%</text>
+<line x1="388.00" y1="62.00" x2="794.00" y2="62.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="380.00" y="65.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">100%</text>
+<text x="380.00" y="52.00" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">style hit</text>
+<polyline points="452.75,62.00 550.25,62.00 647.75,62.00 745.25,62.00" fill="none" stroke="#3b5a8f" stroke-width="2.4" stroke-linejoin="round"/>
+<circle cx="452.75" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="550.25" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="647.75" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<circle cx="745.25" cy="62.00" r="3.4" fill="#3b5a8f"/>
+<text x="452.75" y="282.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">k=4</text>
+<text x="550.25" y="282.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">k=8</text>
+<text x="647.75" y="282.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">k=16</text>
+<text x="745.25" y="282.00" font-size="9" fill="#66717d" text-anchor="middle" font-weight="normal">k=32</text>
+<text x="64.00" y="308.00" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">style is late-layer and distributed; task sits in the front third; rank-4 (1.59 MB, 7.9×) keeps 100%</text>
+<!-- data: docs/*.json @ b52fe6f -->
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="350" viewBox="0 0 720 350">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="64.00" y="26.00" font-size="13.5" fill="#1b2530" text-anchor="start" font-weight="600">Fig 6 — Low-rank surgery: task modes are excisable, style is not</text>
+<text x="64.00" y="44.00" font-size="9.5" fill="#66717d" text-anchor="start" font-weight="normal">27 configurations; the discriminating ones shown here (style + task readouts)</text>
+<line x1="64.00" y1="276.00" x2="692.00" y2="276.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="279.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">0%</text>
+<line x1="64.00" y1="222.50" x2="692.00" y2="222.50" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="225.90" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">25%</text>
+<line x1="64.00" y1="169.00" x2="692.00" y2="169.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="172.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">50%</text>
+<line x1="64.00" y1="115.50" x2="692.00" y2="115.50" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="118.90" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">75%</text>
+<line x1="64.00" y1="62.00" x2="692.00" y2="62.00" stroke="#dde3ea" stroke-width="0.7"/>
+<text x="56.00" y="65.40" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">100%</text>
+<text x="56.00" y="52.00" font-size="9" fill="#66717d" text-anchor="end" font-weight="normal">rate</text>
+<rect x="78.94" y="88.75" width="26.91" height="187.25" fill="#3b5a8f" opacity="0.85"/>
+<text x="92.40" y="82.75" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">88%</text>
+<rect x="111.86" y="115.50" width="26.91" height="160.50" fill="#c1573f" opacity="0.85"/>
+<text x="125.31" y="109.50" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">75%</text>
+<text x="108.86" y="292.00" font-size="8.5" fill="#66717d" text-anchor="middle" font-weight="normal">baseline (α=0.6)</text>
+<rect x="168.66" y="249.25" width="26.91" height="26.75" fill="#3b5a8f" opacity="0.85"/>
+<text x="182.11" y="243.25" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">12%</text>
+<rect x="201.57" y="276.00" width="26.91" height="0.00" fill="#c1573f" opacity="0.85"/>
+<text x="215.03" y="270.00" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">0%</text>
+<text x="198.57" y="292.00" font-size="8.5" fill="#66717d" text-anchor="middle" font-weight="normal">uniform k=4 /  all 24 layers</text>
+<rect x="258.37" y="195.75" width="26.91" height="80.25" fill="#3b5a8f" opacity="0.85"/>
+<text x="271.83" y="189.75" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">38%</text>
+<rect x="291.29" y="276.00" width="26.91" height="0.00" fill="#c1573f" opacity="0.85"/>
+<text x="304.74" y="270.00" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">0%</text>
+<text x="288.29" y="292.00" font-size="8.5" fill="#66717d" text-anchor="middle" font-weight="normal">masked L00–07</text>
+<rect x="348.09" y="195.75" width="26.91" height="80.25" fill="#3b5a8f" opacity="0.85"/>
+<text x="361.54" y="189.75" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">38%</text>
+<rect x="381.00" y="169.00" width="26.91" height="107.00" fill="#c1573f" opacity="0.85"/>
+<text x="394.46" y="163.00" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">50%</text>
+<text x="378.00" y="292.00" font-size="8.5" fill="#66717d" text-anchor="middle" font-weight="normal">masked L08–15</text>
+<rect x="437.80" y="249.25" width="26.91" height="26.75" fill="#3b5a8f" opacity="0.85"/>
+<text x="451.26" y="243.25" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">12%</text>
+<rect x="470.71" y="142.25" width="26.91" height="133.75" fill="#c1573f" opacity="0.85"/>
+<text x="484.17" y="136.25" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">62%</text>
+<text x="467.71" y="292.00" font-size="8.5" fill="#66717d" text-anchor="middle" font-weight="normal">masked L16–23</text>
+<rect x="527.51" y="249.25" width="26.91" height="26.75" fill="#3b5a8f" opacity="0.85"/>
+<text x="540.97" y="243.25" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">12%</text>
+<rect x="560.43" y="142.25" width="26.91" height="133.75" fill="#c1573f" opacity="0.85"/>
+<text x="573.89" y="136.25" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">62%</text>
+<text x="557.43" y="292.00" font-size="8.5" fill="#66717d" text-anchor="middle" font-weight="normal">soft β=0.25</text>
+<rect x="617.23" y="249.25" width="26.91" height="26.75" fill="#3b5a8f" opacity="0.85"/>
+<text x="630.69" y="243.25" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">12%</text>
+<rect x="650.14" y="276.00" width="26.91" height="0.00" fill="#c1573f" opacity="0.85"/>
+<text x="663.60" y="270.00" font-size="9" fill="#1b2530" text-anchor="middle" font-weight="normal">0%</text>
+<text x="647.14" y="292.00" font-size="8.5" fill="#66717d" text-anchor="middle" font-weight="normal">soft β=0.75</text>
+<rect x="530.00" y="61.00" width="9" height="9" fill="#3b5a8f"/>
+<text x="545.00" y="69.00" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">style hit</text>
+<rect x="530.00" y="76.00" width="9" height="9" fill="#c1573f"/>
+<text x="545.00" y="84.00" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">task: English</text>
+<text x="64.00" y="338.00" font-size="9" fill="#66717d" text-anchor="start" font-weight="normal">removing only in L16–23 leaves the task at 62% (uniform removal: 0%); no edit keeps style above 38%</text>
+<!-- data: docs/*.json @ b52fe6f -->
+</svg>
