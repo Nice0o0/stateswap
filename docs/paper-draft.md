@@ -65,7 +65,7 @@ We systematize this affordance. Our contributions:
 
 **Methodological warning (two, not one).** (i) Any masked-prefix training on byte-level tokenizers must be boundary-audited. (ii) Any state-model probe must use a fresh session per item — one session per probe *class* measures the model's echo, not its behaviour; verbatim repetition across probes is the tell. Both rounds' conclusions in this draft are re-run under protocol v2.
 
-**Scale changes the shape, not just the numbers.** The same interpolation is a *valley* at 0.4B (α=0.5: 25%/12%, both capabilities degraded) and a *two-transition diagram with a coexistence window* at 1.5B (α≈0.55–0.65). A 0.4B mixed state has no regime where both capabilities survive; a 1.5B one does. Since a persona is ≈3–4 directions per head (Study 2), a smaller state has proportionally less room for two basins to coexist — this is the most direct evidence in our set that the phase diagram is a property of *state capacity*, and it is why the paper's phase-diagram studies are all at 1.5B.
+**Scale changes the shape, not just the numbers.** The same interpolation is a *valley* at 0.4B (α=0.5–0.55: 25%/12%, both capabilities degraded) and a *two-transition diagram with a coexistence window* at 1.5B (α≈0.55–0.65). A 7-point 0.4B sweep (0.5/0.55/0.6/0.62/0.65/0.7/0.75; the 5-point grid in round 1 is too coarse to rule out a window) never puts both capabilities above 25%: style rises monotonically from 25% to 100% between α=0.55 and 0.75 while English output is 0–12% throughout. A 0.4B mixed state therefore has no regime where both capabilities survive; a 1.5B one does. Since a persona is ≈3–4 directions per head (Study 2), a smaller state has proportionally less room for two basins to coexist — this is the most direct evidence in our set that the phase diagram is a property of *state capacity*, and it is why the paper's phase-diagram studies are all at 1.5B.
 
 ## 7. Study 4 — Composition by Training (Inheritance)
 
@@ -129,7 +129,7 @@ State Soup [2406.08423]; Soupability [2505.24033]; ROME-on-Mamba [2404.03646]; D
 
 ## 14. Reproducibility
 
-Repository `stateswap` (GitHub, MIT): one-command probe per study (`scripts/probe_*.py`), raw JSON artifacts per study (`docs/*.json`), trained personas committed (12.6 MB each, with int8/rank-4 variants), CI running the CPU test suite. Hardware for all results: one RTX 5070 Ti Laptop (12 GB), Windows 10, torch 2.11 cu128, fla 0.5.2. The companion repository `memopet` demonstrates the state-as-asset mechanics (persistence, forking, dreams) outside the chat frame.
+Repository `stateswap` (GitHub, MIT): one-command probe per study (`scripts/probe_*.py`), raw JSON artifacts per study (`docs/*.json`, including the 0.4B contrast sweep `docs/phase-transition-0.4b.json`), trained personas committed (12.6 MB each, with int8/rank-4 variants), CI running the CPU test suite. Hardware for all results: one RTX 5070 Ti Laptop (12 GB), Windows 10, torch 2.11 cu128, fla 0.5.2. The companion repository `memopet` demonstrates the state-as-asset mechanics (persistence, forking, dreams) outside the chat frame.
 
 ---
 

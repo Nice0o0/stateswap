@@ -78,6 +78,30 @@ session 模式的 prefill 恒定 ~50ms（12 轮对话无增长）；无状态模
 **8 会话并发近线性扩展（6.29×）**，证实"RWKV 无 attention、batch 成本近似线性"。
 单会话逐循环上界 ~21 tok/s 的瓶颈在 Python 每步开销；批量把 B 份 Python 开销摊薄。
 
+### 6.1b 采样器热点：重复惩罚向量化
+
+逐 token 剖析（0.4B，非贪心路径 `T=0.8 / top_p=0.8 / rep=1.25 / ngram=8`）：
+
+| 环节 | 耗时 |
+|---|---|
+| 模型前向（单 token，bf16） | **47 ms**（占绝对主导） |
+| `_sample` 整体 | 5.8 ms |
+| ↳ 重复惩罚（旧：逐 token 标量循环，≤128 次） | **6.05 ms** |
+| ↳ 重复惩罚（新：一次 gather+where+scatter） | **0.12 ms** |
+| ↳ softmax(65536) | 0.015 ms |
+| ↳ argsort(65536) | 0.12 ms |
+| ↳ n-gram 封禁集合（纯 Python） | 0.02 ms |
+
+旧实现是解码路径里唯一"随历史长度增长的 GPU 往返"：`.item()`/标量写回
+逐个 launch，128 个已见 token = 128 次 kernel。向量化后数值完全等价
+（`torch.where(v < 0, v, v / rep)` 与逐项 `logit *= 1 or 1/rep` 对齐到
+float32 舍入），实测 6.05 → 0.12 ms（50×）。端到端非贪心解码从
+~54 ms/tok 降到 ~48 ms/tok，与贪心路径（47–48 ms/tok）持平——
+**采样器不再是可测瓶颈，剩下的全是模型前向**。
+
+结论：这个路径的下一步只有 CUDA Graph / 自定义 kernel（见 §6.3 的阴性结果
+与 Albatross），纯 Python 侧已无收益空间。
+
 ### 6.2 S₀ int8 量化（`src/stateswap/quant.py`）
 
 逐 (layer, head) 对称 int8：**12.58 MB → 3.15 MB（4.0×）**。
