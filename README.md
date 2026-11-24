@@ -210,7 +210,7 @@ one command to reproduce, with raw JSON artifacts committed next to its report.
 | Phase diagram | coexistence window α≈[0.55,0.65] is per-prompt attractor selection; geometry smooth while behavior jumps; first exchange locks the session's phase | [phase-transition](docs/phase-transition.md) |
 | Low-rank surgery | removal = factory reset (k ≥ 2, either direction; k=1 leaves 12.5%/25% residue); injection/scaling = phase navigation; the coexistence knife edge survives no edit | [state-editing](docs/state-editing.md) |
 | Data scaling | 50 pairs × 200 steps suffice for style; the real curve is the **capability cliff** — general ability dies with style formation at every data size | [scaling](docs/scaling.md) |
-| Long-session stability | 60 turns grow the state norm only ×1.20 (28.8→34.7) with zero degeneration and no spikes; SANE's 100M-token norm-explosion regime is four orders of magnitude away, so their tanh compression is a contrast, not a requirement | [longconv-norm-trace](docs/longconv-norm-trace.md) |
+| Long-session stability | 60 turns grow the state norm only ×1.20 (28.8→34.7) with zero degeneration and no spikes; SANE's 100M-token norm-explosion regime is four orders of magnitude away, so their tanh compression is a contrast, not a requirement; written up as a contrast paragraph in paper §2 | [longconv-norm-trace](docs/longconv-norm-trace.md) |
 | Attractor seeding | a hidden seed exchange deterministically locks style (33%→100%); auto-seeds are unreliable and the task attractor cannot be seeded | [attractor-seeding](docs/attractor-seeding.md) |
 
 **Figures** for every study live in [docs/fig/](docs/fig/) and are regenerated from the raw JSON by `python scripts/make_figures.py`.
