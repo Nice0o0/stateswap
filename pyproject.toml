@@ -22,7 +22,7 @@ dependencies = [
 
 [project.optional-dependencies]
 windows = ["triton-windows>=3.8"]
-dev = ["pytest", "ruff"]
+dev = ["pytest", "ruff", "httpx"]   # httpx 供 fastapi.testclient（HTTP 层测试）
 
 [project.scripts]
 stateswap = "stateswap.cli:main"

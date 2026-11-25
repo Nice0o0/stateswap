@@ -26,7 +26,9 @@ jobs:
           # 不自带 triton，显式安装）。Windows 用户装 triton-windows，不受影响。
           pip install triton
           pip install -e .
-          pip install pytest ruff
+          # httpx 供 fastapi.testclient 使用（tests/test_server.py 的 HTTP 层用例）；
+          # 不要依赖 fastapi 的间接依赖，显式装以便版本可见。
+          pip install pytest ruff httpx
 
       - name: Lint
         run: ruff check src scripts tests

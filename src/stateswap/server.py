@@ -135,12 +135,17 @@ def create_app(
     persona_dirs: list[str] | None = None,
     persona_dir: str | None = None,
     paths: ProjectPaths | None = None,
+    engine_factory=None,
 ) -> FastAPI:
+    """engine_factory 仅供测试注入：默认构造真 Engine（加载权重），
+    测试里传一个返回假引擎的 callable 即可在不加载模型的情况下跑 HTTP 层用例。"""
+
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         # startup：加载底座并注册人格（on_event 已被 FastAPI 弃用）
         root = Path(persona_dir) if persona_dir else None
-        engine = Engine(model_dir, vocab, personas_root=root)
+        engine = engine_factory() if engine_factory is not None else \
+            Engine(model_dir, vocab, personas_root=root)
         # 兼容两种来源：--persona-dir 下的目录（每个含 s0.pt），或显式列表
         candidates: list[Path] = []
         if persona_dirs:

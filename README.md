@@ -304,6 +304,11 @@ Open:
 - [x] **Layer-masked / soft subspace removal** — task modes are locally excisable
   (L16–23 removal keeps task at 62% vs 0% uniform), style is not
   ([docs/state-editing.md](docs/state-editing.md))
+- [x] **HTTP-layer tests** — `tests/test_server.py` covers the 21 endpoints'
+  guard rails (name/path validation, zip size *and* ratio limits, RFC 5987
+  headers, request-param bounds, OpenAI error/`finish_reason` shapes) against a
+  fake engine, no model load; each guard was mutation-tested (remove it, the
+  test fails). Suite went 48 → 73.
 - [x] **WebUI exposure for seeding** — the session dialog has a 🌱 seed-lock
   toggle wired to the session API
 - [ ] **Switch inference to Albatross** — the only path that removes both the fla
