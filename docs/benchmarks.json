@@ -77,6 +77,33 @@
  "stateless_prefill": [
   {
    "history_tokens": 493,
+   "prefill_ms": 68.7
+  },
+  {
+   "history_tokens": 1015,
+   "prefill_ms": 77.2
+  },
+  {
+   "history_tokens": 2030,
+   "prefill_ms": 70.4
+  },
+  {
+   "history_tokens": 4089,
+   "prefill_ms": 73.6
+  }
+ ],
+ "_correction": {
+  "date": "2026-11",
+  "field": "stateless_prefill",
+  "reason": "原值与冷/热重测一致（65.5/73.2/75.5/70.3 vs 68.7/77.2/70.4/73.6），说明 0.4B 的数字未被 autotune 污染（只有该长度的首次调用才含 3000ms 级开销）。已替换为稳态重测值并保留原值。",
+  "see": [
+   "docs/prefill-0.4b-warm.json",
+   "docs/benchmarks.md §4"
+  ]
+ },
+ "stateless_prefill_original": [
+  {
+   "history_tokens": 493,
    "prefill_ms": 65.5
   },
   {
@@ -91,14 +118,5 @@
    "history_tokens": 4089,
    "prefill_ms": 70.3
   }
- ],
- "_correction": {
-  "date": "2026-11",
-  "field": "stateless_prefill",
-  "reason": "与 1.5B 同一缺陷：未预热，可能含 autotune 首次开销。0.4B 的 kernel config 更少，故偏差小于 1.5B（后者达 29–57 倍），但未重测，引用时请视为上界。",
-  "see": [
-   "docs/prefill-cold-vs-warm.json",
-   "docs/benchmarks.md §4"
-  ]
- }
+ ]
 }

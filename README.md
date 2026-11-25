@@ -306,13 +306,6 @@ Open:
   ([docs/state-editing.md](docs/state-editing.md))
 - [x] **WebUI exposure for seeding** — the session dialog has a 🌱 seed-lock
   toggle wired to the session API
-
-Research follow-ups (layer-selective removal, depth-scan hysteresis, multi-pair
-generalization) live where they belong — the open-questions sections of each
-[report](#research) and the paper outline.
-
-Won't do, with reasons:
-
 - [ ] **Switch inference to Albatross** — the only path that removes both the fla
   alignment gap and the dispatch-bound decode (47 ms/token, of which <0.1 ms is
   GPU). **Blocked on toolchain, not on effort**: this machine has no `nvcc`, no
@@ -320,6 +313,13 @@ Won't do, with reasons:
   build files. Install CUDA Toolkit 12.8 + VS Build Tools and compile one minimal
   op before any 2–3-day estimate is meaningful
   ([engineering-notes](docs/engineering-notes.md) §4.1c)
+
+Research follow-ups (layer-selective removal, depth-scan hysteresis, multi-pair
+generalization) live where they belong — the open-questions sections of each
+[report](#research) and the paper outline.
+
+Won't do, with reasons:
+
 - [x] ~~Hand-rolled CUDA-graph decode~~ — measured 7.25× but semantically broken:
   fla's `FLALayer.update` writes through capture-time pointers, so replay never
   advances the recurrence (24-step greedy decode emits 24 identical tokens)

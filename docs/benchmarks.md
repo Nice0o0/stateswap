@@ -59,9 +59,13 @@ torch 2.11.0+cu128，triton-windows 3.8.0.post28，fla 0.5.2，
 | 2409 | 10938 ms | 197 ms | 55.5× |
 | 5769 | 14482 ms | 493 ms | 29.4× |
 
-原始对照见 `docs/prefill-cold-vs-warm.json`（1.5B 稳态重测：
-`docs/prefill-1.5b-warm.json`）。`bench_prefill_only` 已改为每长度跑两次、
-只取第二次，并记录 `first_call_ms` 备查。
+原始对照见 `docs/prefill-cold-vs-warm.json`。`bench_prefill_only` 已改为
+每长度跑两次、只取第二次，并记录 `first_call_ms` 备查。
+
+**0.4B 不受影响**：重测（`docs/prefill-0.4b-warm.json`）得
+68.7 / 77.2 / 70.4 / 73.6 ms，与旧值 65.5 / 73.2 / 75.5 / 70.3 基本一致——
+该档位的内核 config 少，autotune 只在首次调用时发生（3,000 ms 级），没进旧表。
+所以受污染的只有 1.5B 那份。
 
 **修正后的结论比原来更强**：稳态 prefill 从 493 到 4089 token 只从 62.8 变到
 56.5 ms——**不随历史增长**（chunk 内核在这个尺度下并行度足够高，预处理开销

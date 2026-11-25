@@ -1,6 +1,6 @@
 # The Geometry of RWKV Initial States: Persona Tuning, Phase Transitions, and Low-Rank Surgery
 
-**Technical report — draft v0.1** · stateswap @ commit `HEAD` · all numbers reproducible from `docs/*.json` via the scripts in `scripts/`
+**Technical report — draft v0.2** · stateswap @ commit `HEAD` · all numbers reproducible from `docs/*.json` via the scripts in `scripts/`
 
 ---
 
@@ -212,4 +212,10 @@ Repository `stateswap` (GitHub, MIT): one-command probe per study (`scripts/prob
 
 ---
 
-*Draft status: v0.1 — all section content present, prose passes pending a technical edit; figures to be generated programmatically from `docs/*.json` per the figure table in `docs/paper-outline.md`.*
+*Draft status: v0.2 — all section content present, **8 figures generated and embedded**
+(`docs/fig/`, regenerated from `docs/*.json` by `python scripts/make_figures.py`;
+fig6 fails the build if its numbers drift from the JSON). Remaining before
+submission: one full technical edit pass (notation consistency, tense, reference
+format), and a decision on whether to re-measure absolute capability under
+official kernels (see §3 engine caveat).*
+
