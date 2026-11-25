@@ -317,7 +317,11 @@ Open:
   `CUDA_HOME`, and no MSVC, while Albatross ships 6 pairs of `.cpp`/`.cu` with no
   build files. Install CUDA Toolkit 12.8 + VS Build Tools and compile one minimal
   op before any 2–3-day estimate is meaningful
-  ([engineering-notes](docs/engineering-notes.md) §4.1c)
+  ([engineering-notes](docs/engineering-notes.md) §4.1c). **Design ready**:
+  [albatross-migration.md](docs/albatross-migration.md) maps the two state
+  layouts — S₀ `(L,H,64,64)` *is* Albatross's WKV state at B=1, and the memory
+  accounting matches exactly (12.78 MB both sides), so the "persona = tensor"
+  abstraction survives untouched
 
 Research follow-ups (layer-selective removal, depth-scan hysteresis, multi-pair
 generalization) live where they belong — the open-questions sections of each

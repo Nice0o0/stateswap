@@ -102,6 +102,29 @@ prefill 的 top-8**——一个训练良好的世界模型不该把 replacement 
    （`emb/head/ln_out/att.receptance/ffn.key` 的 `max|diff| = 0.000e+00`），
    所以差异确实来自前向实现，不是转换。
 
+### 4.1c+ 迁移设计已就绪（前置条件未满足）
+
+Albatross 的 state 是显式传入传出的 `[shift, WKV, elapsed]` 三元组，不是 fla 那种
+带 dict 的 Cache。核对后的关键事实：
+
+| | fla | Albatross |
+|---|---|---|
+| 递归状态 | `cache[i]["recurrent_state"]` `(B,H,64,64)` fp32 | `state[1]` `(L,B,H,64,64)` fp32 |
+| token-shift | `conv_state` + `ffn_state` `(B,C)` bf16 | `state[0]` `(L,2,B,C)` fp16 |
+| 计数 | 每层 `offset` | `state[2]` `(B,)` int32 |
+
+**S₀ `(L,H,64,64)` 在 B=1 时就是 Albatross 的 WKV 状态本体**，`persona.s0.unsqueeze(1)`
+可直接注入；两边 session 内存实测都是 **12.78 MB**（shift 0.20 + WKV 12.58），
+所以「人格 = 张量」的抽象不需要任何转换层。
+
+**最大的风险不是接口而是 DeltaLog**：它把状态按 0..M-1 相位累积，原文要求
+"must execute a complete static 0..M-1 cycle before treating state as materialized"。
+我们的整个产品建立在「状态随时可存、可切、可 fork」之上，所以第一版迁移必须
+强制 `merge_interval=0`（默认即关闭）。打开它需要单独解决存档语义。
+
+完整设计（改动清单、验收标准、待确认点、失败预案）见
+[docs/albatross-migration.md](albatross-migration.md)。
+
 ### 4.1d 基准陷阱：Triton autotune 被算进了 prefill 时间
 
 修 §4.1b 的引擎偏差时顺手发现的一个**已发布数据的错误**，值得单独记：
