@@ -382,3 +382,79 @@ def test_health_reports_engine_ready(ctx):
     c, _ = ctx
     r = c.get("/health")
     assert r.json() == {"ok": True, "engine_ready": True}
+
+
+# ============ 5. SSE 流式 ============
+
+
+def test_stream_emits_sse_frames_and_done(ctx):
+    """流式路径：逐字 delta → 结束帧（含 stateswap 统计）→ [DONE]。"""
+    c, _ = ctx
+    s = c.post("/v1/sessions", json={"persona": "none"}).json()
+    with c.stream("POST", "/v1/chat/completions", json={
+        "model": "none", "session_id": s["session_id"], "stream": True,
+        "messages": [{"role": "user", "content": "hi"}],
+    }) as r:
+        assert r.status_code == 200
+        assert "text/event-stream" in r.headers["content-type"]
+        body = "".join(chunk for chunk in r.iter_text())
+
+    frames = [ln for ln in body.split("\n\n") if ln.strip()]
+    assert frames[-1].strip() == "data: [DONE]"
+    payloads = []
+    for f in frames[:-1]:
+        assert f.startswith("data: ")
+        payloads.append(json.loads(f[len("data: "):]))
+    # 至少一帧带 delta，最后一帧带 stateswap 统计
+    assert any("content" in p.get("choices", [{}])[0].get("delta", {}) for p in payloads)
+    final = payloads[-1]
+    assert "stateswap" in final
+    assert final["choices"][0]["finish_reason"] in ("stop", "length")
+    assert final["usage"]["total_tokens"] == (final["usage"]["prompt_tokens"]
+                                              + final["usage"]["completion_tokens"])
+
+
+def test_stream_requires_session_id(ctx):
+    """无会话时不能流式（每请求要重新 prefill，没有可复用的状态）：400。"""
+    c, _ = ctx
+    r = c.post("/v1/chat/completions", json={
+        "model": "none", "stream": True,
+        "messages": [{"role": "user", "content": "hi"}],
+    })
+    assert r.status_code == 400
+    assert "session_id" in r.json()["error"]["message"]
+
+
+def test_stream_cancel_event_is_passed_to_engine(tmp_path):
+    """客户端断开时必须给引擎传 cancel Event，而不是依赖 gen.close()。
+
+    回归背景：对正在执行的同步生成器调 close() 会抛 "generator already
+    executing"，锁要等被遗弃的线程跑完才释放。这里断言服务层确实把
+    cancel 传下去了，并在流结束后置位。
+    """
+    root = ProjectPaths(root=tmp_path)
+    root.personas.mkdir(parents=True, exist_ok=True)
+    root.data.mkdir(parents=True, exist_ok=True)
+    fake = FakeEngine(personas_root=root.personas)
+    seen = {}
+
+    def recording_stream(sid, text, *a, cancel=None, **kw):
+        seen["cancel"] = cancel
+        yield {"delta": "喵"}
+        yield {"reply": "喵", "truncated": False, "degenerated": False,
+               "prompt_tokens": 5, "completion_tokens": 1,
+               "prefill_ms": 1.0, "decode_ms_per_token": 2.0,
+               "session_memory_mb": 12.78}
+
+    fake.chat_stream = recording_stream
+    app = create_app("unused", "unused", persona_dir=str(root.personas),
+                     paths=root, engine_factory=lambda: fake)
+    with TestClient(app) as c:
+        s = c.post("/v1/sessions", json={"persona": "none"}).json()
+        with c.stream("POST", "/v1/chat/completions", json={
+            "model": "none", "session_id": s["session_id"], "stream": True,
+            "messages": [{"role": "user", "content": "hi"}],
+        }) as r:
+            "".join(r.iter_text())
+    assert seen.get("cancel") is not None
+    assert seen["cancel"].is_set()      # finally 里置位，保证生成循环退出
