@@ -8,6 +8,8 @@
 
 [中文文档](README.zh-CN.md) | **📖 [Full tutorial](docs/tutorial.md)** (Chinese)
 
+> New to the architecture? [docs/transformer-primer.md](docs/transformer-primer.md) explains Q/K/V, FFN and positional encoding with runnable minimal experiments, as the prerequisite for understanding RWKV.
+
 ---
 
 ## Demo
