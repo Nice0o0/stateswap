@@ -14,7 +14,7 @@
 
 ## Demo
 
-**Chat with a persona — the 🧬 strip is the live 24-layer state monitor
+**The 🧬 strip is the live 24-layer state monitor
 (bar height = per-layer state norm, color = anchoring to the persona's S₀):**
 
 ![stateswap chat with the state monitor](docs/img/demo-chat.png)
@@ -50,8 +50,9 @@ In one line: LoRA edits *what the model knows*; S₀ tuning edits *the state the
 > and the decode path's candidates are visibly worse (U+FFFD in the top-8).
 > **Relative** results (persona vs baseline, α sweeps, tier vs tier) are
 > self-consistent; **absolute** capability numbers are likely depressed and should
-> not be compared with official-kernel RWKV-7 results. Measurement table:
-> [engineering-notes §4.1b](docs/engineering-notes.md).
+> not be compared with official-kernel RWKV-7 results. How it was measured:
+> same prompt and state through `chunk_rwkv7` (prefill) and `fused_mul_recurrent`
+> (decode), compared logit by logit (`scripts/probe_chunk_vs_fused.py`).
 
 ## Results
 
@@ -113,7 +114,7 @@ flowchart TB
 ## Quickstart
 
 Requirements: Windows or Linux, NVIDIA GPU (≥8 GB reproduces everything here),
-**Python ≥ 3.12** (3.10 breaks triton-windows — see [war stories](#engineering-war-stories)).
+**Python ≥ 3.12** (3.10's `inspect.getsourcelines` truncates multi-decorator source and triton-windows crashes on import).
 
 ```bash
 # 1) dependencies (cu128 wheels required for Blackwell GPUs)
@@ -212,10 +213,8 @@ one command to reproduce, with raw JSON artifacts committed next to its report.
 | Phase diagram | coexistence window α≈[0.55,0.65] is per-prompt attractor selection; geometry smooth while behavior jumps; first exchange locks the session's phase | [phase-transition](docs/phase-transition.md) |
 | Low-rank surgery | removal = factory reset (k ≥ 2, either direction; k=1 leaves 12.5%/25% residue); injection/scaling = phase navigation; the coexistence knife edge survives no edit | [state-editing](docs/state-editing.md) |
 | Data scaling | 50 pairs × 200 steps suffice for style; the real curve is the **capability cliff** — general ability dies with style formation at every data size | [scaling](docs/scaling.md) |
-| Long-session stability | 60 turns grow the state norm only ×1.20 (28.8→34.7) with zero degeneration and no spikes; SANE's 100M-token norm-explosion regime is four orders of magnitude away, so their tanh compression is a contrast, not a requirement; written up as a contrast paragraph in paper §2 | [longconv-norm-trace](docs/longconv-norm-trace.md) |
+| Long-session stability | 60 turns grow the state norm only ×1.20 (28.8→34.7) with zero degeneration and no spikes; SANE's 100M-token norm-explosion regime is four orders of magnitude away, so their tanh compression is a contrast, not a requirement | [longconv-norm-trace](docs/longconv-norm-trace.md) |
 | Attractor seeding | a hidden seed exchange deterministically locks style (33%→100%); auto-seeds are unreliable and the task attractor cannot be seeded | [attractor-seeding](docs/attractor-seeding.md) |
-
-**Figures** for every study live in [docs/fig/](docs/fig/) and are regenerated from the raw JSON by `python scripts/make_figures.py`.
 
 **The phase diagram** (study centerpiece): interpolating between the catgirl and
 translator S₀s, behavior holds in a pure style phase for α ≥ 0.65, collapses to a
@@ -226,38 +225,11 @@ of S₀ geometry**. Within a session, the first exchange locks the phase; no edi
 blend or seed keeps the coexistence knife edge alive.
 
 **Surgery** (the interventional validation): removing either persona's top-k singular
-subspace from the mixture — at any rank — resets behavior to the base model (the
-trained-state signal is deleted as a whole, not decomposed), while a cos-0.99
-injection flips behavior entirely into the target attractor. Operators in
+subspace from the mixture (k ≥ 2, either direction) resets behavior to the base model
+(the trained-state signal is deleted as a whole, not decomposed; at k=1 a 12.5% style /
+25% task residue survives), while an injection at cos 0.92 to the target S₀ (0.99 to the
+mixture) flips behavior entirely into the target attractor. Operators in
 `src/stateswap/editing.py`.
-
-Methodology constants across all studies: style and task probes in **separate fresh
-sessions** (session state carries conversation — mixed probes pollute), **greedy
-decoding** (one "perfect" sample was luck), degeneration flags recorded, raw replies
-committed.
-
-## Engineering war stories
-
-Six real, log-backed traps hit on this stack (Windows + Blackwell + GFW) —
-full autopsies in [docs/engineering-notes.md](docs/engineering-notes.md) (Chinese):
-
-1. **CPython 3.10 truncates multi-decorator source** — `inspect.getsourcelines` returns
-   258 chars for a `@triton.heuristics` + `@triton.jit` stack; triton-windows crashes on
-   import. Fix: Python 3.12.
-2. **fla 0.5.2's `fused_recurrent` drops S₀ gradients** in eval mode with short
-   sequences — training "runs" but learns nothing. Fix: force the chunked kernel path.
-3. **Byte-level tokenizer mask misalignment**: prompt+completion encoded as one string
-   lets cross-boundary tokens eat the answer's first bytes — training loss reaches zero
-   while recall is 5%. Fix: encode sides separately; this bug had faked an entire
-   experimental conclusion.
-4. **`swap_persona(keep_context=True)` degenerates mid-conversation** — stale conv/ffn
-   states against offset-0 bookkeeping emit `"AssAss…"` template fragments. Fix: reset
-   token-shift caches together with the state; context is carried by history replay.
-5. **CI broke without any code change**: transformers 5.17 changed lazy-module behavior
-   so fla 0.5.2 eagerly imports `triton` at module load — absent on a CPU runner. And
-   the fla eager import chain itself was only reachable because new tests imported the
-   engine. Fix: install triton in CI; root cause documented, wrong hypothesis retracted
-   in the commit message.
 
 ## Repository layout
 
@@ -295,14 +267,9 @@ WebUI with live state monitor.
 
 Open:
 
-- [x] **Paper draft** — "The Geometry of RWKV Initial States" —
-  [docs/paper-draft.md](docs/paper-draft.md) with **8 programmatically generated
-  figures** ([docs/fig/](docs/fig/), regenerated by `python scripts/make_figures.py`
-  from `docs/*.json`, no matplotlib)
 - [x] **3-tier phase sweep** — 0.1B / 0.4B / 1.5B, all personas retrained with the
   fixed tokenizer pipeline; the mixing regime turns out **not** to be monotone in
-  state size (smooth handover → collapse → coexistence), see
-  [docs/fig/fig8-capacity.svg](docs/fig/fig8-capacity.svg)
+  state size (smooth handover → collapse → coexistence)
 - [x] **Layer-masked / soft subspace removal** — task modes are locally excisable
   (L16–23 removal keeps task at 62% vs 0% uniform), style is not
   ([docs/state-editing.md](docs/state-editing.md))
@@ -310,7 +277,7 @@ Open:
   guard rails (name/path validation, zip size *and* ratio limits, RFC 5987
   headers, request-param bounds, OpenAI error/`finish_reason` shapes) against a
   fake engine, no model load; each guard was mutation-tested (remove it, the
-  test fails). Suite went 48 → 73.
+  test fails). Suite went 48 → 76 (non-slow).
 - [x] **WebUI exposure for seeding** — the session dialog has a 🌱 seed-lock
   toggle wired to the session API
 - [ ] **Switch inference to Albatross** — the only path that removes both the fla
@@ -318,26 +285,11 @@ Open:
   GPU). **Blocked on toolchain, not on effort**: this machine has no `nvcc`, no
   `CUDA_HOME`, and no MSVC, while Albatross ships 6 pairs of `.cpp`/`.cu` with no
   build files. Install CUDA Toolkit 12.8 + VS Build Tools and compile one minimal
-  op before any 2–3-day estimate is meaningful
-  ([engineering-notes](docs/engineering-notes.md) §4.1c). **Design ready**:
+  op before any 2–3-day estimate is meaningful. **Design ready**:
   [albatross-migration.md](docs/albatross-migration.md) maps the two state
   layouts — S₀ `(L,H,64,64)` *is* Albatross's WKV state at B=1, and the memory
   accounting matches exactly (12.78 MB both sides), so the "persona = tensor"
   abstraction survives untouched
-
-Research follow-ups (layer-selective removal, depth-scan hysteresis, multi-pair
-generalization) live where they belong — the open-questions sections of each
-[report](#research) and the paper outline.
-
-Won't do, with reasons:
-
-- [x] ~~Hand-rolled CUDA-graph decode~~ — measured 7.25× but semantically broken:
-  fla's `FLALayer.update` writes through capture-time pointers, so replay never
-  advances the recurrence (24-step greedy decode emits 24 identical tokens)
-  ([benchmarks.md](docs/benchmarks.md) §6.3)
-- [x] ~~Retrieval-augmented episodic memory~~ — standard in
-  [ai00_server](https://github.com/Ai00-X/ai00_server); the state-science arc covers
-  this repo's distinct contribution
 
 ## Acknowledgements
 

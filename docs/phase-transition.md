@@ -29,8 +29,9 @@
 5. **意外收获：引擎 bug**——`swap_persona(keep_context=True)` 在对话中途换人格
    会产出退化模板碎片（"AssAssAssistant…"）：递归状态被替换但 conv/ffn 与
    offset 留在旧流里，错位损坏生成；全重置（`keep_context=False`）无此问题。
-   WebUI 默认全重置，用户不受影响。详见
-   [engineering-notes §7](engineering-notes.md)。
+   WebUI 默认全重置，用户不受影响。修复落在 `Engine.swap_persona`：
+   换 S₀ 的同时把每层 conv/ffn 缓存一并置零（回归测试
+   `test_swap_keep_context_no_degeneration`）。
 
 ## 1. 实验设置
 
@@ -125,7 +126,8 @@ phase-transition.json）：
 
 - **E2a 换人格阶梯**（keep_context=True 逐级 swap）：**结果无效**——诊断发现
   keep_context 换人格后生成退化为模板碎片（"AssAssAssistant…"），比率全被污染。
-  这是引擎 bug 而非模型行为，见下与 engineering-notes。
+  这是引擎 bug 而非模型行为：`swap_persona(keep_context=True)` 保留了旧流的
+  conv/ffn 缓存而与 offset=0 的重置记账错位，已修复（见 §0 第 5 条）。
 - **E2b 会话内弛豫**（同一会话同一探针连发 3 轮）：α=1.0/0.7/0.5 三轮全 100% 风格、
   α=0.3/0.0 全 0——**对比 E1 的 α=0.5 独立会话 12.5%：首回合的猫娘回复写进状态后
   把会话锁进风格吸引子**（自增强双稳态）。边界附近"谁先出手谁定相"。
@@ -193,7 +195,7 @@ settle 回复即变为模板碎片与乱码（`' ] ] ] ]'`、`'Assistant:'`）�
 
 1. **会话内混合行走的相干视界很短**，与 settle prompt 多样性无关——多次
    "混合 + 续写"循环后，运行态（线性混合叠加生成内容）滑出相干流形，退化
-   不可逆（与[长对话状态雪崩](engineering-notes.md)同族：坏内容写进状态、
+   不可逆（与长对话状态雪崩同族：坏内容写进状态、
    被混合、再放大）。E2d 单次混合行走能走通全程，是交换次数少的侥幸边界。
 2. **平衡态滞后回线在本引擎上暂不可测**，问题保持开放。可行的替代设计：
    新鲜会话 + 深度可控的合成历史（在每个 α 用固定历史前缀 prefill，扫

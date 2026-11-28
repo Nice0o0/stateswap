@@ -12,7 +12,7 @@
 
 ## 演示
 
-**与人格聊天——顶部 🧬 条是实时 24 层状态监视器（柱高=层状态范数，
+**顶部 🧬 条是实时 24 层状态监视器（柱高=层状态范数，
 颜色=与人格 S₀ 的锚定度）：**
 
 ![stateswap 聊天与状态监视器](docs/img/demo-chat.png)
@@ -40,7 +40,8 @@ RWKV-7 每层维护一个随 token 演化的递归状态矩阵 **S**（每头 64
 一句话对比：LoRA 改的是"模型知道什么"；S₀ 调优改的是"模型睁开眼时所处的状态"。
 它能固化风格、人格与任务模式；不能注入新知识（知识在冻结的权重里）。
 
-> 底座大小决定对话能力上限，S₀ 只负责风格与任务模式。项目在 RWKV7-World-1.5B
+> 底座大小决定对话能力上限，S₀ 只负责风格与任务模式。本项目演示基于
+> RWKV7-World-1.5B（更早的 0.4B/0.1B 产物见 `personas-legacy/`）。
 
 > **已知限制——问题在引擎，不在方法。** 本项目全部结论跑在
 > [flash-linear-attention](https://github.com/fla-org/flash-linear-attention)
@@ -50,8 +51,8 @@ RWKV-7 每层维护一个随 token 演化的递归状态矩阵 **S**（每头 64
 > `max|Δlogit| = 0.25`，且 decode 路径的候选词明显更差（top-8 里出现 U+FFFD）。
 > **相对结论**（人格 vs 基线、α 扫描、档位对比）自洽可信；
 > **绝对能力数字**很可能被系统性拖低，不应与官方内核下的 RWKV-7 结果直接比较。
-> 测量表见 [engineering-notes §4.1b](docs/engineering-notes.md)。
-> 上演示（更早的 0.4B/0.1B 产物见 `personas-legacy/`）。
+> 测量方法：同一 prompt 同一状态下分别跑 `chunk_rwkv7`（prefill）与
+> `fused_mul_recurrent`（decode），逐 logit 比对（`scripts/probe_chunk_vs_fused.py`）。
 
 ## 实测结果
 
@@ -114,7 +115,7 @@ flowchart TB
 ## 快速上手
 
 环境：Windows 或 Linux + NVIDIA GPU（≥8GB 显存可复现本项目全部数字），
-**Python ≥ 3.12**（3.10 会踩 triton-windows 的坑——见[踩坑战争故事](#踩坑战争故事)）。
+**Python ≥ 3.12**（3.10 的 `inspect.getsourcelines` 会截断多层装饰器源码，triton-windows 导入即崩）。
 
 ```bash
 # 1) 依赖（Blackwell 显卡必需 cu128 轮子）
@@ -196,7 +197,7 @@ curl -X POST http://127.0.0.1:8000/v1/personas/import_bundle \
 
 ## 研究发现
 
-围绕"S₀ 能做什么、不能做什么"的六组受控实验。每个研究一条命令可复现，
+围绕"S₀ 能做什么、不能做什么"的六组受控实验。每个研究命令可复现，
 原始 JSON 与报告一同入库：
 
 | 研究 | 一句话结论 | 报告 |
@@ -209,46 +210,20 @@ curl -X POST http://127.0.0.1:8000/v1/personas/import_bundle \
 | 相图 | 共存窗 α≈[0.55,0.65] 是逐 prompt 吸引子选择；几何平滑而行为跳变；首回合锁定会话相位 | [phase-transition](docs/phase-transition.md) |
 | 低秩外科 | 切除 = 格式化回基线（k≥2、任一方向；k=1 仍残留 12.5%/25%）；注入/缩放 = 相图导航；共存刀锋撑不过任何编辑 | [state-editing](docs/state-editing.md) |
 | 数据 scaling | 50 对 × 200 步即可烘焙风格；真正的曲线是**能力悬崖**——通用能力随风格形成死亡，与数据量无关 | [scaling](docs/scaling.md) |
-| 长会话稳定性 | 60 轮后状态范数只涨 ×1.20（28.8→34.7），零退化、无尖峰；SANE 的 1 亿 token 范数爆炸场景差四个数量级，其 tanh 压缩对本项目是**对照而非必需品**，已写成论文 §2 的对照段落 | [longconv-norm-trace](docs/longconv-norm-trace.md) |
+| 长会话稳定性 | 60 轮后状态范数只涨 ×1.20（28.8→34.7），零退化、无尖峰；SANE 的 1 亿 token 范数爆炸场景差四个数量级，其 tanh 压缩对本项目是**对照而非必需品** | [longconv-norm-trace](docs/longconv-norm-trace.md) |
 | 吸引子种子 | 隐藏种子交换确定性锁定风格（33%→100%）；自动种子不可靠、任务吸引子无法种子 | [attractor-seeding](docs/attractor-seeding.md) |
 
-**相图**（招牌研究）：在猫娘与翻译 S₀ 之间插值，α ≥ 0.65 行为停在纯风格相、
+**相图**：在猫娘与翻译 S₀ 之间插值，α ≥ 0.65 行为停在纯风格相、
 α ≤ 0.5 塌向纯任务相，中间是狭窄共存窗（α=0.6：87.5% 风格 + 75% 翻译）。
 与两端点的几何量沿 α 近线性，行为却跳变两次——**行为是吸引子选择，不是
 S₀ 几何的线性函数**。会话内首回合锁定相位；任何编辑、混合或种子都撑不住
 共存刀锋。
 
-**外科**（干预性验证）：从混合体切除任一人格的 top-k 奇异子空间——任意
-rank——行为都回归底座基线（训练态信号被整体删除，不可分解）；而 cos 0.99
-的注入就把行为完全推入目标吸引子。算子在 `src/stateswap/editing.py`。
+**外科**（干预性验证）：从混合体切除任一人格的 top-k 奇异子空间（k≥2、
+任一方向）行为都回归底座基线（训练态信号被整体删除，不可分解；k=1 时仍残留
+12.5% 风格 / 25% 任务）；而对目标 S₀ 余弦 0.92（对混合体 0.99）的注入就把行为
+完全推入目标吸引子。算子在 `src/stateswap/editing.py`。
 
-贯穿所有研究的方法论：风格与任务探针在**独立新鲜会话**里测（会话状态携带
-对话——混测即污染）、**贪心解码**复核（一次"完美"翻译是采样运气）、记录
-退化标记、原始回复入库。
-
-## 踩坑战争故事
-
-本技术栈（Windows + Blackwell + GFW）上六个有日志佐证的真实陷阱——
-完整解剖见 [docs/engineering-notes.md](docs/engineering-notes.md)：
-
-1. **CPython 3.10 截断多层装饰器源码**——`inspect.getsourcelines` 对
-   `@triton.heuristics` + `@triton.jit` 栈只返回 258 字符，triton-windows 导入即崩。
-   解法：Python 3.12。
-2. **fla 0.5.2 的 `fused_recurrent` 在 eval 模式短序列下丢弃 S₀ 梯度**——训练
-   "在跑"但什么都学不到。解法：强制 chunk 内核路径。
-3. **字节级分词器掩码边界错位**：prompt+completion 整句编码让跨边界 token 吞掉
-   答案首字节——训练 loss 归零而召回 5%。解法：分段编码；这个 bug 曾伪造过一整轮
-   实验结论。
-4. **`swap_persona(keep_context=True)` 对话中途换人格产生退化**——旧流的
-   conv/ffn 状态对着 offset=0 的重置记账，输出 `"AssAss…"` 模板碎片。
-   修复：换状态时一并重置 token-shift 缓存；上下文由 history 重放承接。
-5. **CI 无代码改动也炸**：transformers 5.17 改变懒模块行为，fla 0.5.2 导入时
-   急切加载 `triton`——CPU runner 没有它。而那条急切导入链之所以被踩到，
-   是因为新测试首次导入了 engine。修复：CI 装 triton；错误假说在 commit
-   message 里撤回。
-6. **Blackwell (sm_120) 上的 Triton**：fla 全部 RWKV7 内核在
-   torch 2.11+cu128 / triton-windows 3.8 下编译、调优、运行全通——前提是
-   dtype 组合正确（状态 fp32、其余 bf16）。
 
 ## 目录结构
 
@@ -272,7 +247,7 @@ src/stateswap/
 web/             零依赖 HTML/CSS/JS 前端（亮/暗主题）
 persona_cards/   人格卡片（factory 输入：人设 + 风格标记 + 种子对话 + 话题池）
 tests/           pytest（分词器 / 掩码 / 编辑 / 采样回归 / S0 梯度）
-docs/            12 份研究/运维报告 + 每个研究的原始 JSON + 教程 + 演示图
+docs/            13 份研究/运维报告 + 每个研究的原始 JSON + 教程 + 演示图
 scripts/         一次性脚本：各研究探针、模型转换、数据构建、冒烟测试
 vendor/          fla 转换器原版 + BlinkDL 参考实现 + 词表（溯源见 NOTICE）
 data/            训练语料（许可与出处见 NOTICE）
@@ -286,28 +261,12 @@ data/            训练语料（许可与出处见 NOTICE）
 
 开放：
 
-- [x] **长文撰写**——"The Geometry of RWKV Initial States"：
-  [docs/paper-draft.md](docs/paper-draft.md)，含 **8 张程序化生成的图**
-  （[docs/fig/](docs/fig/)，`python scripts/make_figures.py` 从 `docs/*.json`
-  重生成，不依赖 matplotlib）
 - [x] **三档标度扫描**——0.1B / 0.4B / 1.5B，全部人格用修复后的分词管线重训；
-  混合形态**对状态容量不单调**（平滑交接 → 中段塌陷 → 共存窗），见
-  [docs/fig/fig8-capacity.svg](docs/fig/fig8-capacity.svg)
+  混合形态**对状态容量不单调**（平滑交接 → 中段塌陷 → 共存窗）
 - [x] **分层切除 / 软切除**——任务模式可局部切除（只切 L16–23 时任务仍有
   62%，均匀切除为 0%），风格不可（[docs/state-editing.md](docs/state-editing.md)）
 - [x] **种子的 WebUI 暴露**——会话对话框已有 🌱 种子锁定开关，接入 session API
 
-研究续篇（深度扫描滞后、多人格对泛化）住在它们该在的地方——
-各[报告](#研究发现)的未决问题章节。
-
-不做（含理由）：
-
-- [x] ~~手写 CUDA-graph 解码~~——BlinkDL 的
-  [Albatross](https://github.com/BlinkDL/Albatross) 占据 RWKV 推理
-  （CUDA Graph + MegaKernel）；torch.compile 尝试实测 0.77×
-  （[benchmarks.md](docs/benchmarks.md) §6.3）
-- [x] ~~检索式情景记忆~~——[ai00_server](https://github.com/Ai00-X/ai00_server)
-  已是标配；状态科学弧线才是本仓库的差异化贡献
 
 ## 致谢
 

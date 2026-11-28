@@ -64,7 +64,7 @@ ZH_SENTENCES_EXT = ZH_SENTENCES + [
 ]
 COEXIST_ALPHAS = [0.65, 0.62, 0.6, 0.58, 0.55]  # 共存相及其边界
 # E7 弛豫交换轮换池：每步相同的 settle/probe prompt 会诱发复读退化
-# （状态雪崩，见 engineering-notes）——轮换不同 prompt 消除重复源
+# （状态雪崩：坏内容写进状态后被反复放大）——轮换不同 prompt 消除重复源
 SETTLE_POOL = [
     "我们聊点别的吧", "换个话题怎么样", "你最近还好吗", "今天过得怎么样",
     "有什么想说的吗", "随便聊聊", "说点什么吧", "接下来想做什么",

@@ -281,8 +281,9 @@ prompt 与 completion **分段编码**。
 需要 `triton-windows` 且 Python 3.12（`pyproject.toml` 的 `requires-python` 已同步；3.10 的 inspect 行为会让 triton 崩溃，3.11 未验证）。
 
 **Q：国内外网络下载模型/依赖失败？**
-权重走 ModelScope（`RWKV/rwkv-7-world`）；pip 可配代理或镜像；
-本项目 `docs/engineering-notes.md` 记录了完整的网络应对方案。
+权重走 ModelScope（`RWKV/rwkv-7-world`）；pip 可配代理或镜像（如
+`-i https://pypi.tuna.tsinghua.edu.cn/simple`）；`uv` 支持 `--index-url`
+与 `UV_INDEX_URL` 环境变量。
 
 ## 9. 目录速查
 

@@ -5,8 +5,9 @@
 > 这样环境就绪后可以直接动手，不会边想边改。
 >
 > 起因：fla 0.5.2 的 RWKV-7 被上游明确标注为「未与参考实现对齐、性能明显更差」，
-> 且其 decode 路径（`fused_recurrent`）实测输出分布劣化（见
-> [engineering-notes](engineering-notes.md) §4.1b）。Albatross 是官方推理实现，
+> 且其 decode 路径（`fused_recurrent`）实测输出分布劣化——同一 prompt 同一状态下
+> prefill 与 decode 两条路径 `max|Δlogit| = 0.25`、`mean = 0.047`，decode 的 top-8
+> 里会出现 U+FFFD（`scripts/probe_chunk_vs_fused.py`）。Albatross 是官方推理实现，
 > 同时解决「数值正确性」与「dispatch 受限的解码速度」两个问题。
 >
 > **本文件基于对 Albatross `faster3a_2607/rwkv7_fast_v3a.py` 源码的阅读**，
@@ -128,7 +129,7 @@ DeltaLog 是 WKV 的可选模式：它在 `0..M-1` 的相位里累积工作区�
 
 | 检查 | 判据 |
 |---|---|
-| **跨引擎 logits 对齐** | 同一 S₀ + 同一 prompt，Albatross 与 fla 的 logits `max\|Δ\|` 必须显著小于 fla 内部两路径的差距（0.25）。这本身就是论文里「fla 未对齐」的独立证据 |
+| **跨引擎 logits 对齐** | 同一 S₀ + 同一 prompt，Albatross 与 fla 的 logits `max\|Δ\|` 必须显著小于 fla 内部两路径的差距（0.25）。这本身就是「fla 未对齐」的独立证据 |
 | 逐 token 解码 | 贪心 24 步产出**不同的 token**（回归 §6.3 的 graph 陷阱：状态必须真的递推） |
 | `swap_persona` | 切换后人格行为正确，`keep_context=True` 时历史仍可回放 |
 
@@ -196,8 +197,8 @@ Albatross 是纯推理库（`torch.load(MODEL_PATH)`，无训练循环）。训�
 4. **会话机制**（半天）：`swap_persona` / 护栏快照回滚 / `state-stats`。
 5. **行为回归**（半天）：§4.2 全部探针。
 6. **批量解码**（半天）：`batch_chat` 换原生批量。
-7. **文档**：benchmarks 补新数字、README 改「Engine」段、engineering-notes
-   记录 fla→Albatross 的差异实测。
+7. **文档**：benchmarks 补新数字、README 改「Engine」段，并在
+   `docs/benchmarks.md` 记录 fla → Albatross 的差异实测。
 
 **总计约 3–4 天**（不含工具链安装）。每步都有独立的验收点，任何一步失败
 都可以停在「旧路径仍工作」的状态。
@@ -209,10 +210,10 @@ Albatross 是纯推理库（`torch.load(MODEL_PATH)`，无训练循环）。训�
 1. **只换 decode kernel**：用 Albatross 的 `cuda/` 源文件单独编译
    `rwkv7_wkv_*`，塞回 fla 的 `fused_recurrent` 位置——风险是接口不兼容。
 2. **等 fla 对齐**：跟踪上游 issue，这是零成本但不可控。
-3. **放弃迁移，只记录 caveat**：现状已经在论文 §3 和 README 顶部写清楚了
-   「相对结论可信、绝对数字偏低」，不迁移也能发表，只是少了一条性能故事。
+3. **放弃迁移，只记录 caveat**：现状已经在 README 顶部写清楚了
+   「相对结论可信、绝对数字偏低」，不迁移也能继续做研究，只是少了一条性能故事。
 4. **借 Albatross 做交叉验证**：哪怕不迁移，只要能编译一个 op 并在小样例上
-   跑通，就能给出「fla vs 官方」的**逐 logit 对照**——那本身就是论文的有力数据点，
+   跑通，就能给出「fla vs 官方」的**逐 logit 对照**——那本身就是一条扎实的独立结论，
    而且成本远低于完整迁移。
 
 第 4 条值得强调：**它把「迁移」这个 3–4 天的工程任务，降级为「半天的实验」**，

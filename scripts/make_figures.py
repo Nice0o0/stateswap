@@ -1,4 +1,4 @@
-"""Programmatic figures for docs/paper-draft.md — pure-Python SVG, no dependencies.
+"""Programmatic study figures — pure-Python SVG, no dependencies.
 
 为什么自己写 SVG：
 - 仓库宣称"零依赖 WebUI"，为一个静态图引入 matplotlib（及它拉进来的 numpy

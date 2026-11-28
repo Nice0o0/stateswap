@@ -313,7 +313,7 @@ class Engine:
         keep_context=True 保留会话 history（context_replay 会在下一轮把历史
         重放进新人格的状态——跨人格上下文交接走这条路）；False 额外清空历史。
         两种情况都会重置 token-shift 缓存：保留旧流的 conv/ffn 会与 offset=0
-        的重置记账错位，生成退化为模板碎片（engineering-notes §7）。"""
+        的重置记账错位，生成退化为模板碎片（实测 "AssAssAssistant…"）。"""
         t0 = time.perf_counter()
         session = self.sessions[session_id]
         if not session.lock.acquire(blocking=False):
@@ -325,7 +325,7 @@ class Engine:
             if keep_context:
                 # 换 S₀ 并重置 token-shift 缓存。conv/ffn 必须一并置零：保留旧流的
                 # 词元级状态会与 offset=0 的重置记账错位，生成退化为模板碎片
-                # （实测 "AssAssAssistant…"，engineering-notes §7）。会话语义由
+                # （实测 "AssAssAssistant…"）。会话语义由
                 # history 承接：context_replay 在下一轮把历史重放进新状态。
                 holder = S0(self.model).to(self.device)
                 holder.load_stacked(persona.on(self.device))

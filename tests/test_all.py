@@ -484,7 +484,7 @@ class TestEngineHeavy:
 
     def test_swap_keep_context_no_degeneration(self, engine):
         """回归：keep_context 换人格后 conv/ffn 必须重置——旧行为在对话中途
-        swap 会产生 "AssAss…" 模板碎片（engineering-notes §7）。"""
+        swap 会产生 "AssAss…" 模板碎片。"""
         persona = "personas-legacy/neko-0.4b-v2/s0.pt"
         if not Path(persona).exists():
             pytest.skip("legacy 0.4B persona not present")

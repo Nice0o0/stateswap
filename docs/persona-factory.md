@@ -46,7 +46,7 @@ curl http://127.0.0.1:8000/v1/chat/completions -H "Content-Type: application/jso
   "topics": ["Python 基础", ...], // 造数话题池（决定 instruction 多样性）
   "n_pairs": 400,               // 目标语料量
   "turns": 2,                   // >1 时按多轮样本训练（长对话稳健性，见
-                                // engineering-notes：长对话场景默认应开）
+                                // 长对话场景默认应开：单轮样本会让中段状态无覆盖）
   "style_min": 0.75,            // 门禁：风格命中率下限
   "correct_min": 0.5            // 门禁：中性事实题答对率下限
 }
