@@ -280,16 +280,6 @@ Open:
   test fails). Suite went 48 → 76 (non-slow).
 - [x] **WebUI exposure for seeding** — the session dialog has a 🌱 seed-lock
   toggle wired to the session API
-- [ ] **Switch inference to Albatross** — the only path that removes both the fla
-  alignment gap and the dispatch-bound decode (47 ms/token, of which <0.1 ms is
-  GPU). **Blocked on toolchain, not on effort**: this machine has no `nvcc`, no
-  `CUDA_HOME`, and no MSVC, while Albatross ships 6 pairs of `.cpp`/`.cu` with no
-  build files. Install CUDA Toolkit 12.8 + VS Build Tools and compile one minimal
-  op before any 2–3-day estimate is meaningful. **Design ready**:
-  [albatross-migration.md](docs/albatross-migration.md) maps the two state
-  layouts — S₀ `(L,H,64,64)` *is* Albatross's WKV state at B=1, and the memory
-  accounting matches exactly (12.78 MB both sides), so the "persona = tensor"
-  abstraction survives untouched
 
 ## Acknowledgements
 
