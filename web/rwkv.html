@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RWKV-7 逐步拆解：为什么它不需要注意力</title>
+<style>
+:root, html[data-theme="light"]{
+  --bg:#fff; --panel:#f7f8fa; --card:#fff; --border:#e3e6eb; --border-strong:#cfd4dc;
+  --text:#1b1f27; --muted:#6c7480; --accent:#2f6f5e; --accent2:#b8552f;
+  --accent-weak:#e8f4f0; --accent2-weak:#fbeee8;
+  --ok:#0e8f6e; --warn:#b4741a; --code:#f4f5f7;
+  --shadow:0 1px 2px rgba(20,24,32,.05), 0 4px 12px rgba(20,24,32,.04);
+}
+html[data-theme="dark"]{
+  --bg:#15171b; --panel:#1b1e23; --card:#1f2228; --border:#2c3138; --border-strong:#3d434c;
+  --text:#e8eaef; --muted:#9aa1ad; --accent:#6fbfa8; --accent2:#e0926f;
+  --accent-weak:#1b2f2b; --accent2-weak:#33241e;
+  --ok:#4fd08c; --warn:#e0b060; --code:#23262c;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--text);
+  font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+code,pre,.mono{font-family:ui-monospace,"SF Mono",Consolas,"Cascadia Mono",monospace}
+
+.topbar{
+  position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:14px;
+  padding:10px 20px; background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
+}
+.brand{font-weight:700; letter-spacing:-.2px}
+.brand span{color:var(--accent2)}
+.spacer{flex:1}
+.btn{border:1px solid var(--border-strong); background:var(--card); color:var(--text);
+  padding:6px 12px; border-radius:8px; cursor:pointer; font-size:13px}
+.btn:hover{background:var(--panel)}
+.navlink{font-size:12.5px; color:var(--muted); text-decoration:none; border-bottom:1px dotted var(--border-strong)}
+.navlink:hover{color:var(--accent)}
+
+.wrap{display:grid; grid-template-columns:238px minmax(0,1fr); min-height:calc(100% - 49px); min-width:0}
+@media (max-width:940px){
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  nav{display:none}
+  main{padding:20px 14px 70px}
+  .stage-body{padding:12px}
+  .mat-row{flex-direction:column; gap:14px}
+  .mat{width:100%; flex-basis:100%}
+  .head-grid{grid-template-columns:repeat(auto-fill, minmax(112px, 1fr))}
+  .topbar{padding:8px 12px; gap:8px; flex-wrap:wrap}
+  #model-badge{display:none}
+  .bar{grid-template-columns:74px 1fr 46px; font-size:11.5px}
+}
+nav{border-right:1px solid var(--border); background:var(--panel); padding:16px 0;
+  position:sticky; top:49px; height:calc(100vh - 49px); overflow:auto}
+nav ol{list-style:none; margin:0; padding:0}
+nav a{display:flex; gap:10px; padding:8px 18px; color:var(--muted); text-decoration:none;
+  font-size:13.5px; border-left:2px solid transparent}
+nav a:hover{color:var(--text); background:var(--card)}
+nav a.on{color:var(--accent); border-left-color:var(--accent); background:var(--card); font-weight:600}
+nav a b{font-variant-numeric:tabular-nums; color:var(--border-strong); font-weight:600}
+nav a.on b{color:var(--accent)}
+main{padding:26px 34px 90px; max-width:1500px; min-width:0; overflow-x:hidden}
+
+.stage{margin:0 0 30px; scroll-margin-top:70px}
+.stage-head{display:flex; align-items:flex-start; gap:14px; margin-bottom:6px}
+.stage-num{flex:0 0 auto; width:34px; height:34px; border-radius:9px; display:grid; place-items:center;
+  background:var(--accent); color:#fff; font-weight:700; font-size:15px}
+.stage-head h2{margin:0 0 2px; font-size:20px; letter-spacing:-.3px}
+.stage-head p{margin:0; color:var(--muted); font-size:13.5px}
+.stage-body{border:1px solid var(--border); border-radius:12px; background:var(--card);
+  padding:18px; box-shadow:var(--shadow)}
+.stage-body > * + *{margin-top:16px}
+
+.tokens{display:flex; flex-wrap:wrap; gap:5px; align-items:center}
+.tok{border:1px solid var(--border-strong); border-radius:7px; padding:4px 9px; font-size:13px;
+  background:var(--panel); position:relative; transition:.15s}
+.tok.special{color:var(--muted); background:transparent; border-style:dashed}
+.tok.hi{border-color:var(--accent2); background:var(--accent2-weak); box-shadow:0 0 0 2px color-mix(in srgb,var(--accent2) 22%,transparent)}
+.tok.now{outline:2px solid var(--accent); outline-offset:1px}
+.tok i{position:absolute; top:-9px; left:5px; font-size:9.5px; color:var(--muted); font-style:normal}
+
+.mat-row{display:flex; flex-wrap:wrap; gap:18px; align-items:flex-start; min-width:0}
+.mat{display:inline-block; vertical-align:top; max-width:100%; min-width:0; flex:1 1 300px}
+.mat h4{margin:0 0 6px; font-size:13px; font-weight:600; line-height:1.3}
+.mat h4 small{color:var(--muted); font-weight:400; font-size:11.5px}
+.canvas-host{position:relative; line-height:0; max-width:100%}
+canvas{display:block; border-radius:6px; border:1px solid var(--border)}
+.legend{display:flex; align-items:center; gap:8px; margin-top:5px; font-size:11px;
+  color:var(--muted); white-space:nowrap}
+.legend canvas{width:72px; height:8px; border-radius:3px}
+.legend.compact canvas{width:52px; height:6px}
+.head-grid{display:grid; grid-template-columns:repeat(4, max-content); gap:14px 20px;
+  align-items:start; justify-content:start}
+
+.tip{position:fixed; z-index:100; pointer-events:none; padding:5px 8px; border-radius:6px;
+  background:var(--text); color:var(--bg); font-size:11.5px; opacity:0; transition:opacity .1s;
+  white-space:nowrap; font-family:ui-monospace,monospace}
+
+.why,.without,.compare{border-left:3px solid var(--accent); background:var(--accent-weak);
+  padding:10px 14px; border-radius:0 8px 8px 0; font-size:13.5px}
+.without{border-left-color:var(--accent2); background:var(--accent2-weak)}
+.compare{border-left-color:var(--border-strong); background:var(--panel)}
+.why h5,.without h5,.compare h5{margin:0 0 4px; font-size:12px; letter-spacing:.4px;
+  text-transform:uppercase; color:var(--accent)}
+.without h5{color:var(--accent2)}
+.compare h5{color:var(--muted)}
+.why p,.without p,.compare p{margin:0}
+.why p+p,.without p+p,.compare p+p{margin-top:6px}
+.why em,.without em,.compare em{font-style:normal; font-weight:600}
+
+.math{background:var(--code); border-radius:8px; padding:10px 13px; overflow-x:auto;
+  font-size:13px; line-height:1.7; white-space:pre-wrap}
+.math .hl{background:color-mix(in srgb,var(--accent) 18%, transparent); border-radius:3px; padding:0 3px}
+.math span.c{color:var(--muted)}
+
+.stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(128px,1fr)); gap:10px}
+.stat{background:var(--panel); border:1px solid var(--border); border-radius:9px; padding:9px 11px}
+.stat b{display:block; font-size:19px; font-variant-numeric:tabular-nums; letter-spacing:-.4px}
+.stat small{color:var(--muted); font-size:11.5px; line-height:1.35; display:block; margin-top:2px}
+
+.bars{display:flex; flex-direction:column; gap:7px}
+.bar{display:grid; grid-template-columns:96px 1fr 56px; gap:9px; align-items:center; font-size:12.5px}
+.bar .track{height:15px; background:var(--panel); border-radius:5px; overflow:hidden; position:relative}
+.bar .fill{height:100%; border-radius:5px; background:var(--accent)}
+.bar .fill.pos{background:var(--accent2)}
+.bar .fill.neg{background:#7fa8dd}
+.bar b{text-align:right; font-variant-numeric:tabular-nums; font-weight:600}
+
+.tabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px}
+.tabs button{border:1px solid var(--border-strong); background:var(--card); color:var(--muted);
+  border-radius:7px; padding:4px 10px; font-size:12.5px; cursor:pointer}
+.tabs button.on{background:var(--accent); border-color:var(--accent); color:#fff}
+
+.note{font-size:12px; color:var(--muted); border-top:1px dashed var(--border); padding-top:10px}
+table.mini{border-collapse:collapse; font-size:12.5px; width:100%}
+table.mini th,table.mini td{border-bottom:1px solid var(--border); padding:5px 8px; text-align:left}
+table.mini th{color:var(--muted); font-weight:600; font-size:11.5px}
+table.mini td.num{text-align:right; font-variant-numeric:tabular-nums}
+
+/* 状态时间轴：每个 token 一格，格内 4 个头 */
+.timeline{display:flex; gap:6px; overflow-x:auto; padding-bottom:6px}
+.tl-frame{flex:0 0 auto; text-align:center}
+.tl-frame .cells{display:flex; gap:2px; align-items:flex-end; height:54px}
+.tl-frame .cells i{display:block; width:10px; border-radius:2px; background:var(--accent);
+  transition:.2s}
+.tl-frame .tk{font-size:10px; color:var(--muted); margin-top:3px; display:block;
+  max-width:48px; overflow:hidden; text-overflow:ellipsis}
+.slider-row{display:flex; align-items:center; gap:12px; font-size:13px}
+.slider-row input{flex:1; accent-color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">RWKV-7 逐步拆解 <span>·</span></div>
+  <div class="mono" style="font-size:12px;color:var(--muted)" id="model-badge">加载中…</div>
+  <div class="spacer"></div>
+  <a class="navlink" href="transformer.html">← Transformer 版</a>
+  <button class="btn" id="theme-btn">🌙</button>
+</div>
+
+<div class="wrap">
+  <nav><ol id="navlist"></ol></nav>
+  <main id="main"></main>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script src="rwkv-trace.js"></script>
+<script>
+"use strict";
+const D = window.RWKV_TRACE;
+if (!D) {
+  document.getElementById("main").innerHTML =
+    "<p>缺少 <code>rwkv-trace.js</code>。先运行 <code>python scripts/tiny_rwkv.py</code> 生成它。</p>";
+  throw new Error("no trace");
+}
+const M = D.model, ST = D.steps, ABL = D.ablation, T = D.seq_len, TOK = ST.tokens;
+const H = M.n_heads, HD = M.head_dim, L = M.n_layers, d = M.d_model;
+
+/* ══════════ 工具 ══════════ */
+const $ = (s, r = document) => r.querySelector(s);
+function reshape(flat, rows, cols) {
+  const out = [];
+  for (let r = 0; r < rows; r++) out.push(flat.slice(r * cols, (r + 1) * cols));
+  return out;
+}
+function hsl(v01) {
+  const lo = [47,111,94], mid = [250,250,252], hi = [184,85,47];
+  const a = v01 < .5 ? lo : mid, b = v01 < .5 ? mid : hi;
+  const t = v01 < .5 ? v01 * 2 : (v01 - .5) * 2;
+  const c = a.map((x, i) => Math.round(x + (b[i] - x) * t));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+function seqColor(v01) {
+  const lo = [247,248,250], hi = [47,111,94];
+  const c = lo.map((x, i) => Math.round(x + (hi[i] - x) * v01));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+function fmt(v, p = 3) { return Math.abs(v) < 1e-12 ? "0" : v.toFixed(p); }
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function avg(a) { return a.reduce((x, y) => x + y, 0) / a.length; }
+const TIP = $("#tip");
+function attachTip(host, textFn) {
+  if (host.__tipBound) { host.__tipFn = textFn; return; }
+  host.__tipBound = true; host.__tipFn = textFn;
+  host.addEventListener("mousemove", e => {
+    const fn = host.__tipFn; if (!fn) return;
+    TIP.textContent = fn(e);
+    TIP.style.left = (e.clientX + 12) + "px";
+    TIP.style.top = (e.clientY + 12) + "px";
+    TIP.style.opacity = 1;
+  });
+  host.addEventListener("mouseleave", () => TIP.style.opacity = 0);
+}
+function getCSS(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+function hostWidth(host) {
+  let el = host;
+  while (el && !el.clientWidth) el = el.parentElement;
+  if (!el || !el.clientWidth) {
+    const sb = document.querySelector(".stage-body");
+    if (sb && sb.clientWidth) el = sb;
+  }
+  if (!el || !el.clientWidth) return 320;
+  const st = getComputedStyle(el);
+  const pad = (parseFloat(st.paddingLeft) || 0) + (parseFloat(st.paddingRight) || 0);
+  return Math.max(180, el.clientWidth - pad - 4);
+}
+
+const HEATMAPS = [];
+function heatmap(host, grid, opts = {}) {
+  const item = { host, grid, opts, legend: null };
+  HEATMAPS.push(item);
+  return drawHeatmap(item);
+}
+function unregisterHeatmaps(nodes) {
+  for (const node of (Array.isArray(nodes) ? nodes : [nodes])) {
+    for (let i = HEATMAPS.length - 1; i >= 0; i--) {
+      const h = HEATMAPS[i].host;
+      if (h === node || (node.contains && node.contains(h))) HEATMAPS.splice(i, 1);
+    }
+  }
+}
+function relayout() {
+  for (const item of HEATMAPS) {
+    if (!item.host.isConnected) continue;
+    item.host.innerHTML = "";
+    if (item.legend && item.legend.parentNode) item.legend.parentNode.removeChild(item.legend);
+    item.legend = null;
+    drawHeatmap(item);
+  }
+}
+function drawHeatmap(item) {
+  const { host, grid, opts } = item;
+  const rows = grid.length, cols = grid[0].length;
+  const pid = opts.cell || 20, pad = 14, gapRatio = 1.6;
+  const left = opts.ylabels ? 46 : pad;
+  const top = opts.xlabels ? 34 : pad;
+  const availW = hostWidth(host);
+  const avail = availW - left - pad - 8;
+  const cellW = Math.min(pid, Math.max(2, avail / cols));
+  const cellH = opts.rowH || Math.max(pid, Math.min(18, 260 / rows));
+  const W = left + cols * cellW + pad, Hh = top + rows * cellH + pad;
+  const cv = document.createElement("canvas");
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = Hh * dpr;
+  cv.style.width = W + "px"; cv.style.height = Hh + "px";
+  const g = cv.getContext("2d");
+  g.scale(dpr, dpr);
+  g.clearRect(0, 0, W, Hh);
+
+  const vals = grid.flat().filter(v => v > (opts.gap ?? -1e4));
+  const mn = opts.min ?? Math.min(...vals), mx = opts.max ?? Math.max(...vals);
+  const span = mx - mn || 1;
+  const norm = v => opts.diverging ? (v - mn) / span : Math.max(0, Math.min(1, (v - mn) / span));
+  const cw = Math.max(1, cellW - (cellW > 6 ? gapRatio : 0.4));
+  const ch = Math.max(1, cellH - (cellH > 6 ? gapRatio : 0.4));
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const v = grid[r][c], x = left + c * cellW, y = top + r * cellH;
+    if (v <= (opts.gap ?? -1e4)) {
+      g.fillStyle = getCSS("--panel"); g.fillRect(x, y, cw, ch);
+      if (cellW > 6 && cellH > 6) {
+        g.strokeStyle = getCSS("--border"); g.lineWidth = 1;
+        g.strokeRect(x + .5, y + .5, cw - 1, ch - 1);
+      }
+      continue;
+    }
+    g.fillStyle = opts.diverging ? hsl(norm(v)) : seqColor(norm(v));
+    g.fillRect(x, y, cw, ch);
+  }
+  host.appendChild(cv);
+
+  if (opts.xlabels || opts.ylabels) {
+    const lbl = document.createElement("canvas");
+    lbl.width = W * dpr; lbl.height = Hh * dpr;
+    lbl.style.cssText = `position:absolute;left:0;top:0;width:${W}px;height:${Hh}px;border:0;pointer-events:none`;
+    const lg = lbl.getContext("2d"); lg.scale(dpr, dpr);
+    lg.fillStyle = getCSS("--muted"); lg.font = "10px ui-monospace,monospace";
+    if (opts.xlabels) for (let c = 0; c < cols; c++) {
+      if (c * cellW > W - 8) break;
+      lg.save(); lg.translate(left + c * cellW + cw / 2, top - 5);
+      lg.rotate(-Math.PI / 4); lg.textAlign = "right"; lg.fillText(opts.xlabels[c], 0, 0); lg.restore();
+    }
+    if (opts.ylabels) for (let r = 0; r < rows; r++) {
+      lg.textAlign = "right"; lg.fillText(opts.ylabels[r], left - 4, top + r * cellH + ch / 2 + 2);
+    }
+    host.appendChild(lbl);
+  }
+
+  const legend = document.createElement("div");
+  legend.className = "legend" + (cellW <= 11 ? " compact" : "");
+  const lc = document.createElement("canvas");
+  const lw = cellW <= 11 ? 52 : 72, lh = cellW <= 11 ? 6 : 8;
+  lc.width = lw; lc.height = lh;
+  const l2 = lc.getContext("2d");
+  for (let i = 0; i < lw; i++) {
+    l2.fillStyle = opts.diverging ? hsl(i / (lw - 1)) : seqColor(i / (lw - 1));
+    l2.fillRect(i, 0, 1, lh);
+  }
+  legend.appendChild(lc);
+  const t1 = document.createElement("span");
+  t1.textContent = opts.diverging ? `${fmt(mn, 2)} ← 0 → ${fmt(mx, 2)}` : `0 → ${fmt(mx, 2)}`;
+  legend.appendChild(t1);
+  if (opts.legendNote) {
+    const n = document.createElement("span");
+    n.textContent = "· " + opts.legendNote; legend.appendChild(n);
+  }
+  item.legend = legend;
+  (host.parentElement || host).appendChild(legend);
+
+  if (opts.onCell) {
+    attachTip(host, e => {
+      const box = cv.getBoundingClientRect();
+      const c = Math.floor((e.clientX - box.left - left) / cellW);
+      const r = Math.floor((e.clientY - box.top - top) / cellH);
+      if (r < 0 || c < 0 || r >= rows || c >= cols) return "";
+      return opts.onCell(r, c, grid[r][c]);
+    });
+  }
+  return cv;
+}
+
+function matBlock(title, sub) {
+  const wrap = document.createElement("div");
+  wrap.className = "mat";
+  wrap.innerHTML = `<h4>${title}${sub ? ` <small>${sub}</small>` : ""}</h4>`;
+  const host = document.createElement("div");
+  host.className = "canvas-host";
+  wrap.appendChild(host);
+  return { wrap, host };
+}
+
+/* 取某帧某头的 (HD,HD) 状态矩阵 */
+function stateOf(frame, head, which) {
+  const key = which || "S";
+  const flat = frame[key];
+  const one = flat.slice(head * HD * HD, (head + 1) * HD * HD);
+  return reshape(one, HD, HD);
+}
+
+/* ══════════ 派生量 ══════════ */
+const SNAP = ST.snaps;
+const decayAll = SNAP.flatMap(s => s.decay);
+const MEAN_DECAY = avg(decayAll);
+const HALF_LIFE = Math.log(0.5) / Math.log(MEAN_DECAY);
+const writeNorms = SNAP.map(s => Math.hypot(...s.write));
+const eraseNorms = SNAP.map(s => Math.hypot(...s.erase));
+const sepPos = TOK.indexOf("<SEP>");
+const bestWrite = writeNorms.indexOf(Math.max(...writeNorms));
+
+function frameNorms(i) { return ST.state_frames[i].norms; }
+
+/* ══════════ 阶段 ══════════ */
+const STAGES = [];
+function stage(id, num, title, subtitle, build) { STAGES.push({ id, num, title, subtitle, build }); }
+
+/* ── 0 全景 ── */
+stage("overview", 0, "全景：RWKV 和 Transformer 差在哪", "同一个任务，完全不同的记忆方式", (root) => {
+  const grid = document.createElement("div");
+  grid.className = "stat-grid";
+  grid.innerHTML = `
+    <div class="stat"><b>${(D.accuracy * 100).toFixed(1)}%</b><small>induction 任务准确率</small></div>
+    <div class="stat"><b>${M.state_elems}</b><small>状态元素数，与长度无关</small></div>
+    <div class="stat"><b>${M.params.toLocaleString()}</b><small>参数量（无注意力）</small></div>
+    <div class="stat"><b>${HALF_LIFE.toFixed(2)}</b><small>记忆半衰期（token）</small></div>`;
+  root.appendChild(grid);
+
+  const cmp = document.createElement("div");
+  cmp.className = "compare";
+  cmp.innerHTML = `<h5>两页共用同一个任务</h5>
+    <p>看到 <code>猫 追 蝴蝶 穿过 花园 藏进 ｜ 猫 追</code> 要预测 <code>蝴蝶</code>。
+    Transformer 版靠「注意力去找上一次出现的位置」；<b>RWKV 没有注意力</b>，
+    它靠一个 <em>${L}×${H}×${HD}×${HD} = ${M.state_elems}</em> 个数的矩阵状态，
+    每个 token 进来就改写它一次。</p>
+    <p>本页所有数字都来自一个真训练过的微型 RWKV-7
+    （d=${d}、${H} 头、头维 ${HD}、${L} 层，${M.params.toLocaleString()} 参数）。
+    把它和 <a class="navlink" href="transformer.html">Transformer 版</a>并排看，差别最清楚。</p>`;
+  root.appendChild(cmp);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么这个玩具足够说明问题</h5>
+    <p>真实的 RWKV-7 是 24 层、32 头、2048 维；这里缩到 ${L} 层、${H} 头、${d} 维。
+    缩小的只是<b>尺寸</b>，算术一个字没改：同样的 token shift、同样的 delta rule、
+    同样的「衰减 + 擦 + 写 + 读」。真实模型的注意力矩阵是 (96×128×4096²) 量级、
+    根本读不出来；这里的每头状态是 ${HD}×${HD}，小到能逐格看。</p>`;
+  root.appendChild(why);
+});
+
+/* ── 1 切词 ── */
+stage("tokenize", 1, "切词与词嵌入", "和 Transformer 完全一样的前半段", (root) => {
+  const row = document.createElement("div");
+  row.className = "tokens";
+  row.innerHTML = TOK.map((t, i) =>
+    `<span class="tok${t.startsWith("<") ? " special" : ""}"><i>${i}</i>${esc(t)}</span>`).join("");
+  root.appendChild(row);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>这一站两边完全相同</h5>
+    <p>切词（BPE / 子词）和词嵌入表对 Transformer 和 RWKV 是一样的：
+    都是把 token 编号查成 ${d} 维向量。真正的分岔在下一步——
+    Transformer 会在这里<em>加位置向量</em>，RWKV <b>什么也不加</b>。</p>`;
+  root.appendChild(why);
+
+  const cmp = document.createElement("div");
+  cmp.className = "compare";
+  cmp.innerHTML = `<h5>注意：没有位置嵌入</h5>
+    <p>Transformer 页的第 2 站有一张「位置嵌入 P」的矩阵，这一页没有。
+    因为 RWKV 不用任何位置索引 —— 顺序信息由 token shift（下一站）和状态递推本身承载。
+    这不是省了一步，而是换了一套机制。</p>`;
+  root.appendChild(cmp);
+});
+
+/* ── 2 Token Shift ── */
+stage("shift", 2, "Token Shift：RWKV 的位置信息", "只用「上一个 token」", (root) => {
+  const dnorm = ST.shift_norm;
+
+  const bars = document.createElement("div");
+  bars.className = "bars";
+  const mx = Math.max(...dnorm);
+  dnorm.forEach((v, i) => {
+    bars.innerHTML += `<div class="bar"><span>${esc(TOK[i])}</span>
+      <div class="track"><div class="fill" style="width:${(v / mx * 100).toFixed(1)}%"></div></div>
+      <b>${v.toFixed(2)}</b></div>`;
+  });
+  root.appendChild(bars);
+  const bn = document.createElement("p");
+  bn.className = "note";
+  bn.textContent = "‖x[t−1] − x[t]‖：相邻两个 token 的差异有多大。t=0 没有前一个 token，所以是 0。";
+  root.appendChild(bn);
+
+  const math = document.createElement("div");
+  math.className = "math mono";
+  math.innerHTML = `delta[t] = x[t−1] − x[t]          <span class="c">// t=0 时补零 → delta=0</span>
+x_r = x + delta * coef_r        <span class="c">// 六路各自混，系数逐通道可学习</span>
+x_w = x + delta * coef_w
+x_k = x + delta * coef_k
+x_v = x + delta * coef_v
+x_a = x + delta * coef_a
+
+<span class="c">// 等价于每通道自适应的插值：</span>
+xk[t] = (1−coef)·x[t] + coef·x[t−1]`;
+  root.appendChild(math);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么这就够当位置信息</h5>
+    <p><b>局部顺序</b>（"前一个词是什么"）由 shift 直接捕获；
+    <b>长程顺序</b>由状态 S 的递推天然承载——S 本身是按时间累积的，
+    写第 5 个 token 时的状态里还留着第 1 个 token 的痕迹。所以「第几个」这个数字根本不需要。</p>
+    <p>实测这条设计是承重的：<b>把 shift 系数全清零 → 准确率 ${(ABL.baseline * 100).toFixed(1)}% → ${(ABL.no_token_shift * 100).toFixed(1)}%</b>。
+    模型立刻失去局部顺序感。</p>`;
+  root.appendChild(why);
+
+  const cmp = document.createElement("div");
+  cmp.className = "compare";
+  cmp.innerHTML = `<h5>对照 Transformer</h5>
+    <p>Transformer 用绝对/相对位置编码（正弦、RoPE），需要知道"我是第几个"。
+    RWKV 只用"上一个 token"——因此天然可外推到训练时没见过的长度，
+    也不会把位置信息污染进状态（状态必须保持纯内容、可移植，这是 stateswap 项目的基础）。</p>`;
+  root.appendChild(cmp);
+});
+
+/* ── 3 递推：衰减 + 擦 + 写 + 读 ── */
+stage("recurrence", 3, "状态更新：衰减 · 擦除 · 写入 · 读出", "这就是取代注意力的全部数学", (root) => {
+  const math = document.createElement("div");
+  math.className = "math mono";
+  math.innerHTML = `S_t = <span class="hl">exp(w_t)</span> ⊙ S_{t−1}   <span class="c">← 衰减</span>
+    + <span class="hl">b_t (a_tᵀ S_{t−1})</span>            <span class="c">← 擦除（delta rule）</span>
+    + <span class="hl">k_t v_tᵀ</span>                     <span class="c">← 写入</span>
+
+o_t = <span class="hl">S_t r_t</span>                          <span class="c">← 读出</span>
+
+其中 a_t = −k̂_t（k̂ = L2 归一化后的 key），b_t = k̂_t·a_t，w_t < 0`;
+  root.appendChild(math);
+
+  const grid = document.createElement("div");
+  grid.className = "stat-grid";
+  grid.innerHTML = `
+    <div class="stat"><b>${MEAN_DECAY.toFixed(3)}</b><small>平均衰减率 exp(w)：每步保留 ${(MEAN_DECAY*100).toFixed(1)}%</small></div>
+    <div class="stat"><b>${HALF_LIFE.toFixed(2)}</b><small>记忆半衰期（token 数）</small></div>
+    <div class="stat"><b>${avg(eraseNorms.map((e,i)=>e/Math.max(writeNorms[i],1e-9))).toFixed(2)}</b><small>擦/写 平均范数比</small></div>`;
+  root.appendChild(grid);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>四项各干什么</h5>
+    <p><b>衰减 <code>exp(w)·S</code></b>：整体记忆变淡。w 由网络生成、恒为负
+    （实现里是 <code>−0.6065·sigmoid(…)</code>，所以永远是负的），保证记忆会忘记而不是无限累积。</p>
+    <p><b>擦除 <code>b(aᵀS)</code></b>：写新值之前，先沿 <code>a</code> 方向把旧值<em>减掉</em>。
+    这是 delta rule 的核心——同一条记忆不会越叠越乱，而是被"改写"。</p>
+    <p><b>写入 <code>k vᵀ</code></b>：当前 token 存成一个外积。从空状态开始时，
+    第一步的状态<b>恰好等于</b> <code>k vᵀ</code>（自检实测 ‖S‖ = ‖kvᵀ‖ = 6.94）。</p>
+    <p><b>读出 <code>S r</code></b>：用 r 从矩阵里取内容。注意读出发生在写入<b>之后</b>，
+    所以当前 token 自己也在自己的输出里。</p>`;
+  root.appendChild(why);
+
+  const ab = document.createElement("table");
+  ab.className = "mini";
+  ab.innerHTML = `<tr><th>拆掉哪一项</th><th>准确率</th><th>说明</th></tr>
+    <tr><td>完整模型</td><td class="num">${(ABL.baseline*100).toFixed(1)}%</td><td>—</td></tr>
+    <tr><td><b>关掉衰减</b>（exp(w)=1）</td><td class="num">${(ABL.no_decay*100).toFixed(1)}%</td><td>状态永不淡化，旧信息堆积成噪声</td></tr>
+    <tr><td><b>关掉擦除</b>（a=1）</td><td class="num">${(ABL.no_erase*100).toFixed(1)}%</td><td>旧值无法被改写，只能层层叠加</td></tr>
+    <tr><td>关掉 token shift</td><td class="num">${(ABL.no_token_shift*100).toFixed(1)}%</td><td>失去局部顺序</td></tr>`;
+  root.appendChild(ab);
+  const abn = document.createElement("p");
+  abn.className = "note";
+  abn.textContent = "这三条都是 RWKV 独有的机制，Transformer 里不存在对应项——所以这张表在 Transformer 那一页是找不到的。";
+  root.appendChild(abn);
+});
+
+/* ── 4 逐 token 演化（交互） ── */
+stage("evolution", 4, "看着状态被一个个 token 改写", "拖动滑块，逐帧看 S 怎么变", (root) => {
+  const tl = document.createElement("div");
+  tl.className = "timeline";
+  root.appendChild(tl);
+
+  const srow = document.createElement("div");
+  srow.className = "slider-row";
+  srow.innerHTML = `<span class="mono" id="cur-t">t = 0</span>
+    <input type="range" min="0" max="${T - 1}" value="0" id="frame-slider">
+    <span class="mono" id="cur-tok">${esc(TOK[0])}</span>`;
+  root.appendChild(srow);
+
+  const tokRow = document.createElement("div");
+  tokRow.className = "tokens";
+  tokRow.id = "tok-track";
+  root.appendChild(tokRow);
+
+  const pick = document.createElement("div");
+  pick.className = "tabs";
+  pick.innerHTML = `<span style="font-size:12.5px;color:var(--muted);align-self:center">看哪个头：</span>` +
+    Array.from({length: H}, (_, h) => `<button data-h="${h}" class="${h===0?"on":""}">头 ${h}</button>`).join("");
+  root.appendChild(pick);
+
+  const row = document.createElement("div");
+  row.className = "mat-row";
+  const hosts = {};
+  for (const [key, title, sub] of [
+    ["S_prev", "① 上一步状态 S_{t−1}", `${HD}×${HD}`],
+    ["erase", "② 擦除项 b(aᵀS)", "要减掉的旧值"],
+    ["write", "③ 写入项 k vᵀ", "新 token 的外积"],
+    ["S", "④ 新状态 S_t", "①×衰减 + ② + ③"],
+  ]) {
+    const b = matBlock(title, sub);
+    hosts[key] = b.host;
+    row.appendChild(b.wrap);
+  }
+  root.appendChild(row);
+
+  const stat = document.createElement("div");
+  stat.className = "stat-grid";
+  stat.id = "frame-stats";
+  root.appendChild(stat);
+
+  let curH = 0;
+  function draw() {
+    const i = +$("#frame-slider").value;
+    const f = SNAP[i];
+    $("#cur-t").textContent = `t = ${i}`;
+    $("#cur-tok").textContent = TOK[i];
+    srow.querySelector("#cur-tok").className = "mono";
+
+    // 时间轴高亮
+    tl.querySelectorAll(".tl-frame").forEach((el, k) =>
+      el.style.opacity = (k === i ? 1 : .55));
+    tl.querySelectorAll(".tl-cells").forEach((el, k) =>
+      el.parentElement.style.outline = k === i ? "2px solid var(--accent)" : "none");
+    tokRow.querySelectorAll(".tok").forEach((el, k) =>
+      el.classList.toggle("now", k === i));
+
+    for (const key of ["S_prev", "erase", "write", "S"]) {
+      unregisterHeatmaps(hosts[key]);
+      hosts[key].innerHTML = "";
+      const lg = hosts[key].parentElement.querySelector(".legend");
+      if (lg) lg.remove();
+      const m = stateOf(f, curH, key);
+      heatmap(hosts[key], m, {
+        cell: 22, diverging: true,
+        ylabels: Array.from({length: HD}, (_, r) => r === 0 ? "行" : ""),
+        legendNote: `${key === "S" ? "状态" : key}`,
+        onCell: (r, c, v) => `头 ${curH}  [${r},${c}] = ${fmt(v, 3)}`
+      });
+    }
+
+    const headWrite = Math.hypot(...f.write.slice(curH * HD * HD, (curH + 1) * HD * HD));
+    // t=0 时 S_prev 与 erase 按定义全为 0（还没有上一步状态可擦），不是渲染错误
+    if (i === 0) {
+      const hint = document.createElement("p");
+      hint.className = "note";
+      hint.id = "t0-hint";
+      hint.textContent = "t=0 时「上一步状态」和「擦除项」按定义为空（还没有状态可衰减、可擦），"
+        + "所以那两张图是整片纯色。从 t=1 起才真正开始演化。";
+      if (!hosts.S_prev.parentElement.querySelector("#t0-hint")) {
+        hosts.S_prev.parentElement.appendChild(hint);
+      }
+    } else {
+      const old = document.querySelector("#t0-hint");
+      if (old) old.remove();
+    }
+    stat.innerHTML = `
+      <div class="stat"><b>${f.S_norm[curH].toFixed(2)}</b><small>头 ${curH} 的状态范数 ‖S‖</small></div>
+      <div class="stat"><b>${f.decay.slice(curH*HD,(curH+1)*HD).map(v=>fmt(v,2)).join("/")}</b>
+        <small>这一帧该头的衰减率 exp(w)，逐维</small></div>
+      <div class="stat"><b>${Math.hypot(...f.write).toFixed(2)}</b><small>写入 ‖k vᵀ‖（${H} 头合计）</small></div>
+      <div class="stat"><b>${Math.hypot(...f.erase).toFixed(2)}</b><small>擦除 ‖b(aᵀS)‖（${H} 头合计）</small></div>
+      <div class="stat"><b>${headWrite.toFixed(2)}</b><small>当前头 ${curH} 的写入 ‖k vᵀ‖</small></div>`;
+  }
+
+  // 时间轴初始化
+  const maxNorm = Math.max(...ST.state_frames.flatMap(f => f.norms));
+  ST.state_frames.forEach((f, i) => {
+    const cell = document.createElement("div");
+    cell.className = "tl-frame";
+    cell.innerHTML = `<div class="tl-cells">` +
+      f.norms.map(n => `<i style="height:${(n / maxNorm * 50 + 2).toFixed(1)}px"></i>`).join("") +
+      `</div><span class="tk">${esc(TOK[i])}</span>`;
+    tl.appendChild(cell);
+  });
+  tokRow.innerHTML = TOK.map((t, i) =>
+    `<span class="tok${t.startsWith("<") ? " special" : ""}"><i>${i}</i>${esc(t)}</span>`).join("");
+
+  $("#frame-slider").addEventListener("input", draw);
+  pick.addEventListener("click", e => {
+    const btn = e.target.closest("button"); if (!btn) return;
+    pick.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === btn));
+    curH = +btn.dataset.h;
+    draw();
+  });
+  draw();
+
+  const note = document.createElement("p");
+  note.className = "note";
+  note.textContent = "四张图是同一个头的同一帧：旧状态被衰减后，先减去擦除项，再加上新 token 的外积，就得到新状态。"
+    + "下面的统计卡片里，写入/擦除范数是「所有头合起来」的（所以比单张图大得多），"
+    + "而状态范数是当前选中那个头的。想看头之间的差异，把上面切到不同的头。";
+  root.appendChild(note);
+});
+
+/* ── 5 状态大小恒定 ── */
+stage("constant", 5, "关键性质：状态大小恒定", "O(1)，与序列长度无关", (root) => {
+  const grid = document.createElement("div");
+  grid.className = "stat-grid";
+  grid.innerHTML = `
+    <div class="stat"><b>${M.state_elems}</b><small>状态元素数（L×H×${HD}×${HD}）</small></div>
+    <div class="stat"><b>${L}×${H}×${HD}×${HD}</b><small>真实形状</small></div>
+    <div class="stat"><b>${(M.state_elems * 4 / 1024).toFixed(2)} KB</b><small>fp32 大小</small></div>`;
+  root.appendChild(grid);
+
+  const math = document.createElement("div");
+  math.className = "math mono";
+  math.innerHTML = `输入 10 个 token   → 状态 ${M.state_elems} 个数
+输入 100 个 token  → 状态 ${M.state_elems} 个数
+输入 10000 个 token → 状态 ${M.state_elems} 个数   <span class="c">// 完全不变</span>
+
+<span class="c">// 对照 Transformer：KV cache 是 2×L×T×d，随 T 线性增长</span>
+Transformer @T=10000 : 2 × ${L} × 10000 × ${d} = ${(2*L*10000*d).toLocaleString()} 个数
+RWKV        @T=10000 : ${M.state_elems} 个数     <span class="c">// 差 ${Math.round(2*L*10000*d/M.state_elems)} 倍</span>`;
+  root.appendChild(math);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么这条性质让 stateswap 和 memopet 成为可能</h5>
+    <p>状态是个<em>独立、定长、可移植</em>的张量，于是：</p>
+    <p>· <b>存档</b>：存成 .pt 文件就能拷走（真实 1.5B 模型的状态是 12.58 MB）<br>
+    · <b>分身</b>：复制张量就是复制一个"大脑"<br>
+    · <b>换人格</b>：换掉初始状态就是换人格（实测 2.6–4.4 ms）<br>
+    · <b>prefill 不增长</b>：历史 493→4089 token，耗时 62.8→56.5 ms（实测）</p>
+    <p>Transformer 的 KV cache 做不到这些：它绑在 token 位置上，脱离模型就没有意义。</p>`;
+  root.appendChild(why);
+
+  const cmp = document.createElement("div");
+  cmp.className = "compare";
+  cmp.innerHTML = `<h5>代价也要说清楚</h5>
+    <p>状态是<em>有损压缩</em>。注意力能精确回看"第 37 个 token"；矩阵状态会把细节衰减、
+    混合、擦掉。这个玩具模型里记忆半衰期只有 <b>${HALF_LIFE.toFixed(2)} 个 token</b>
+    —— 再远的信息基本被衰减掉了。真实模型靠更多的头和更大的矩阵来缓解，
+    但"记不全"是这个架构的固有代价。</p>`;
+  root.appendChild(cmp);
+});
+
+/* ── 6 逐头分工 ── */
+stage("heads", 6, "四个头各自在看什么", `多头 = 各自独立的 ${HD}×${HD} 状态`, (root) => {
+  const normRows = Array.from({length: H}, (_, h) => ({
+    h,
+    norms: ST.state_frames.map(f => f.norms[h]),
+  }));
+
+  const tbl = document.createElement("table");
+  tbl.className = "mini";
+  tbl.innerHTML = `<tr><th>头</th>${TOK.map(t => `<th>${esc(t)}</th>`).join("")}<th>峰值位置</th></tr>` +
+    normRows.map(r => {
+      const mx = Math.max(...r.norms);
+      const at = r.norms.indexOf(mx);
+      return `<tr><td>头 ${r.h}</td>` +
+        r.norms.map(n => `<td class="num" style="background:color-mix(in srgb,var(--accent) ${(n/Math.max(...normRows.flatMap(x=>x.norms))*55).toFixed(0)}%, transparent)">${n.toFixed(1)}</td>`).join("") +
+        `<td>${esc(TOK[at])} (t=${at})</td></tr>`;
+    }).join("");
+  root.appendChild(tbl);
+
+  const row = document.createElement("div");
+  row.className = "mat-row";
+  const gridWrap = document.createElement("div");
+  gridWrap.className = "head-grid";
+  row.appendChild(gridWrap);
+  root.appendChild(row);
+  for (let h = 0; h < H; h++) {
+    const b = matBlock(`头 ${h} 的最终状态`, `${HD}×${HD}`);
+    heatmap(b.host, stateOf(SNAP[T - 1], h, "S"), {
+      cell: 16, diverging: true,
+      onCell: (r, c, v) => `头 ${h} [${r},${c}] = ${fmt(v, 3)}`
+    });
+    gridWrap.appendChild(b.wrap);
+  }
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>多头在这里的含义和 Transformer 一样</h5>
+    <p>把 ${d} 维切成 ${H} 份，每份 ${HD} 维，<b>各自维护一个独立的 ${HD}×${HD} 状态</b>。
+    参数量不变（${H} × ${HD} = ${d} 在状态维度上），但每个头可以学不同的记忆模式。</p>
+    <p>从上面的表能直接看出来：<b>头 2</b> 在 <code>&lt;SEP&gt;</code> 处范数暴涨到 29.76
+    （其他头那一刻只有 4.83 / 2.15），而且那一帧该头的写入范数就有 <b>29.28</b>
+    —— 说明它专门负责在分隔符处做一次大规模写入。
+    而 <b>头 0</b> 全程平缓（4.6–6.7），它在 SEP 处只写了 0.77。</p>`;
+  root.appendChild(why);
+});
+
+/* ── 7 输出头 ── */
+stage("head", 7, "输出头：从状态到词", "最后一步两边一样", (root) => {
+  const hd = ST.head;
+  const bars = document.createElement("div");
+  bars.className = "bars";
+  hd.top_words.forEach((w, i) => {
+    const isTarget = w === ST.target_word;
+    bars.innerHTML += `<div class="bar"><span>${esc(w)}${isTarget ? " ✓" : ""}</span>
+      <div class="track"><div class="fill ${isTarget ? "pos" : ""}"
+        style="width:${Math.max(0.6, hd.top_probs[i] * 100).toFixed(2)}%"></div></div>
+      <b>${(hd.top_probs[i] * 100).toFixed(2)}%</b></div>`;
+  });
+  root.appendChild(bars);
+
+  const stat = document.createElement("div");
+  stat.className = "stat-grid";
+  stat.innerHTML = `
+    <div class="stat"><b>${hd.entropy.toFixed(3)}</b><small>输出熵（越低越确定）</small></div>
+    <div class="stat"><b>${(hd.top_probs[0] * 100).toFixed(2)}%</b><small>首选词概率</small></div>`;
+  root.appendChild(stat);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>这一步两页完全一样</h5>
+    <p>最后都是：主干向量 → LayerNorm → 与词表矩阵求内积 → softmax。
+    RWKV 和 Transformer 在这里没有区别——差异全部发生在<em>怎么把历史带过来</em>这一步。</p>`;
+  root.appendChild(why);
+});
+
+/* ── 8 消融总表 ── */
+stage("ablation", 8, "拆掉每个部件看掉多少", "每一项都是「扣掉它再算一次」", (root) => {
+  const rows = [
+    ["完整模型", ABL.baseline, "—"],
+    ["清零 L1 的 Time-Mix", ABL.zero_timemix_L1, "第一层的跨 token 混合被拆"],
+    ["清零 L2 的 Time-Mix", ABL.zero_timemix_L2, "第二层被拆"],
+    ["清零 L1 的 Channel-Mix", ABL.zero_chmix_L1, "逐 token 变换被拆"],
+    ["清零 L2 的 Channel-Mix", ABL.zero_chmix_L2, "同上"],
+    ["去掉 token shift", ABL.no_token_shift, "失去局部顺序"],
+    ["关掉衰减（exp(w)=1）", ABL.no_decay, "记忆无限累积成噪声"],
+    ["关掉擦除（a=1）", ABL.no_erase, "旧值只能叠加不能改写"],
+  ];
+  const bars = document.createElement("div");
+  bars.className = "bars";
+  rows.forEach(([name, v]) => {
+    bars.innerHTML += `<div class="bar"><span>${name}</span>
+      <div class="track"><div class="fill ${v >= .9 ? "" : "pos"}"
+        style="width:${(v * 100).toFixed(1)}%"></div></div>
+      <b>${(v * 100).toFixed(1)}%</b></div>`;
+  });
+  root.appendChild(bars);
+
+  const tbl = document.createElement("table");
+  tbl.className = "mini";
+  tbl.innerHTML = `<tr><th>改动</th><th>准确率</th><th>原因</th></tr>` +
+    rows.map(([n, v, why]) => `<tr><td>${n}</td><td class="num">${(v*100).toFixed(1)}%</td><td>${why}</td></tr>`).join("");
+  root.appendChild(tbl);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>这张表读出来的结构</h5>
+    <p>· <b>Channel-Mix 拆掉几乎归零</b>（L1: ${(ABL.zero_chmix_L1*100).toFixed(1)}%）——
+    比 Time-Mix 还致命。说明这个 toy 里"逐 token 加工"是必经环节。</p>
+    <p>· <b>衰减（${(ABL.no_decay*100).toFixed(1)}%）和 token shift（${(ABL.no_token_shift*100).toFixed(1)}%）掉得一样多</b>——
+    两个都是 RWKV 独有的机制，都真正承重。</p>
+    <p>· <b>擦除拆掉还剩 ${(ABL.no_erase*100).toFixed(1)}%</b>——有贡献但不如衰减关键。
+    这与"擦除是为了改写而不是为了记住"的定位一致。</p>`;
+  root.appendChild(why);
+
+  const len = D.accuracy_by_length;
+  const tbl2 = document.createElement("table");
+  tbl2.className = "mini";
+  tbl2.innerHTML = `<tr><th>序列长度</th>${Object.keys(len).map(k => `<th>${k}</th>`).join("")}</tr>
+    <tr><td>准确率</td>${Object.values(len).map(v => `<td class="num">${(v*100).toFixed(0)}%</td>`).join("")}</tr>`;
+  root.appendChild(tbl2);
+  const n2 = document.createElement("p");
+  n2.className = "note";
+  n2.textContent = "按长度分组全部满分：训练时长度随机（"
+    + `${D.task.min_ctx}–${D.task.max_ctx} 个上下文词，0–${D.task.max_gap} 个填充词），`
+    + "所以它没有靠某个固定长度背答案。";
+  root.appendChild(n2);
+});
+
+/* ── 9 附录 ── */
+stage("appendix", "A", "这个玩具是怎么实现的", "与 fla 的 RWKV-7 对齐", (root) => {
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>训练配置</h5>
+    <p>${D.train.steps} 步 · AdamW · lr ${D.train.lr} · batch ${D.train.batch} · seed ${D.train.seed} ·
+    d=${d} · ${H} 头 · 头维 ${HD} · ${L} 层 · 词表 ${M.vocab} · 参数量 ${M.params.toLocaleString()}。</p>`;
+  root.appendChild(why);
+
+  const math = document.createElement("div");
+  math.className = "math mono";
+  math.innerHTML = `# 重新生成这一页的全部数据（CPU 约 4 分钟；逐 token 串行递推，如实说）
+python scripts/tiny_rwkv.py --steps ${D.train.steps}
+<span class="c"># 自检：递推闭式等价、状态大小恒定、w 恒负、k̂ 单位长度</span>
+python scripts/tiny_rwkv.py --check`;
+  root.appendChild(math);
+
+  const honest = document.createElement("div");
+  honest.className = "without";
+  honest.innerHTML = `<h5>必须说清的四件事</h5>
+    <p>① <b>这是串行实现，不是性能实现。</b>真实的 RWKV 训练靠 <code>chunk_rwkv7</code>
+    的分块并行（WY 表示 + 三角求逆），不是几十行能写对的。本脚本用逐 token 循环，
+    保证与数学定义逐位一致；也因此训练要 4 分钟。</p>
+    <p>② <b>踩过并修掉一个真 bug。</b>最初把 <code>k_k</code> 初始化成全零，
+    于是 <code>k̂ = normalize(k ⊙ 0) = 0</code>，擦除项恒为 0 ——
+    训练里"擦除"从未生效，而准确率仍有 97%，光看分数发现不了。
+    修完初值后 <code>no_erase</code> 消融从 94.8% 掉到 ${(ABL.no_erase*100).toFixed(1)}%，
+    才真正承重。自检 [3b] 现在会拦住这种情况。</p>
+    <p>③ <b>闭式等价的验证范围。</b>自检 [1] 验的是「纯衰减 + 写入」部分的闭式
+    （差 5.96e-08）。含擦除项的完整递推因为依赖 S 自身，严格闭式更复杂，
+    本脚本没有声称验证了它。</p>
+    <p>④ <b>和 Transformer 那页不可直接比准确率。</b>两页任务相同、模型大小相近，
+    但参数量 ${M.params.toLocaleString()} vs 104,576，结构完全不同；
+    100% 对 99.8% 的差距没有意义，有意义的是<em>机制上的差异</em>。</p>`;
+  root.appendChild(honest);
+});
+
+/* ══════════ 渲染 ══════════ */
+function render() {
+  const nav = $("#navlist");
+  nav.innerHTML = STAGES.map(s =>
+    `<li><a href="#${s.id}" data-id="${s.id}"><b>${s.num}</b>${s.title.split("：")[0]}</a></li>`).join("");
+  const main = $("#main");
+  main.innerHTML = "";
+  HEATMAPS.length = 0;
+  for (const s of STAGES) {
+    const el = document.createElement("section");
+    el.className = "stage"; el.id = s.id;
+    el.innerHTML = `<div class="stage-head"><div class="stage-num">${s.num}</div>
+      <div><h2>${s.title}</h2><p>${s.subtitle}</p></div></div><div class="stage-body"></div>`;
+    main.appendChild(el);
+    s.build(el.querySelector(".stage-body"));
+  }
+  relayout();
+  requestAnimationFrame(() => relayout());
+  setTimeout(relayout, 260);
+
+  const links = [...nav.querySelectorAll("a")];
+  const io = new IntersectionObserver(es => {
+    for (const e of es) if (e.isIntersecting)
+      links.forEach(a => a.classList.toggle("on", a.dataset.id === e.target.id));
+  }, { rootMargin: "-25% 0px -65% 0px" });
+  STAGES.forEach(s => io.observe(document.getElementById(s.id)));
+}
+
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(relayout, 220);
+});
+
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  $("#theme-btn").textContent = t === "dark" ? "☀️" : "🌙";
+  localStorage.setItem("rwkv-theme", t);
+  const y = window.scrollY;
+  render();
+  window.scrollTo(0, y);
+}
+$("#theme-btn").onclick = () =>
+  applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+
+(function init() {
+  const saved = localStorage.getItem("rwkv-theme");
+  document.documentElement.dataset.theme = saved ||
+    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  $("#theme-btn").textContent = document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙";
+  $("#model-badge").textContent =
+    `d${d} · ${H}头(${HD}×${HD}状态) · ${L}层 · 参数 ${M.params.toLocaleString()} · 准确率 ${(D.accuracy * 100).toFixed(1)}%`;
+  render();
+})();
+</script>
+</body>
+</html>

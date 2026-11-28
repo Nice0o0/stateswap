@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一句话从输入到大模型回答：逐步拆解 Transformer</title>
+<style>
+:root, html[data-theme="light"]{
+  --bg:#fff; --panel:#f7f8fa; --card:#fff; --border:#e3e6eb; --border-strong:#cfd4dc;
+  --text:#1b1f27; --muted:#6c7480; --accent:#3b5a8f; --accent2:#c1573f;
+  --accent-weak:#eaf0f8; --accent2-weak:#fdefe9;
+  --ok:#0e8f6e; --warn:#b4741a; --code:#f4f5f7;
+  --shadow:0 1px 2px rgba(20,24,32,.05), 0 4px 12px rgba(20,24,32,.04);
+  --hm-pos:#c1573f; --hm-neg:#3b6ea8;
+}
+html[data-theme="dark"]{
+  --bg:#15171b; --panel:#1b1e23; --card:#1f2228; --border:#2c3138; --border-strong:#3d434c;
+  --text:#e8eaef; --muted:#9aa1ad; --accent:#8faae0; --accent2:#e08a70;
+  --accent-weak:#232c3b; --accent2-weak:#3a2a24;
+  --ok:#4fd08c; --warn:#e0b060; --code:#23262c;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.25);
+  --hm-pos:#e08a70; --hm-neg:#7fa8dd;
+}
+*{box-sizing:border-box}
+/* 不要给 html/body 设 height:100%：那会让 body 变成滚动容器，
+   里面的 position:sticky（顶栏与侧边导航）就相对 body 而不是视口，
+   结果整页滚动时顶栏会被一起卷走（实测 scrollY=3394 时 topbarTop=-2644）。
+   这里只清 margin，让 body 保持自然高度，滚动发生在视口上。 */
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--text);
+  font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+code,pre,.mono{font-family:ui-monospace,"SF Mono",Consolas,"Cascadia Mono",monospace}
+
+/* ---------- 顶栏 ---------- */
+.topbar{
+  position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:14px;
+  padding:10px 20px; background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
+}
+.brand{font-weight:700; letter-spacing:-.2px}
+.brand span{color:var(--accent2)}
+.spacer{flex:1}
+.btn{
+  border:1px solid var(--border-strong); background:var(--card); color:var(--text);
+  padding:6px 12px; border-radius:8px; cursor:pointer; font-size:13px;
+}
+.btn:hover{background:var(--panel)}
+.btn.on{background:var(--accent); border-color:var(--accent); color:#fff}
+.seg{display:inline-flex; border:1px solid var(--border-strong); border-radius:8px; overflow:hidden}
+.seg button{
+  border:0; background:var(--card); color:var(--muted); padding:6px 11px; font-size:13px; cursor:pointer;
+}
+.seg button.on{background:var(--accent); color:#fff}
+
+/* ---------- 布局 ---------- */
+/* min-width:0 是 grid 里最关键的一行：没有它，1fr 轨道会被内容（宽 canvas）
+   撑到 max-content，整个页面在窄屏下就会横向溢出。 */
+.wrap{display:grid; grid-template-columns:250px minmax(0,1fr); min-height:calc(100% - 49px); min-width:0}
+@media (max-width:940px){
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  nav{display:none}
+  main{padding:20px 14px 70px}
+  .stage-body{padding:12px}
+  .mat-row{flex-direction:column; gap:14px}
+  .mat{width:100%; flex-basis:100%}
+  .head-grid{grid-template-columns:repeat(auto-fill, minmax(112px, 1fr))}
+  .topbar{padding:8px 12px; gap:8px; flex-wrap:wrap}
+  .brand{font-size:13px}
+  #model-badge{display:none}
+  .bar{grid-template-columns:74px 1fr 46px; font-size:11.5px}
+}
+nav{
+  border-right:1px solid var(--border); background:var(--panel); padding:16px 0;
+  position:sticky; top:49px; height:calc(100vh - 49px); overflow:auto;
+}
+nav ol{list-style:none; margin:0; padding:0}
+nav a{
+  display:flex; gap:10px; padding:8px 18px; color:var(--muted); text-decoration:none;
+  font-size:13.5px; border-left:2px solid transparent;
+}
+nav a:hover{color:var(--text); background:var(--card)}
+nav a.on{color:var(--accent); border-left-color:var(--accent); background:var(--card); font-weight:600}
+nav a b{font-variant-numeric:tabular-nums; color:var(--border-strong); font-weight:600}
+nav a.on b{color:var(--accent)}
+main{padding:26px 34px 90px; max-width:1500px; min-width:0; overflow-x:hidden}
+
+/* ---------- 阶段卡片 ---------- */
+.stage{
+  margin:0 0 30px; padding:0; scroll-margin-top:70px;
+}
+.stage-head{display:flex; align-items:flex-start; gap:14px; margin-bottom:6px}
+.stage-num{
+  flex:0 0 auto; width:34px; height:34px; border-radius:9px; display:grid; place-items:center;
+  background:var(--accent); color:#fff; font-weight:700; font-size:15px;
+}
+.stage-head h2{margin:0 0 2px; font-size:20px; letter-spacing:-.3px}
+.stage-head p{margin:0; color:var(--muted); font-size:13.5px}
+.stage-body{
+  border:1px solid var(--border); border-radius:12px; background:var(--card);
+  padding:18px; box-shadow:var(--shadow);
+}
+.stage-body > * + *{margin-top:16px}
+
+/* ---------- token 行 ---------- */
+.tokens{display:flex; flex-wrap:wrap; gap:5px; align-items:center}
+.tok{
+  border:1px solid var(--border-strong); border-radius:7px; padding:4px 9px; font-size:13px;
+  background:var(--panel); position:relative; transition:.15s;
+}
+.tok.special{color:var(--muted); background:transparent; border-style:dashed}
+.tok.hi{border-color:var(--accent2); background:var(--accent2-weak); box-shadow:0 0 0 2px color-mix(in srgb,var(--accent2) 22%,transparent)}
+.tok.dim{opacity:.45}
+.tok i{position:absolute; top:-9px; left:5px; font-size:9.5px; color:var(--muted); font-style:normal}
+
+/* ---------- 矩阵热图 ---------- */
+.mat-row{display:flex; flex-wrap:wrap; gap:18px; align-items:flex-start; min-width:0}
+/* 小头图：固定 4 列（= 头数），每格内容自然宽度，不参与外层 flex 拉伸 */
+.head-grid{display:grid; grid-template-columns:repeat(4, max-content); gap:14px 20px; align-items:start; justify-content:start}
+/* flex-basis 给一个可读的下限（约 300px）：桌面一行放得下 2~3 张，放不下就换行；
+   min-width:0 只保证"极端情况下可以继续压缩"，不是常态。 */
+.mat{display:inline-block; vertical-align:top; max-width:100%; min-width:0; flex:1 1 300px}
+.mat h4{margin:0 0 6px; font-size:13px; font-weight:600; line-height:1.3}
+.mat h4 small{color:var(--muted); font-weight:400; font-size:11.5px}
+.canvas-host{position:relative; line-height:0; max-width:100%}
+/* 注意：这里不要加 max-width/height:auto —— canvas 的显示尺寸由脚本按容器宽度算好，
+   再被 CSS 缩放一次会让图与容器错位（手机端表现为右侧被裁）。 */
+canvas{display:block; border-radius:6px; border:1px solid var(--border)}
+.legend{display:flex; align-items:center; gap:8px; margin-top:5px; font-size:11px; color:var(--muted); white-space:nowrap}
+.legend canvas{width:72px; height:8px; border-radius:3px}
+.legend.compact canvas{width:52px; height:6px}
+.axis-note{font-size:11.5px; color:var(--muted); margin-top:5px; max-width:300px}
+
+/* 悬停读数 */
+.tip{
+  position:fixed; z-index:100; pointer-events:none; padding:5px 8px; border-radius:6px;
+  background:var(--text); color:var(--bg); font-size:11.5px; opacity:0; transition:opacity .1s;
+  white-space:nowrap; font-family:ui-monospace,monospace;
+}
+
+/* ---------- 说明块 ---------- */
+.why, .without{
+  border-left:3px solid var(--accent); background:var(--accent-weak);
+  padding:10px 14px; border-radius:0 8px 8px 0; font-size:13.5px;
+}
+.without{border-left-color:var(--accent2); background:var(--accent2-weak)}
+.why h5, .without h5{margin:0 0 4px; font-size:12px; letter-spacing:.4px; text-transform:uppercase; color:var(--accent)}
+.without h5{color:var(--accent2)}
+.why p, .without p{margin:0}
+.why p + p, .without p + p{margin-top:6px}
+.why em, .without em{font-style:normal; font-weight:600}
+
+.math{background:var(--code); border-radius:8px; padding:10px 13px; overflow-x:auto; font-size:13px; line-height:1.5}
+.math span.c{color:var(--muted)}
+
+.stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(128px,1fr)); gap:10px}
+.stat{background:var(--panel); border:1px solid var(--border); border-radius:9px; padding:9px 11px}
+.stat b{display:block; font-size:19px; font-variant-numeric:tabular-nums; letter-spacing:-.4px}
+.stat small{color:var(--muted); font-size:11.5px; line-height:1.35; display:block; margin-top:2px}
+.stat em{font-style:normal; font-size:11px; color:var(--ok)}
+.stat em.bad{color:var(--accent2)}
+
+.bars{display:flex; flex-direction:column; gap:7px}
+.bar{display:grid; grid-template-columns:96px 1fr 56px; gap:9px; align-items:center; font-size:12.5px}
+.bar .track{height:15px; background:var(--panel); border-radius:5px; overflow:hidden; position:relative}
+.bar .fill{height:100%; border-radius:5px; background:var(--accent)}
+.bar .fill.neg{background:var(--hm-neg)}
+.bar .fill.pos{background:var(--accent2)}
+.bar b{text-align:right; font-variant-numeric:tabular-nums; font-weight:600}
+
+.tabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px}
+.tabs button{
+  border:1px solid var(--border-strong); background:var(--card); color:var(--muted);
+  border-radius:7px; padding:4px 10px; font-size:12.5px; cursor:pointer;
+}
+.tabs button.on{background:var(--accent); border-color:var(--accent); color:#fff}
+
+.hidden{display:none}
+.note{font-size:12px; color:var(--muted); border-top:1px dashed var(--border); padding-top:10px}
+table.mini{border-collapse:collapse; font-size:12.5px; width:100%}
+table.mini th, table.mini td{border-bottom:1px solid var(--border); padding:5px 8px; text-align:left}
+table.mini th{color:var(--muted); font-weight:600; font-size:11.5px}
+table.mini td.num{text-align:right; font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Transformer 逐步拆解 <span>·</span></div>
+  <div class="mono" style="font-size:12px;color:var(--muted)" id="model-badge">加载中…</div>
+  <div class="spacer"></div>
+  <div class="seg" id="viewseg">
+    <button data-v="trained" class="on">训练后</button>
+    <button data-v="untrained">未训练</button>
+  </div>
+  <a class="btn" href="rwkv.html" style="text-decoration:none">RWKV 版 →</a>
+  <button class="btn" id="theme-btn">🌙</button>
+</div>
+
+<div class="wrap">
+  <nav><ol id="navlist"></ol></nav>
+  <main id="main"></main>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script src="transformer-trace.js"></script>
+<script>
+"use strict";
+const D = window.TRANSFORMER_TRACE;
+if (!D) {
+  document.getElementById("main").innerHTML =
+    "<p>缺少 <code>transformer-trace.js</code>。先运行 <code>python scripts/tiny_transformer.py</code> 生成它。</p>";
+  throw new Error("no trace");
+}
+const M = D.model, ST = D.steps, ABL = D.ablation, T = D.seq_len, TOK = ST.tokens;
+/* 两个位置常量，多个阶段都要用：
+   SEP_POS       —— <SEP> 的下标（第 1 层写入、第 2 层读出的暂存区）
+   LAST_PREV_POS —— 末位 token 上一次出现的下标（第 1 层末行真正该指向的目标）*/
+const SEP_POS = TOK.indexOf("<SEP>");
+const LAST_PREV_POS = [...TOK.keys()]
+  .filter(i => i < T - 1 && TOK[i] === TOK[T - 1]).pop();
+const H = M.n_heads, L = M.n_layers, d = M.d_model;
+let VIEW = "trained";           // trained | untrained
+
+/* ══════════════ 工具 ══════════════ */
+const $ = (s, r = document) => r.querySelector(s);
+
+function reshape(flat, rows, cols) {
+  const out = [];
+  for (let r = 0; r < rows; r++) out.push(flat.slice(r * cols, (r + 1) * cols));
+  return out;
+}
+function hsl(v01) {           // 0..1 → 蓝-白-红发散色
+  const lo = [59,110,168], mid = [250,250,252], hi = [193,87,63];
+  const a = v01 < .5 ? lo : mid, b = v01 < .5 ? mid : hi;
+  const t = v01 < .5 ? v01 * 2 : (v01 - .5) * 2;
+  const c = a.map((x, i) => Math.round(x + (b[i] - x) * t));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+function seqColor(v01) {      // 单色序列（幅度）
+  const lo = [247,248,250], hi = [59,90,143];
+  const c = lo.map((x, i) => Math.round(x + (hi[i] - x) * v01));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+function fmt(v, p = 3) { return Math.abs(v) < 1e-12 ? "0" : v.toFixed(p); }
+/* 词表里有 <BOS> / <SEP> 这种带尖括号的 token，直接塞进 HTML 会被当标签吃掉，
+   所以所有插入 HTML 的 token 名都要过这一层。canvas 里画的不需要转义。 */
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+const TIP = $("#tip");
+function attachTip(host, textFn) {
+  // 用标记位保证每个 host 只挂一次：重画（含 draw() 原地重画）不再叠加监听。
+  if (host.__tipBound) {
+    // 已挂过，只更新取文案的函数
+    host.__tipFn = textFn;
+    return;
+  }
+  host.__tipBound = true;
+  host.__tipFn = textFn;
+  host.addEventListener("mousemove", e => {
+    const fn = host.__tipFn;
+    if (!fn) return;
+    TIP.textContent = fn(e);
+    TIP.style.left = (e.clientX + 12) + "px";
+    TIP.style.top = (e.clientY + 12) + "px";
+    TIP.style.opacity = 1;
+  });
+  host.addEventListener("mouseleave", () => TIP.style.opacity = 0);
+}
+
+/* 估算这张图能用的横向像素：优先用最近的已布局祖先，退回到 stage-body 宽度，
+   再退回窗口宽度。这样手机窄屏也能按真实宽度绘制，不会向右溢出。 */
+function hostWidth(host) {
+  // 注意：手机上 window.innerWidth 可能远大于布局宽度（浏览器缩放/DPR 影响），
+  // 所以一律以"元素的实际布局宽度"为准，绝不用窗口宽度兜底。
+  // 从 host 往上找到第一个真正有宽度的祖先，再扣掉它自己的左右 padding。
+  let el = host;
+  while (el && !el.clientWidth) el = el.parentElement;
+  if (!el || !el.clientWidth) {
+    const sb = document.querySelector(".stage-body");
+    if (sb && sb.clientWidth) el = sb;
+  }
+  if (!el || !el.clientWidth) return 320;          // 极端兜底：宁可窄也不溢出
+  const st = getComputedStyle(el);
+  const pad = (parseFloat(st.paddingLeft) || 0) + (parseFloat(st.paddingRight) || 0);
+  return Math.max(180, el.clientWidth - pad - 4);
+}
+
+/* heatmap 在元素挂进 DOM **之前** 就被调用（各阶段的 build 是先画后 append），
+   那时 clientWidth 还是 0，只能退回窗口宽度——手机上就会画得比容器宽而被裁掉。
+   所以这里把每次绘制登记下来，等整页渲染完（DOM 已布局）再按真实宽度重排一次；
+   窗口 resize 时也走同一条路径。 */
+const HEATMAPS = [];
+function heatmap(host, grid, opts = {}) {
+  const item = { host, grid, opts, legend: null };
+  HEATMAPS.push(item);
+  return drawHeatmap(item);
+}
+
+/* 注销若干节点上的热图登记项。
+两种命中都算：
+  - node 就是那个 host（draw() 清空后原地重画的情形）；
+  - node 包含那个 host（整块容器被丢弃的情形）。
+不注销的后果：relayout 会往同一个 host 里重复画（切几次头就叠几层），
+或去重排已经脱离 DOM 的孤儿节点。 */
+function unregisterHeatmaps(nodes) {
+  for (const node of (Array.isArray(nodes) ? nodes : [nodes])) {
+    for (let i = HEATMAPS.length - 1; i >= 0; i--) {
+      const h = HEATMAPS[i].host;
+      if (h === node || (node.contains && node.contains(h))) HEATMAPS.splice(i, 1);
+    }
+  }
+}
+
+function relayout() {
+  for (const item of HEATMAPS) {
+    if (!item.host.isConnected) continue;
+    // **原地重画**，不替换 host 节点。
+    // 早先的做法是 oldHost.replaceWith(fresh)：那样能把旧节点上的鼠标监听一起丢掉，
+    // 但 draw() 的闭包里存着 hostS.host 这类引用，替换之后它们指向的是已脱离 DOM
+    // 的旧节点 —— 于是切换注意力头时画到了看不见的节点上（用户看到的就是"点了没反应"）。
+    // 现在：清空内容 + 原地重画，引用始终有效；监听由 attachTip 的一次性标记保证不重复。
+    item.host.innerHTML = "";
+    if (item.legend && item.legend.parentNode) item.legend.parentNode.removeChild(item.legend);
+    item.legend = null;
+    drawHeatmap(item);
+  }
+}
+
+function drawHeatmap(item) {
+  const { host, grid, opts } = item;
+  const rows = grid.length, cols = grid[0].length;
+  const pid = opts.cell || 20;
+  const pad = 14;
+  const gapRatio = 1.6;        // 格子之间的缝，视觉上区分单元
+  // 左边距：有行标签时留够，否则标签会被裁掉
+  const left = opts.ylabels ? 46 : pad;
+  const top = opts.xlabels ? 34 : pad;
+  // 宽矩阵（比如 (10,256)）按可用宽度压缩列宽，但**行高保持可读**——
+  // 若行列用同一个 cell，256 列压扁后行高只剩 2px，整张图会变成一条细线。
+  // 可用宽度取真实容器宽度；窗口尺寸变化后由全局 resize 处理器整页重画。
+  const availW = hostWidth(host);
+  const avail = availW - left - pad - 8;
+  const cellW = Math.min(pid, Math.max(2, avail / cols));
+  const cellH = opts.rowH || Math.max(pid, Math.min(18, 260 / rows));
+  const W = left + cols * cellW + pad, Hh = top + rows * cellH + pad;
+  const cv = document.createElement("canvas");
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = Hh * dpr;
+  cv.style.width = W + "px"; cv.style.height = Hh + "px";
+  const g = cv.getContext("2d");
+  g.scale(dpr, dpr);
+  g.clearRect(0, 0, W, Hh);
+
+  const vals = grid.flat().filter(v => v > (opts.gap ?? -1e4));
+  const mn = opts.min ?? Math.min(...vals), mx = opts.max ?? Math.max(...vals);
+  const span = mx - mn || 1;
+  const norm = v => opts.diverging
+    ? (v - mn) / span
+    : Math.max(0, Math.min(1, (v - mn) / span));
+
+  const cw = Math.max(1, cellW - (cellW > 6 ? gapRatio : 0.4));
+  const ch = Math.max(1, cellH - (cellH > 6 ? gapRatio : 0.4));
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const v = grid[r][c];
+    const x = left + c * cellW, y = top + r * cellH;
+    if (v <= (opts.gap ?? -1e4)) {          // 被因果掩码遮住
+      g.fillStyle = getCSS("--panel");
+      g.fillRect(x, y, cw, ch);
+      if (cellW > 6 && cellH > 6) {
+        g.strokeStyle = getCSS("--border");
+        g.lineWidth = 1;
+        g.strokeRect(x + .5, y + .5, cw - 1, ch - 1);
+      }
+      continue;
+    }
+    g.fillStyle = opts.diverging ? hsl(norm(v)) : seqColor(norm(v));
+    g.fillRect(x, y, cw, ch);
+  }
+  host.appendChild(cv);
+
+  const xl = opts.xlabels, yl = opts.ylabels;
+  if (xl || yl) {
+    const lbl = document.createElement("canvas");
+    lbl.width = W * dpr; lbl.height = Hh * dpr;
+    lbl.style.cssText = `position:absolute;left:0;top:0;width:${W}px;height:${Hh}px;border:0;pointer-events:none`;
+    const lg = lbl.getContext("2d");
+    lg.scale(dpr, dpr);
+    lg.fillStyle = getCSS("--muted");
+    lg.font = "10px ui-monospace,monospace";
+    if (xl) for (let c = 0; c < cols; c++) {
+      if (c * cellW > W - 8) break;         // 太密就不画了
+      lg.save();
+      lg.translate(left + c * cellW + cw / 2, top - 5);
+      lg.rotate(-Math.PI / 4);
+      lg.textAlign = "right";
+      lg.fillText(xl[c], 0, 0);
+      lg.restore();
+    }
+    if (yl) for (let r = 0; r < rows; r++) {
+      lg.textAlign = "right";
+      lg.fillText(yl[r], left - 4, top + r * cellH + ch / 2 + 2);
+    }
+    host.appendChild(lbl);
+  }
+
+  const legend = document.createElement("div");
+  legend.className = "legend" + (cellW <= 11 ? " compact" : "");
+  const lc = document.createElement("canvas");
+  const lw = cellW <= 11 ? 52 : 72, lh = cellW <= 11 ? 6 : 8;
+  lc.width = lw; lc.height = lh;
+  const l2 = lc.getContext("2d");
+  for (let i = 0; i < lw; i++) {
+    l2.fillStyle = opts.diverging ? hsl(i / (lw - 1)) : seqColor(i / (lw - 1));
+    l2.fillRect(i, 0, 1, lh);
+  }
+  legend.appendChild(lc);
+  const t1 = document.createElement("span");
+  t1.textContent = opts.diverging ? `${fmt(mn, 2)} ← 0 → ${fmt(mx, 2)}` : `0 → ${fmt(mx, 2)}`;
+  legend.appendChild(t1);
+  if (opts.legendNote) {
+    const n = document.createElement("span");
+    n.textContent = "· " + opts.legendNote;
+    legend.appendChild(n);
+  }
+  item.legend = legend;
+  (host.parentElement || host).appendChild(legend);
+
+  if (opts.onCell) {
+    attachTip(host, e => {
+      const box = cv.getBoundingClientRect();
+      const c = Math.floor((e.clientX - box.left - left) / cellW);
+      const r = Math.floor((e.clientY - box.top - top) / cellH);
+      if (r < 0 || c < 0 || r >= rows || c >= cols) return "";
+      return opts.onCell(r, c, grid[r][c]);
+    });
+  }
+  return cv;
+}
+
+function getCSS(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function matBlock(title, sub) {
+  const wrap = document.createElement("div");
+  wrap.className = "mat";
+  wrap.innerHTML = `<h4>${title}${sub ? ` <small>${sub}</small>` : ""}</h4>`;
+  const host = document.createElement("div");
+  host.className = "canvas-host";
+  wrap.appendChild(host);
+  return { wrap, host };
+}
+
+/* 取出某一层某个头的 (T,T) 矩阵。VIEW=untrained 时用随机权重模型对应层的 probs/scores。 */
+function headMat(layer, head, key) {
+  const src = VIEW === "untrained" && key !== "attn_out"
+    ? D.untrained.layers[layer][key]      // 只有 probs / scores 两样有对照
+    : ST.layers[layer][key];
+  if (!src) return Array.from({ length: T }, () => Array(T).fill(0));
+  return reshape(src.slice(head * T * T, (head + 1) * T * T), T, T);
+}
+/* (1,T,d) 展平 → (T,d) */
+function vecMat(arr, rows = T, cols = d) { return reshape(arr, rows, cols); }
+
+/* ══════════════ 阶段定义 ══════════════ */
+const STAGES = [];
+function stage(id, num, title, subtitle, build) {
+  STAGES.push({ id, num, title, subtitle, build });
+}
+
+/* ── 0. 全景 ── */
+stage("overview", 0, "全景：一句话要走过 8 个工序", "先看地图，再逐站下车", (root) => {
+  const sched = document.createElement("div");
+  sched.className = "stat-grid";
+  const items = [
+    ["1", "切词 tokenize", "文字 → 整数编号"],
+    ["2", "查表 embedding", "编号 → 向量"],
+    ["3", "加位置", "注入「第几个」"],
+    ["4", "注意力", "从别的 token 取信息"],
+    ["5", "FFN", "逐 token 查知识表"],
+    ["6", "× N 层", "重复 4–5"],
+    ["7", "输出头", "向量 → 词表打分"],
+    ["8", "采样", "打分 → 一个词"],
+  ];
+  sched.innerHTML = items.map(([n, t, s]) =>
+    `<div class="stat"><b style="font-size:14px">${n}. ${t}</b><small>${s}</small></div>`).join("");
+  root.appendChild(sched);
+
+  const key = document.createElement("div");
+  key.className = "why";
+  key.innerHTML = `<h5>这一页的所有数字都是真的</h5>
+    <p>下面每一步展示的矩阵，来自一个<em>真的训练过</em>的 2 层 Transformer
+    （d=${M.d_model}、${H} 头、${M.n_layers} 层、参数量 ${M.params.toLocaleString()}），
+    任务是在上下文里做 induction：看到 <code>猫 追 蝴蝶 穿过 花园 藏进 ｜ 猫 追</code>，
+    要预测 <code>蝴蝶</code>，准确率 ${(D.accuracy * 100).toFixed(1)}%。
+    它和 GPT 的内部算术逐项相同，只是小到每个格子都能读。</p>
+    <p>右上角可以切到「未训练」，看同一套结构在随机权重下是什么样——用来对比训练到底改了什么。</p>`;
+  root.appendChild(key);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么不直接展示 GPT-4 的矩阵</h5>
+    <p>真实模型的注意力是 (${96} 层 × ${128} 头 × 4096×4096)<sup>*</sup> 的量级，画出来只是一片噪声，
+    而且每个格子都读不出含义。<em>要理解机制，需要的不是更大的模型，是更小的矩阵</em>——
+    算术一模一样，但每一行每一列都能对应回具体的词。{{gpt4note}}</p>`;
+  root.appendChild(why);
+});
+
+/* ── 1. tokenize ── */
+stage("tokenize", 1, "切词：文字变成整数编号", "模型只认数字，不认汉字", (root) => {
+  const row = document.createElement("div");
+  row.className = "tokens";
+  row.innerHTML = TOK.map((t, i) =>
+    `<span class="tok${t.startsWith("<") ? " special" : ""}"><i>${i}</i>${esc(t)}</span>`).join("");
+  root.appendChild(row);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么必须切词</h5>
+    <p>网络里所有运算都是矩阵乘法，输入必须是固定长度的数字序列。
+    所以第一步是把字符串切成「词表里已有的最小单位」，再映射成编号。
+    真实模型用 BPE/SentencePiece，词表 3.2 万 ~ 25 万；这里为了能一眼读完，只有 ${M.vocab} 个。</p>
+    <p>注意序列结构：<code>BOS</code> 是句首标记，<code>SEP</code> 分隔「原始上下文」和「重复的片段」。
+    这两个标记本身也参与后面的注意力——它们是模型可用的「分隔信号」。</p>`;
+  root.appendChild(why);
+
+  const without = document.createElement("div");
+  without.className = "without";
+  without.innerHTML = `<h5>没有这一步会怎样</h5>
+    <p>网络无法接受任何输入。这是全流程里唯一一步「不是数学，而是约定」：切词方案（BPE / 字 / 词）
+    直接决定模型看到的世界粒度——中文按字切 vs 按词切，同一个句子的 token 数能差一倍，
+    而上下文窗口是按 token 计的。</p>`;
+  root.appendChild(without);
+
+  if (VIEW === "untrained") return;   // 这一步与权重无关
+});
+
+/* ── 2. embedding ── */
+stage("embed", 2, "查表：编号变成向量", "每个词一个 d 维坐标", (root) => {
+  const emb = vecMat(ST.embedding_rows, T, d);
+  const pos = vecMat(ST.pos_rows, T, d);
+  const x0 = vecMat(ST.x0, T, d);
+
+  const row = document.createElement("div");
+  row.className = "mat-row";
+
+  const b1 = matBlock("词嵌入 E[token]", `(${T}, ${d}) 每行是一个词的坐标`);
+  heatmap(b1.host, emb, {
+    cell: 9, diverging: true, xlabels: null, ylabels: TOK,
+    legendNote: "行 = 位置，列 = 维度",
+    onCell: (r, c, v) => `位置 ${r}(${TOK[r]}) 第 ${c} 维 = ${fmt(v)}`
+  });
+  row.appendChild(b1.wrap);
+
+  const b2 = matBlock("位置嵌入 P[位置]", `(${T}, ${d}) 每行是「第几个」的坐标`);
+  heatmap(b2.host, pos, {
+    cell: 9, diverging: true, ylabels: TOK.map((_, i) => "pos " + i),
+    onCell: (r, c, v) => `位置 ${r} 第 ${c} 维 = ${fmt(v)}`
+  });
+  row.appendChild(b2.wrap);
+
+  const b3 = matBlock("相加 x₀ = E + P", "两者相加，后面所有层都在改这一份");
+  heatmap(b3.host, x0, {
+    cell: 9, diverging: true, ylabels: TOK,
+    onCell: (r, c, v) => `位置 ${r}(${TOK[r]}) 第 ${c} 维 = ${fmt(v)}`
+  });
+  row.appendChild(b3.wrap);
+  root.appendChild(row);
+
+  // 嵌入行长度：说明"每个词是个方向"
+  const norms = ST.embedding_norms;
+  const barHost = document.createElement("div");
+  barHost.className = "bars";
+  barHost.innerHTML = norms.map((n, i) =>
+    `<div class="bar"><span>${esc(TOK[i])}</span><div class="track">
+      <div class="fill" style="width:${(n / Math.max(...norms) * 100).toFixed(1)}%"></div>
+     </div><b>${n.toFixed(2)}</b></div>`).join("");
+  root.appendChild(barHost);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么是「查表」而不是别的</h5>
+    <p><code>E</code> 是一张 ${M.vocab}×${d} 的表，第 i 行就是编号 i 的向量。
+    查表 = 用编号当索引取一行，没有任何非线性——它只是一个<em>可学习的字典</em>。
+    梯度会自己把语义相近的词推到一起（"猫"和"狗"的向量会靠近），没有人手工设计这个。</p>
+    <p>为什么还要加位置：光看内容，<code>猫追蝴蝶</code> 和 <code>蝴蝶追猫</code> 是同一个词的集合。
+    注意力本身<em>对顺序完全无感</em>（见下一站），所以必须额外注入「我是第几个」。
+    这里用的是最朴素的可学习位置表（GPT-2 的做法）；GPT-NeoX 之后多用 RoPE（旋转），
+    但作用相同：让模型能区分顺序。</p>`;
+  root.appendChild(why);
+
+  const without = document.createElement("div");
+  without.className = "without";
+  without.innerHTML = `<h5>没有位置嵌入会怎样（实测）</h5>
+    <p>把这 ${d} 维位置向量清零后重测：准确率 <b>${(ABL.baseline * 100).toFixed(1)}% → ${(ABL.no_pos_emb * 100).toFixed(1)}%</b>。
+    模型几乎全错。因为它无法知道「重复片段从哪开始」——所有 token 看起来都像浮在无位置的集合里。
+    这是全流程里<em>影响最大的一步单项改动</em>。</p>`;
+  root.appendChild(without);
+});
+
+/* ── 3. LayerNorm ── */
+stage("ln", 3, "LayerNorm：先把每个 token 的数值尺度摆正", "进注意力之前的标准动作", (root) => {
+  const L1 = ST.layers[0];
+  const before = vecMat(L1.h1, T, d);
+  const meanB = L1.h1_mean, stdB = L1.h1_std;
+
+  const row = document.createElement("div");
+  row.className = "mat-row";
+  const b1 = matBlock("LayerNorm 之前 (x₀ 的末尾)", "每个词的 64 维原始激活");
+  heatmap(b1.host, vecMat(ST.x0, T, d).slice(-3), {
+    cell: 9, diverging: true, ylabels: TOK.slice(-3).map(t => t + " (原)"),
+    onCell: (r, c, v) => `第 ${c} 维 = ${fmt(v)}`
+  });
+  row.appendChild(b1.wrap);
+  const b2 = matBlock("LayerNorm 之后 (h₁)", "同一批 token，尺度被规范化");
+  heatmap(b2.host, before.slice(-3), {
+    cell: 9, diverging: true, ylabels: TOK.slice(-3).map(t => t + " (LN)"),
+    onCell: (r, c, v) => `第 ${c} 维 = ${fmt(v)}`
+  });
+  row.appendChild(b2.wrap);
+  root.appendChild(row);
+
+  const stats = document.createElement("div");
+  stats.className = "stat-grid";
+  const mb = meanB.slice(-3).map(v => fmt(v, 3)).join(" / ");
+  const sb = stdB.slice(-3).map(v => fmt(v, 3)).join(" / ");
+  stats.innerHTML = `
+    <div class="stat"><b>${mb}</b><small>最后 3 个 token 的均值（LN 后应≈0）</small></div>
+    <div class="stat"><b>${sb}</b><small>标准差（LN 后应≈1）</small></div>
+    <div class="stat"><b>${d}</b><small>每个 token 的维数</small></div>`;
+  root.appendChild(stats);
+
+  const math = document.createElement("div");
+  math.className = "math mono";
+  math.innerHTML = `LN(x) = γ ⊙ (x − mean(x)) / std(x) + β
+<span class="c">// 均值和标准差是沿「这一个 token 的 ${d} 维」算的，不是沿 batch 或序列</span>
+<span class="c">// γ, β 是可学习的 ${d} 维缩放/平移，初始 γ=1, β=0</span>`;
+  root.appendChild(math);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么要 LN</h5>
+    <p>残差累加之后，不同 token 的激活尺度会越差越远（有的范数 3，有的 30）。
+    注意力打分是点积，尺度大的 token 会天然拿到更大的分数——这不是语义，是数值副作用。
+    LN 把每个 token 各自归一化到均值 0、标准差 1，<em>消掉尺度差异，只留下方向</em>。</p>
+    <p>为什么是「逐 token」而不是「整批」：模型要能对单条输入独立处理；
+    若用 batch 统计，同一个句子的输出会随同批其他句子变化，部署时不可接受
+    （而且训练/推理行为会不一致）。BatchNorm 在 NLP 里被 LN 取代就是这个原因。</p>`;
+  root.appendChild(why);
+
+  const without = document.createElement("div");
+  without.className = "without";
+  without.innerHTML = `<h5>没有 LN 会怎样</h5>
+    <p>深层网络中激活幅度会随层数累积失控：残差把每层的输出加进主干，范数单调增长。
+    没有 LN 的深层 Transformer 很难训起来——梯度要么爆炸要么消失。
+    注意 LN 之后接了<em>残差</em>：LN 的输出只走旁路（注意力/FFN），主干 x 本身不被改写，
+    所以残差流里保留着原始尺度信息，LN 只保证旁路的输入尺度稳定。</p>`;
+  root.appendChild(without);
+});
+
+/* ── 4. QKV ── */
+stage("qkv", 4, "Q / K / V：把同一份激活投影成三种角色", "注意力的原料", (root) => {
+  const L1 = ST.layers[0];
+  const row = document.createElement("div");
+  row.className = "mat-row";
+  for (const [key, name, desc] of [
+    ["q", "Q 查询", `(${T}, ${d}) 我想找什么`],
+    ["k", "K 索引", `(${T}, ${d}) 我是什么标签`],
+    ["v", "V 内容", `(${T}, ${d}) 我携带什么`]
+  ]) {
+    const b = matBlock(name, desc);
+    heatmap(b.host, vecMat(L1[key], T, d), {
+      cell: 9, diverging: true, ylabels: TOK,
+      onCell: (r, c, v) => `${TOK[r]} 第 ${c} 维 = ${fmt(v)}`
+    });
+    row.appendChild(b.wrap);
+  }
+  root.appendChild(row);
+
+  const tabBar = document.createElement("div");
+  tabBar.className = "tabs";
+  tabBar.innerHTML = `<span style="font-size:12.5px;color:var(--muted);align-self:center">
+    同一份 h₁，经过三个不同的权重矩阵：</span>
+    <button class="on" data-k="q">Q = h₁ W_Q</button>
+    <button data-k="k">K = h₁ W_K</button>
+    <button data-k="v">V = h₁ W_V</button>`;
+  root.appendChild(tabBar);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么必须拆成三个，而不是一个</h5>
+    <p>注意力是<em>软检索</em>：Q 是提问，K 是索引标签，V 是被取走的内容。三者作用在数学上不可合并。</p>
+    <p><b>Q 与 K 必须分开</b>：若共用一个矩阵 W，打分矩阵
+    <code>S = QKᵀ = XWWᵀXᵀ</code>，而 <code>WWᵀ</code> 是对称的，所以 <code>Sᵀ = S</code> 恒成立。
+    实测本模型 ${T}×${T} 打分矩阵的不对称度 = <b>${ABL.attn_symmetry_max}</b>（非零 = 真的不对称）。
+    对称意味着 <code>S[猫,蝴蝶] = S[蝴蝶,猫]</code>，即"猫追蝴蝶"和"蝴蝶追猫"无法区分——
+    方向信息在数学上被抹掉了。</p>
+    <p><b>V 也要独立</b>：K 决定"谁被找到"，V 决定"给出什么"。两者绑定就成了恒等映射，
+    模型无法表达"查到 A，返回 B"——而这正是绝大多数知识的形式（查到"法国"，返回"巴黎"）。</p>`;
+  root.appendChild(why);
+
+  const math = document.createElement("div");
+  math.className = "math mono";
+  math.innerHTML = `Q = h₁ W_Q    K = h₁ W_K    V = h₁ W_V      <span class="c">// 三个独立的 ${d}×${d} 矩阵，参数 ×3</span>
+heads: Q,K,V → 切成 ${H} 份，每份 ${M.head_dim} 维 <span class="c">// 不是多份拷贝，是分工</span>`;
+  root.appendChild(math);
+
+  const without = document.createElement("div");
+  without.className = "without";
+  without.innerHTML = `<h5>没有 V（让 V = K）会怎样</h5>
+    <p>注意力输出就成了"加权平均的索引标签"，等于把匹配到的 token 的<em>标签</em>搬过来，
+    而不是它的<em>内容</em>。模型能知道"我找到的是位置 3"，但拿不到位置 3 携带的信息。
+    induction 这类任务会直接崩掉。</p>`;
+  root.appendChild(without);
+
+  // ── 多头小节：这是整页最容易被误解的概念，单独讲清楚 ──
+  const mid = document.createElement("div");
+  mid.className = "why";
+  const headRows = [0,1,2,3].map(h => {
+    const row = reshape(ST.layers[0].probs.slice(h * T * T, (h + 1) * T * T), T, T)[T - 1];
+    let pk = 0; row.forEach((v, i) => { if (v > row[pk]) pk = i; });
+    return { h, peak: pk, peakTxt: TOK[pk], w: row[pk], atAns: row[ST.target_first_pos] };
+  });
+  mid.innerHTML = `<h5>多头是什么：把 ${d} 维「切块」，每块独立跑一次完整注意力</h5>
+    <p>不是一个注意力看 ${H} 遍，而是<strong>把通道切成 ${H} 段，每段 ${M.head_dim} 维，各做一次完整的
+    Q/K/V + softmax + 加权求和</strong>。参数量不变（${H} × ${M.head_dim} = ${d}），
+    但因为每个头有<em>自己独立的</em> W_Q / W_K / W_V，它可以学完全不同的关注模式。</p>
+    <p class="mono" style="background:var(--code);padding:6px 10px;border-radius:6px">
+    Q,K,V : (T, ${d})  →  (${H}, T, ${M.head_dim})    <span class="c">// 同一份 h₁，按通道切块</span>
+    score : 每头各算 (T,T)，共 ${H} 个独立打分矩阵
+    out   : ${H} 个 (T, ${M.head_dim}) 拼接回 (T, ${d})，再过 W_O</p>
+    <table class="mini" style="margin-top:10px">
+      <tr><th>头</th><th>末行峰值落在</th><th>峰值权重</th><th>在答案位(${ST.target_first_pos})的权重</th><th>它在干什么</th></tr>
+      ${headRows.map(r => `<tr>
+        <td>L1 头 ${r.h}</td>
+        <td>${esc(r.peakTxt)} (位置 ${r.peak})</td>
+        <td class="num">${fmt(r.w, 2)}</td>
+        <td class="num">${fmt(r.atAns, 2)}</td>
+        <td>${r.atAns > 0.5
+             ? "<b>找答案</b>：贴住上一次出现的后继"
+             : r.peak === SEP_POS
+               ? "读 SEP（暂存区）"
+               : r.w > 0.8
+                 ? `盯 <b>${esc(r.peakTxt)}</b>：与答案无关的另一路读取`
+                 : "注意力很分散，本句里没承重"}</td>
+      </tr>`).join("")}
+    </table>
+    <p style="margin-top:10px">上面这张表就是「多头为什么有用」的直接证据：<em>同一个输入、同一份 h₁，
+    ${H} 个头读出了 ${H} 种不同的东西</em>。L1 头 1 有 ${fmt(headRows[1].atAns, 2)} 的注意力压在答案位置，
+    头 2 也接近，而头 0 几乎不看那里（${fmt(headRows[0].atAns, 2)}）——分工不是设计出来的，
+    是训练把它们的 W_Q/W_K 推向了不同方向。</p>
+    <p>为什么不能只用一个 ${d} 维的大头：一个头的 softmax 只能给出<em>一种</em>注意力分布，
+    它没法同时「盯前一个词」和「盯句首」。切成 ${H} 份之后，每个头各有一张自己的 softmax 表，
+    可以各管一件事，最后一拼就同时拿到了多种关系。</p>
+    <p>还要注意一个反直觉的点：<b>头不都是「有用」的</b>。L1 头 0 / 头 2 / 头 3 的末行峰值都是
+    <code>${esc(headRows[0].peakTxt)}</code>（权重接近 1），但它们对答案位置的权重几乎为 0——
+    也就是说它们在看一个<em>跟本题答案无关</em>的位置。真正把答案找回来的是头 1
+    （${fmt(headRows[1].atAns, 2)} 压在答案上）。多头给你的是<em>多种候选读法</em>，
+    由后面的层和输出头去挑，而不是每个头都必须有用。</p>`;
+  root.appendChild(mid);
+});
+
+/* ── 5. 打分 + softmax + 掩码 ── */
+stage("attn", 5, "打分 → 掩码 → softmax：谁该被看见", "这一步决定了信息从哪来", (root) => {
+  const L1 = ST.layers[0];
+  const H_ = HEAD_LABEL[0];
+
+  const pick = document.createElement("div");
+  pick.className = "tabs";
+  pick.id = "attn-pick";
+  const initH = VIEW === "untrained" ? 0 : bestHead(0);
+  for (let h = 0; h < H; h++) {
+    pick.innerHTML += `<button data-h="${h}" class="${h === initH ? "on" : ""}">
+      L1 · 头 ${h}${h === initH && VIEW !== "untrained" ? " ★" : ""}</button>`;
+  }
+  pick.innerHTML += `<button data-h="avg" class="${VIEW === "untrained" ? "on" : ""}">4 头平均</button>`;
+  root.appendChild(pick);
+
+  const row = document.createElement("div");
+  row.className = "mat-row";
+  const hostS = matBlock("① 原始打分 S = QKᵀ / √d", "未归一化的匹配强度");
+  const hostM = matBlock("② + 因果掩码", "上三角置 −∞（灰格）");
+  const hostP = matBlock("③ softmax 后 = 注意力权重", "每行和 = 1");
+  row.append(hostS.wrap, hostM.wrap, hostP.wrap);
+  root.appendChild(row);
+
+  const avg = document.createElement("div");
+  avg.className = "mat-row";
+  const hostAvg = matBlock("本模型 4 个头 × 2 层的完整注意力", "行 = 谁在看，列 = 看谁");
+  avg.appendChild(hostAvg.wrap);
+  root.appendChild(avg);
+  // 小头图容器：单独的 grid，子项不会互相压住
+  const headGrid = document.createElement("div");
+  headGrid.className = "head-grid";
+  hostAvg.wrap.appendChild(headGrid);
+
+  function draw(sel) {
+    [hostS, hostM, hostP].forEach(h => {
+      h.host.innerHTML = ""; h.wrap.querySelector(".legend")?.remove();
+    });
+    hostAvg.host.innerHTML = ""; hostAvg.wrap.querySelector(".legend")?.remove();
+    // headGrid 是 hostAvg.wrap 的兄弟节点，上面那行清不掉它——
+    // 不清就会每切一次头累加 8 张图（实测切 7 次后从 8 涨到 64 个）。
+    // 三张主图也是原地清空后重画，同一 host 会在 HEATMAPS 里留下多条登记，
+    // relayout 时会往同一个 host 里重复叠画，所以一并注销。
+    unregisterHeatmaps([hostS.host, hostM.host, hostP.host, hostAvg.host, headGrid]);
+    headGrid.innerHTML = "";
+
+    let S, P;
+    if (sel === "avg") {
+      const hh = H;
+      const arrP = VIEW === "untrained" ? D.untrained.layers[0].probs : ST.layers[0].probs;
+      const avgP = Array.from({ length: T }, (_, r) =>
+        Array.from({ length: T }, (_, c) => {
+          let s2 = 0; for (let h2 = 0; h2 < hh; h2++) s2 += arrP[h2 * T * T + r * T + c];
+          return s2 / hh;
+        }));
+      heatmap(hostP.host, avgP, { cell: 18, ylabels: TOK, xlabels: TOK,
+        legendNote: VIEW === "untrained" ? "未训练 · 多头平均" : "多头平均" });
+      hostS.host.innerHTML = `<p style="margin:0;font-size:12px;color:var(--muted)">多头平均后原始打分的尺度不一，只展示平均后的权重。</p>`;
+      hostM.host.innerHTML = `<p style="margin:0;font-size:12px;color:var(--muted)">掩码是逐头相同的（形状与头无关）。</p>`;
+    } else {
+      const hh = +sel;
+      S = headMat(0, hh, "scores"); P = headMat(0, hh, "probs");
+      heatmap(hostS.host, S, {
+        cell: 18, diverging: true, xlabels: TOK, ylabels: TOK, gap: -1e4,
+        onCell: (r, c, v) => v <= -1e4 ? `(${TOK[r]} → ${TOK[c]}) 被掩码` :
+          `S[${TOK[r]} → ${TOK[c]}] = ${fmt(v, 2)}`
+      });
+      const masked = S.map((r2, r) => r2.map((v, c) => r >= c ? v : -1e9));      heatmap(hostM.host, masked, {
+        cell: 18, diverging: true, xlabels: TOK, ylabels: TOK, gap: -1e4,
+        onCell: (r, c, v) => v <= -1e4 ? `(${TOK[r]} → ${TOK[c]}) 在未来，遮住` :
+          `S[${TOK[r]} → ${TOK[c]}] = ${fmt(v, 2)}`
+      });
+      heatmap(hostP.host, P, {
+        cell: 18, xlabels: TOK, ylabels: TOK,
+        legendNote: VIEW === "untrained" ? "未训练：几乎均匀" : "0 → 1，每行和 = 1",
+        onCell: (r, c, v) => `注意力[${TOK[r]} → ${TOK[c]}] = ${fmt(v, 3)}`
+      });
+    }
+
+    // 4 头 × 2 层的小图（未训练时用随机权重模型的 probs）
+    for (let l = 0; l < L; l++) for (let h = 0; h < H; h++) {
+      const src = VIEW === "untrained" ? D.untrained.layers[l].probs : ST.layers[l].probs;
+      const m = reshape(src.slice(h * T * T, (h + 1) * T * T), T, T);
+      const label = VIEW === "untrained"
+        ? `L${l + 1} 头${h} <small style="color:var(--accent2)">随机</small>`
+        : `L${l + 1} 头${h}` + (D.head_metrics[`L${l + 1}H${h}`]
+          ? ` <small>ind ${D.head_metrics[`L${l + 1}H${h}`].induction}</small>` : "");
+      const b = matBlock(label, "");
+      heatmap(b.host, m, {
+        cell: 9, ylabels: TOK, gap: -1, legendNote: null,
+        onCell: (r, c, v) => `[${TOK[r]} → ${TOK[c]}] = ${fmt(v, 3)}`
+      });
+      headGrid.appendChild(b.wrap);
+    }
+  }
+  pick.addEventListener("click", e => {
+    const btn = e.target.closest("button"); if (!btn) return;
+    pick.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === btn));
+    draw(btn.dataset.h);
+  });
+  draw(initH + "");
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么要 1/√d 缩放</h5>
+    <p>Q 和 K 的每一维都是独立的随机变量，点积是 ${M.head_dim} 项之和，
+    标准差随维度增长（≈ √${M.head_dim}）。不缩放的话打分会很大，softmax 会饱和成 one-hot，
+    梯度几乎为零，模型学不动。除以 √d 把方差拉回 O(1)，softmax 处在线性区。
+    实测：不缩放时打分标准差 <b>${ABL.score_std_unscaled}</b>、平均熵 <b>${ABL.entropy_unscaled}</b>；
+    缩放后 <b>${ABL.score_std_scaled}</b>、<b>${ABL.entropy_scaled}</b>。</p>`;
+  root.appendChild(why);
+
+  const why2 = document.createElement("div");
+  why2.className = "why";
+  why2.innerHTML = `<h5>为什么要因果掩码</h5>
+    <p>生成时模型只能看到「已出现的词」。若允许看未来，训练时它会直接把答案抄过来，
+    推理时答案还不存在——训练与推理不一致，模型完全不可用。
+    掩码把 $(r,c)$ with $c > r$ 置 −∞，softmax 后权重恰好 0。
+    上三角的灰格就是被遮住的部分，<em>它们不是"权重很小"，而是精确的 0</em>。</p>`;
+  root.appendChild(why2);
+
+  const why3 = document.createElement("div");
+  why3.className = "why";
+  why3.innerHTML = `<h5>softmax 为什么是「每行」</h5>
+    <p>softmax 沿最后一个维度（= 列 = "候选来源"）归一化，所以<em>每一行是一个分布</em>：
+    第 r 行表示"位置 r 把 100% 的注意力怎么分配给它看到的所有位置"。
+    不是沿列——列上的和没有意义（位置 c 可能被很多不同的 query 看，权重不必相加为 1）。</p>`;
+  root.appendChild(why3);
+
+  const without = document.createElement("div");
+  without.className = "without";
+  without.innerHTML = `<h5>没有注意力（或注意力被拆掉）会怎样（实测）</h5>
+    <p>把第 1 层的注意力输出整体清零：准确率 <b>${(ABL.baseline * 100).toFixed(1)}% →
+    ${(ABL.zero_attn_L1 * 100).toFixed(1)}%</b>。彻底崩掉——因为<span>信息根本进不来</span>：
+    每个 token 只能看到自己的内容，induction 需要的"别的 token 的信息"一条也没拿到。</p>
+    <p>把<em>第 2 层</em>的注意力清零：<b>${(ABL.zero_attn_L2 * 100).toFixed(1)}%</b>。
+    掉得明显但没归零，因为第 1 层已经把部分信息写进了主干。</p>`;
+  root.appendChild(without);
+
+  const sepPos = SEP_POS;
+  const lastPrevPos = LAST_PREV_POS;
+  const l2sep = [0,1,2,3].map(h => {
+    const row = reshape(ST.layers[1].probs.slice(h * T * T, (h + 1) * T * T), T, T)[T - 1];
+    return row[sepPos];
+  });
+  const l1sepToAns = [0,1,2,3].map(h => {
+    const row = reshape(ST.layers[0].probs.slice(h * T * T, (h + 1) * T * T), T, T)[sepPos];
+    return row[ST.target_first_pos];
+  });
+  const readNow = document.createElement("div");
+  readNow.className = "why";
+  readNow.innerHTML = `<h5>这张图现在在说什么（本模型实测，逐头读数）</h5>
+    <p><b>第 1 层</b>：末行（查询 = 末位 <code>${esc(TOK[T - 1])}</code>，位置 ${T - 1}）几乎全部指向
+    <code>${esc(TOK[ST.target_first_pos])}</code>（位置 ${ST.target_first_pos}）。
+    为什么是这个位置：<code>${esc(TOK[T - 1])}</code> 上一次出现在位置 ${lastPrevPos}，
+    它的<em>后继</em>正好是位置 ${ST.target_first_pos} 的 <code>${esc(TOK[ST.target_first_pos])}</code>——
+    也就是要预测的答案。四个头的权重分别是 ${
+      [0,1,2,3].map(h => {
+        const row = reshape(ST.layers[0].probs.slice(h * T * T, (h + 1) * T * T), T, T)[T - 1];
+        return fmt(row[ST.target_first_pos], 2);
+      }).join(" / ")
+    }。同时看 <code>&lt;SEP&gt;</code> 那一行：它从 <code>${esc(TOK[ST.target_first_pos])}</code>
+    取走 ${l1sepToAns.map(v => fmt(v, 2)).join(" / ")} 的权重，<em>把答案词的信息搬到了 SEP 位置</em>
+    ——这是这个模型自发长出来的「暂存区」（scratchpad）。</p>
+    <p><b>第 2 层</b>：末行的四个头几乎只盯 <code>&lt;SEP&gt;</code>，权重
+    ${l2sep.map(v => fmt(v, 2)).join(" / ")}（位置 ${sepPos}）。
+    也就是说：<em>第 1 层把答案写到 SEP，第 2 层从 SEP 读出来</em>，两步合起来等价于一次 induction。</p>
+    <p>这<em>不是</em>教科书里「单个 induction 头直接在 s+1 上读出答案」的形态。
+    真实模型里两者都存在；这里如实展示测到的这一种，并在下一页用「扣掉它」量化每一个位置。</p>`;
+  root.appendChild(readNow);
+});
+
+/* ── 6. 混合 + 输出投影 + 残差 ── */
+stage("mix", 6, "加权求和 + 输出投影 + 回主干", "把别人的内容搬进自己", (root) => {
+  const L1 = ST.layers[0];
+  const hAvg = 0;
+  const row = document.createElement("div");
+  row.className = "mat-row";
+
+  const b1 = matBlock("① 注意力权重 × V", "每行 = Σ 权重·V，权重来自上一站");
+  heatmap(b1.host, vecMat(L1.attn_mixed, T, d), {
+    cell: 9, diverging: true, ylabels: TOK,
+    onCell: (r, c, v) => `${TOK[r]} 第 ${c} 维 = ${fmt(v)}`
+  });
+  row.appendChild(b1.wrap);
+
+  const b2 = matBlock("② 再过 W_O（输出投影）", "把「取到的内容」转成主干的增量");
+  heatmap(b2.host, vecMat(L1.attn_out, T, d), {
+    cell: 9, diverging: true, ylabels: TOK,
+    onCell: (r, c, v) => `${TOK[r]} 第 ${c} 维 = ${fmt(v)}`
+  });
+  row.appendChild(b2.wrap);
+
+  const b3 = matBlock("③ 加回主干 x₁ = x₀ + ②", "残差：主干从不被覆盖，只被累加");
+  heatmap(b3.host, vecMat(L1.x_after_attn, T, d), {
+    cell: 9, diverging: true, ylabels: TOK,
+    onCell: (r, c, v) => `${TOK[r]} 第 ${c} 维 = ${fmt(v)}`
+  });
+  row.appendChild(b3.wrap);
+  root.appendChild(row);
+
+  const rr = L1.residual_ratio;
+  const bars = document.createElement("div");
+  bars.className = "bars";
+  bars.innerHTML = "";
+  rr.forEach((v, i) => {
+    bars.innerHTML += `<div class="bar"><span>${esc(TOK[i])}</span><div class="track">
+      <div class="fill" style="width:${Math.min(100, v * 100).toFixed(1)}%"></div>
+    </div><b>${v.toFixed(2)}×</b></div>`;
+  });
+  root.appendChild(bars);
+  const barNote = document.createElement("p");
+  barNote.className = "note";
+  barNote.textContent = "‖注意力输出‖ / ‖加之前的主干‖。比值远小于 1 说明每一步只对主干做小幅修正——这是残差网络的常态，也是能堆几十层的原因。";
+  root.appendChild(barNote);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么要残差</h5>
+    <p>残差 <code>x ← x + f(x)</code> 让梯度有一条直通路径：反向传播时 <code>∂x_out/∂x = 1 + ∂f/∂x</code>，
+    那个常数 1 保证梯度即使穿过几十层也不会衰减到 0。没有残差，深层网络梯度消失到无法训练。</p>
+    <p>另一个视角更重要：<em>主干是一条"带宽有限的信道"</em>。每层的输出是往这条信道里"加一点东西"，
+    所以任何一层的信息都不会被后层覆盖——最后做预测时，第 1 层看到的东西依然在主干里可读。
+    这解释了为什么上面的比值这么小：<b>每层只加一点点</b>，信息在层间缓慢累积，而不是层层重写。</p>`;
+  root.appendChild(why);
+
+  const math = document.createElement("div");
+  math.className = "math mono";
+  math.innerHTML = `attn(x) = softmax(QKᵀ/√d + mask) V W_O
+x₁ = x₀ + attn(LN(x₀))      <span class="c">// 残差加，不是替换</span>`;
+  root.appendChild(math);
+
+  const without = document.createElement("div");
+  without.className = "without";
+  without.innerHTML = `<h5>没有残差（改成 x₁ = attn(LN(x₀))）会怎样</h5>
+    <p>主干被每一层完全重写，前面所有层的信息都丢掉；梯度只剩 <code>∂f/∂x</code>，
+    深层网络基本无法训练。这是 2015 年之前的深层网络做不深的核心原因，ResNet 就是为了解决它。</p>`;
+  root.appendChild(without);
+});
+
+/* ── 7. FFN ── */
+stage("ffn", 7, "FFN：逐 token 查一张知识表", "不跨 token，只加深每个 token", (root) => {
+  const L1 = ST.layers[0];
+  const act = vecMat(L1.ffn_act, T, M.d_ff);
+  const pre = vecMat(L1.ffn_pre, T, M.d_ff);
+  const outv = L1.ffn_out;
+
+  const row = document.createElement("div");
+  row.className = "mat-row";
+  const b1 = matBlock("① W₁ 升维 + GELU", `(${T}, ${M.d_ff})，${d} → ${M.d_ff}`);
+  heatmap(b1.host, act, {
+    cell: 4, ylabels: TOK, legendNote: "稀疏：大部分槽位为 0",
+    onCell: (r, c, v) => `${TOK[r]} 槽 ${c} = ${fmt(v, 2)}`
+  });
+  row.appendChild(b1.wrap);
+
+  const b2 = matBlock("② 对照：升维后未过 GELU", "有正有负，稠密");
+  heatmap(b2.host, pre, {
+    cell: 4, diverging: true, ylabels: TOK,
+    onCell: (r, c, v) => `${TOK[r]} 槽 ${c} = ${fmt(v, 2)}`
+  });
+  row.appendChild(b2.wrap);
+  root.appendChild(row);
+
+  const fracs = L1.ffn_active_frac;
+  const stats = document.createElement("div");
+  stats.className = "stat-grid";
+  stats.innerHTML = `
+    <div class="stat"><b>${(avg(fracs) * 100).toFixed(0)}%</b>
+      <small>GELU 后非零槽位比例（4× 宽度的 ${M.d_ff} 个槽里）</small></div>
+    <div class="stat"><b>${M.d_ff}</b><small>中间维度 d_ff = 4×d</small></div>
+    <div class="stat"><b>${(2 * d * M.d_ff).toLocaleString()}</b>
+      <small>FFN 参数量，占全模型 ${(100 * 2 * d * M.d_ff / M.params).toFixed(0)}%</small></div>`;
+  root.appendChild(stats);
+
+  const bars = document.createElement("div");
+  bars.className = "bars";
+  fracs.forEach((v, i) => {
+    bars.innerHTML += `<div class="bar"><span>${esc(TOK[i])}</span><div class="track">
+      <div class="fill" style="width:${(v * 100).toFixed(0)}%"></div></div><b>${(v * 100).toFixed(0)}%</b></div>`;
+  });
+  root.appendChild(bars);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么 FFN 是「键值记忆」</h5>
+    <p>把 <code>W₁</code> 的每一行看成一个 key，<code>W₂</code> 的每一列看成一个 value：</p>
+    <p class="mono" style="background:var(--code);padding:6px 10px;border-radius:6px">
+    FFN(x) = Σᵢ act(x · kᵢ) · vᵢ</p>
+    <p>和注意力的区别就在这：注意力用 Q·K 决定<em>从哪个 token 取</em>，FFN 用 x·kᵢ 决定
+    <em>从哪条记忆里取</em>。而且 FFN <em>不跨 token</em>——每个位置独立过同一个 FFN，
+    所以它学到的是"通用知识"，不是"上下文关系"。实测参数量占比 ${(100 * 2 * d * M.d_ff / M.params).toFixed(0)}%：
+    模型的知识主要存在这里，不在注意力里。</p>
+    <p>GELU 带来的稀疏（实测只有 ${(avg(fracs) * 100).toFixed(0)}% 的槽位被激活）意味着每个 token
+    只用少数几条记忆——这也是 MoE（把 FFN 换成 N 个专家、每 token 只路由到 2 个）能奏效的根据。</p>`;
+  root.appendChild(why);
+
+  const why2 = document.createElement("div");
+  why2.className = "why";
+  why2.innerHTML = `<h5>为什么 4× 这个比例</h5>
+    <p>原始 Transformer 论文写的是 d_model=512、d_ff=2048，<em>恰好 4×，但没有给出理由</em>。
+    它是"容量 vs 参数"的经验折中，此后成了惯例。LLaMA 用 8/3× 是因为 SwiGLU 门控多了一个矩阵，
+    为参数量对齐而调低。这个项目里也是同样的惯例——<em>没有理论必然性</em>。</p>`;
+  root.appendChild(why2);
+
+  const without = document.createElement("div");
+  without.className = "without";
+  without.innerHTML = `<h5>没有 FFN 会怎样（实测）</h5>
+    <p>清零第 1 层 FFN 输出：准确率 <b>${(ABL.baseline * 100).toFixed(1)}% → ${(ABL.zero_ffn_L1 * 100).toFixed(1)}%</b>；
+    清零第 2 层：<b>${(ABL.zero_ffn_L2 * 100).toFixed(1)}%</b>。
+    这个任务主要考验「内容搬运」（注意力），所以 FFN 拆掉还能剩不少——
+    但换成知识问答类任务，情况会反过来：<em>知识在 FFN 里，关系在注意力里</em>。
+    这个对照正说明：同样的架构，不同任务对各部件的依赖完全不同。</p>`;
+  root.appendChild(without);
+});
+
+/* ── 8. 输出头 ── */
+stage("head", 8, "输出头：向量变回词表打分", "最后一步才是「选词」", (root) => {
+  const hd = ST.head;
+  const row = document.createElement("div");
+  row.className = "mat-row";
+  const b1 = matBlock("最终 LN 后的 x", `(${d},) 一个向量`);
+  heatmap(b1.host, [reshape(hd.x_final, 1, d)[0]], {
+    cell: 9, diverging: true, ylabels: ["x"], legendNote: "横着看就是这 64 个数",
+    onCell: (r, c, v) => `第 ${c} 维 = ${fmt(v)}`
+  });
+  row.appendChild(b1.wrap);
+
+  const logitsRow = reshape(hd.logits, 1, hd.logits.length)[0];
+  const b2 = matBlock("logit = W_U · x（全词表）", `${hd.logits.length} 个候选的原始打分`);
+  heatmap(b2.host, [logitsRow], {
+    cell: 5, diverging: true, ylabels: ["logit"],
+    onCell: (r, c, v) => `${D.task.tokens[c]} 的 logit = ${fmt(v, 2)}`
+  });
+  row.appendChild(b2.wrap);
+  root.appendChild(row);
+
+  const bars = document.createElement("div");
+  bars.className = "bars";
+  const topW = hd.top_words, topP = hd.top_probs;
+  const tgtId = ST.target_id;
+  bars.innerHTML = topW.map((w, i) =>
+    `<div class="bar"><span>${w}${D.task.tokens.indexOf(w) === tgtId ? " ✓" : ""}</span>
+     <div class="track"><div class="fill ${D.task.tokens.indexOf(w) === tgtId ? "pos" : ""}"
+       style="width:${Math.max(0.6, topP[i] * 100).toFixed(2)}%"></div></div>
+     <b>${(topP[i] * 100).toFixed(2)}%</b></div>`
+  ).join("");
+  root.appendChild(bars);
+
+  const barsNote = document.createElement("p");
+  barsNote.className = "note";
+  barsNote.innerHTML = `训练后 softmax 已经饱和：首选 ${(topP[0] * 100).toFixed(1)}%，
+    其余全部 ≈0。这在教学上不便于看"排序"，所以下面并排给出<em>未训练</em>的同结构模型——
+    结构完全一样，只是权重随机，输出是一片平坦的分布。`;
+  root.appendChild(barsNote);
+
+  // 并排：训练后 vs 未训练
+  const cmpHost = document.createElement("div");
+  cmpHost.className = "mat-row";
+  const mkCmp = (title, words, probs, isTrained) => {
+    const b = matBlock(title, isTrained ? "学过了" : "同样结构，随机权重");
+    const inner = document.createElement("div");
+    inner.className = "bars";
+    const mx = Math.max(...probs);
+    inner.innerHTML = words.map((w, i) =>
+      `<div class="bar" style="grid-template-columns:78px 1fr 48px"><span>${w}</span>
+       <div class="track"><div class="fill ${isTrained ? "pos" : ""}"
+         style="width:${Math.max(0.8, probs[i] / mx * 100).toFixed(1)}%"></div></div>
+       <b>${(probs[i] * 100).toFixed(2)}%</b></div>`).join("");
+    b.wrap.appendChild(inner);
+    b.wrap.style.minWidth = "260px";
+    return b.wrap;
+  };
+  cmpHost.appendChild(mkCmp("训练后 top-6", topW, topP, true));
+  cmpHost.appendChild(mkCmp("未训练 top-6", D.untrained.head.top_words,
+    D.untrained.head.top_probs.map(v => Math.max(v, 0)), false));
+  root.appendChild(cmpHost);
+
+  const entCmp = document.createElement("p");
+  entCmp.className = "note";
+  entCmp.innerHTML = `熵（越低越确定，最大 = ln ${hd.logits.length} = ${Math.log(hd.logits.length).toFixed(2)}）：
+    训练后 <b>${hd.entropy.toFixed(3)}</b>，未训练 <b>${D.untrained.head.entropy.toFixed(2)}</b>。
+    训练把这个分布从"几乎均匀"压成了"几乎确定"，这就是 loss 从 ln ${hd.logits.length} ≈ ${Math.log(hd.logits.length).toFixed(2)}
+    降到 ≈0 的含义。`;
+  root.appendChild(entCmp);
+
+  const stats = document.createElement("div");
+  stats.className = "stat-grid";
+  stats.innerHTML = `
+    <div class="stat"><b>${hd.entropy.toFixed(3)}</b><small>输出熵（越低越确定）</small></div>
+    <div class="stat"><b>${(hd.top_probs[0] * 100).toFixed(2)}%</b><small>首选词概率</small></div>
+    <div class="stat"><b>${fmt(hd.lnf_mean, 2)} / ${fmt(hd.lnf_std, 2)}</b><small>最终 LN 的均值 / 标准差</small></div>`;
+  root.appendChild(stats);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么要一个 LN + 一个大矩阵</h5>
+    <p>最终 LN 与前面的 LN 同理：把尺度摆正，保证 logits 落在合理范围。
+    <code>W_U</code> 是 ${hd.logits.length}×${d} 矩阵，每行是一个词"应该长什么样"的方向：
+    logit = 主干向量和这个词方向的点积——<em>越像，分数越高</em>。</p>
+    <p>本模型把输出矩阵和输入嵌入<em>绑定</em>（tied embedding，<code>W_U = Eᵀ</code>）：
+    同一个词在"输入"和"输出"时用同一套坐标，省参数且往往更好训。GPT-2/GPT-3 都这么做。</p>`;
+  root.appendChild(why);
+
+  const without = document.createElement("div");
+  without.className = "without";
+  without.innerHTML = `<h5>为什么不能「直接拿主干向量当答案」</h5>
+    <p>主干向量在 ${d} 维空间里，但词是 ${hd.logits.length} 个离散选项。向量到离散之间必须有一次
+    「为每个候选项打分」的投影——这就是 softmax 之前的 logits。没有它，模型只能说"这个方向像什么"，
+    无法产出"下一个词是哪个"。<em>语言模型的输出永远是分布，不是向量</em>。</p>`;
+  root.appendChild(without);
+
+  if (VIEW === "untrained") {
+    const cmp = document.createElement("div");
+    cmp.className = "without";
+    cmp.innerHTML = `<h5>对照：未训练的同一结构</h5>
+      <p>首选 ${D.untrained.head.top_words.slice(0, 3).join(" / ")}，概率都在
+      ${(D.untrained.head.top_probs[0] * 100).toFixed(1)}% 上下，熵
+      <b>${D.untrained.head.entropy.toFixed(2)}</b>（训练后是 ${hd.entropy.toFixed(3)}）。
+      结构完全一样，只是权重没学——输出就是一片均匀的噪声。</p>`;
+    root.appendChild(cmp);
+  }
+});
+
+/* ── 9. 归因 ── */
+stage("attribution", 9, "归因：到底是哪一步给出了答案", "扣掉它，再算一次", (root) => {
+  const dla = ST.dla;
+  const names = Object.keys(dla.contrib);
+  const label = { "embed+pos": "词嵌入+位置", attn_L1: "L1 注意力", ffn_L1: "L1 FFN", attn_L2: "L2 注意力", ffn_L2: "L2 FFN" };
+
+  const bars = document.createElement("div");
+  bars.className = "bars";
+  const mx = Math.max(...names.map(n => Math.abs(dla.contrib[n])));
+  bars.innerHTML = names.map(n =>
+    `<div class="bar"><span>${label[n]}</span><div class="track">
+      <div class="fill ${dla.contrib[n] >= 0 ? "pos" : "neg"}"
+        style="width:${(Math.abs(dla.contrib[n]) / mx * 100).toFixed(1)}%"></div>
+     </div><b>${dla.contrib[n].toFixed(2)}</b></div>`).join("");
+  root.appendChild(bars);
+
+  const how = document.createElement("p");
+  how.className = "note";
+  how.textContent = "做法：把这一块的输出从主干里扣掉，重新过 LN 和输出头，看答案词的 logit 掉多少。"
+    + "正 = 这一块在推动答案，负 = 在压低答案。这就是「扣掉它再算一次」的精确留一归因（不是线性化近似）。";
+  root.appendChild(how);
+
+  const stat = document.createElement("div");
+  stat.className = "stat-grid";
+  stat.innerHTML = `
+    <div class="stat"><b>${dla.actual_logit.toFixed(2)}</b><small>答案词实际 logit</small></div>
+    <div class="stat"><b>${dla.contrib.attn_L2.toFixed(2)}</b><small>L2 注意力贡献（最大单项）</small></div>
+    <div class="stat"><b>${dla.logit_without.attn_L2.toFixed(2)}</b><small>扣掉 L2 注意力后的 logit</small></div>`;
+  root.appendChild(stat);
+
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>为什么答案主要来自第 2 层注意力</h5>
+    <p>这个任务需要「跨位置」的信息：答案词 <code>${ST.target_word}</code> 在位置
+    ${ST.target_first_pos} 出现过，但真正要预测的是"${TOK[T - 1]} 之后 = ${ST.target_word}"。
+    这必须靠注意力从别处搬过来；FFN 是逐 token 的，不可能跨位置。
+    数字也对上了：<b>L2 注意力贡献 ${dla.contrib.attn_L2.toFixed(2)}</b>，扣掉它 logit 从
+    ${dla.actual_logit.toFixed(2)} 掉到 ${dla.logit_without.attn_L2.toFixed(2)}，概率接近归零。</p>
+    <p>FFN 的贡献是 ${dla.contrib.ffn_L2.toFixed(2)}——它在做「把取到的内容整理成答案词的样子」。
+    但注意一个反直觉的实测：<em>清零 L2 的 FFN 后准确率仍是 ${(ABL.zero_ffn_L2 * 100).toFixed(0)}%</em>，
+    说明这条整理路径有冗余（注意力输出本身已经足够接近答案方向）。</p>`;
+  root.appendChild(why);
+
+  // 位置级归因：扣掉某个 token 的 value 输出
+  const tokHost = document.createElement("div");
+  tokHost.innerHTML = `<h5 style="font-size:13px;margin:0 0 8px">进一步：答案来自哪个 token</h5>`;
+  root.appendChild(tokHost);
+  const tb = document.createElement("div");
+  tb.className = "tokens";
+  const cols = ["var(--accent2)", "var(--accent)", "var(--muted)", "var(--border-strong)"];
+  TOK.forEach((t, i) => {
+    const cls = t.startsWith("<") ? " special" : "";
+    const weight = (i === ST.target_first_pos) ? "hi" : "";
+    tb.innerHTML += `<span class="tok ${cls} ${weight}"><i>${i}</i>${esc(t)}</span>`;
+  });
+  root.appendChild(tb);
+  const ta = ST.token_attr || [];
+  if (ta.length) {
+    const taBars = document.createElement("div");
+    taBars.className = "bars";
+    const tmx = Math.max(...ta.map(r => Math.abs(r.logit_drop)), 0.001);
+    taBars.innerHTML = ta.map(r =>
+      `<div class="bar"><span>${r.pos}: ${esc(r.token)}</span><div class="track">
+        <div class="fill ${r.logit_drop >= 0 ? "pos" : "neg"}"
+          style="width:${Math.abs(r.logit_drop) / tmx * 100}%"></div>
+       </div><b>${r.logit_drop.toFixed(2)}</b></div>`).join("");
+    root.appendChild(taBars);
+  }
+  const note2 = document.createElement("p");
+  note2.className = "note";
+  note2.innerHTML = `做法：在第 2 层注意力里把「第 src 个位置作为 V 源」的权重清零并重新归一化，
+    再看答案词的 logit 掉多少。<em>这件事必须作用在 p·V 那一步</em>，不能从 W_O 的输出里扣
+    （那里已经是混合后的向量，且位置语义不对）。实测：只有 <code>&lt;SEP&gt;</code>
+    这一个源是关键的（掉 ${(ta[0] ? ta[0].logit_drop.toFixed(2) : "?")}），
+    而 <code>${esc(TOK[ST.target_first_pos])}</code> 作为直接源几乎不起作用——
+    因为它是先被第 1层写进 SEP，再由第 2 层从 SEP 读出。`;
+  root.appendChild(note2);
+
+  const summary = document.createElement("div");
+  summary.className = "why";
+  summary.innerHTML = `<h5>把整条链路连起来</h5>
+    <p>① 切词把句子变成 ${T} 个编号 → ② 查表得到 ${d} 维向量 → ③ 加位置让模型知道顺序 →
+    ④ 第 1 层注意力：每个位置去看<em>相关内容上一次出现在哪</em>，把那里携带的信息搬过来 →
+    ⑤ 第 1 层 FFN 整理这些信息 → ⑥ 第 2 层重复，此时"上下文里哪个词跟着哪个词"的关系已经编码在主干里 →
+    ⑦ FFN 再整理 → ⑧ 输出头把它投影成 ${ST.head.logits.length} 个候选的打分 → softmax 得到 <code>${ST.target_word}</code>。</p>
+    <p>每一步都不是"可选的优化"，而是缺了就崩的功能件：无位置 → ${(ABL.no_pos_emb * 100).toFixed(0)}%，
+    无 L1 注意力 → ${(ABL.zero_attn_L1 * 100).toFixed(0)}%，无 L2 注意力 → ${(ABL.zero_attn_L2 * 100).toFixed(0)}%。
+    <em>这个模型只有 ${M.params.toLocaleString()} 个参数，但已经完整地展示了 LLM 的骨架</em>——
+    真实模型是同一条链路上把这套结构重复 ${96} 层、每层 ${32} 个头、${d}=12288 维。</p>`;
+  root.appendChild(summary);
+});
+
+/* ── 附录 ── */
+stage("appendix", "A", "附：这个玩具模型是怎么训练出来的", "它不是手写的，是真训出来的", (root) => {
+  const why = document.createElement("div");
+  why.className = "why";
+  why.innerHTML = `<h5>训练配置</h5>
+    <p>${D.train.steps} 步 · AdamW · lr ${D.train.lr} · batch ${D.train.batch} · seed ${D.train.seed} ·
+    d=${M.d_model} · ${H} 头 · ${M.n_layers} 层 · 词表 ${M.vocab} · 参数量 ${M.params.toLocaleString()}。
+    它能学到 induction 是因为任务里有"重复的结构"可学——没有人告诉它去学 induction。</p>`;
+  root.appendChild(why);
+
+  const ab = document.createElement("div");
+  ab.innerHTML = `<h5 style="font-size:13px;margin:0 0 8px">消融全表（每一项都是"扣掉它"的实测）</h5>`;
+  root.appendChild(ab);
+  const tbl = document.createElement("table");
+  tbl.className = "mini";
+  const rows = [
+    ["基线（完整模型）", (ABL.baseline * 100).toFixed(1) + "%", "—"],
+    ["清零 L1 注意力", (ABL.zero_attn_L1 * 100).toFixed(1) + "%", "信息进不来"],
+    ["清零 L2 注意力", (ABL.zero_attn_L2 * 100).toFixed(1) + "%", "跨位置信息少了第二遍"],
+    ["清零 L1 FFN", (ABL.zero_ffn_L1 * 100).toFixed(1) + "%", "知识整理少一层"],
+    ["清零 L2 FFN", (ABL.zero_ffn_L2 * 100).toFixed(1) + "%", "输出前整理少一层"],
+    ["去掉位置嵌入", (ABL.no_pos_emb * 100).toFixed(1) + "%", "不知道第几个"],
+  ];
+  tbl.innerHTML = `<tr><th>改动</th><th>准确率</th><th>原因</th></tr>` +
+    rows.map(([a, b, c]) => `<tr><td>${a}</td><td class="num">${b}</td><td>${c}</td></tr>`).join("");
+  tbl.innerHTML += `<tr><td>不缩放打分（1/√d）</td>
+    <td class="num">熵 ${ABL.entropy_unscaled} → ${ABL.entropy_scaled}</td><td>softmax 饱和</td></tr>`;
+  root.appendChild(tbl);
+
+  const acc = D.accuracy_by_length;
+  const tbl2 = document.createElement("table");
+  tbl2.className = "mini";
+  tbl2.innerHTML = `<tr><th>序列长度</th>${Object.keys(acc).map(k => `<th>${k}</th>`).join("")}</tr>
+    <tr><td>准确率</td>${Object.values(acc).map(v => `<td class="num">${(v * 100).toFixed(0)}%</td>`).join("")}</tr>`;
+  root.appendChild(tbl2);
+  const n3 = document.createElement("p");
+  n3.className = "note";
+  n3.textContent = "按长度分组全部满分，说明它没有靠某个固定长度背答案——训练时长度是随机的（"
+    + `${D.task.min_ctx}–${D.task.max_ctx} 个上下文词，0–${D.task.max_gap} 个填充词）。`;
+  root.appendChild(n3);
+
+  const honest = document.createElement("div");
+  honest.className = "without";
+  honest.innerHTML = `<h5>这里必须说明的三件事</h5>
+    <p>① <b>这个模型学到的不是教科书式的「单点 induction 头」</b>，而是「写入暂存区 + 读出」
+    两步：第 1 层把答案词的信息搬到 <code>&lt;SEP&gt;</code> 位置（SEP 行从答案位置取走 0.30 的权重），
+    第 2 层再从 SEP 读出（4 个头各 0.92–0.99 的权重全在 SEP 上），最后第 2 层的注意力输出
+    与答案词嵌入的余弦达 0.86。真实模型里两种形态都存在，这里如实展示测到的这一种。</p>
+    <p>② <b>这里的"扣掉"都是精确的留一实验</b>，但留一归因加总不等于原 logit（LN 是非线性的），
+    所以各项贡献之和与真实的 ${ST.dla.actual_logit.toFixed(1)} 有差距——看<em>相对大小</em>，不要看绝对和。</p>
+    <p>③ <b>这个玩具模型和 RWKV 无关</b>。它是标准 Transformer，用来解释通用机制；
+    本项目主体是 RWKV-7 的状态服务，两者的对应关系在 <code>docs/transformer-primer.md</code> 末尾有对照表。</p>`;
+  root.appendChild(honest);
+
+  const repro = document.createElement("div");
+  repro.className = "math mono";
+  repro.innerHTML = `# 重新生成这一页的全部数据（CPU 约 40 秒）
+python scripts/tiny_transformer.py --steps ${D.train.steps}
+<span class="c"># 自检：手写注意力 vs PyTorch SDPA、可变长度、参数共享</span>
+python scripts/tiny_transformer.py --check`;
+  root.appendChild(repro);
+});
+
+/* ══════════════ 派生量 ══════════════ */
+function avg(a) { return a.reduce((x, y) => x + y, 0) / a.length; }
+function bestHead(layer) {
+  let best = 0, bi = 0;
+  for (let h = 0; h < H; h++) {
+    const m = D.head_metrics[`L${layer + 1}H${h}`];
+    if (m && m.mean_peak > best) { best = m.mean_peak; bi = h; }
+  }
+  return bi;
+}
+const HEAD_LABEL = [];
+const BEST = [];
+(() => {
+  for (let h = 0; h < H; h++) {
+    const key = `L1H${h}`, m = D.head_metrics[key];
+    const row = reshape(ST.layers[0].probs.slice(h * T * T, (h + 1) * T * T), T, T)[T - 1];
+    let pk = 0; row.forEach((v, i) => { if (v > row[pk]) pk = i; });
+    BEST.push({ label: key, peak: `${TOK[pk]} (位置 ${pk}, 权重 ${fmt(row[pk], 2)})`, head: h, m });
+  }
+})();
+
+/* ══════════════ 渲染 ══════════════ */
+function render() {
+  const nav = $("#navlist");
+  nav.innerHTML = STAGES.map(s =>
+    `<li><a href="#${s.id}" data-id="${s.id}"><b>${s.num}</b>${s.title.split("：")[0]}</a></li>`).join("");
+
+  const main = $("#main");
+  main.innerHTML = "";
+  HEATMAPS.length = 0;        // 旧节点随 main 一起被清掉，登记表也要清
+  for (const s of STAGES) {
+    const el = document.createElement("section");
+    el.className = "stage";
+    el.id = s.id;
+    el.innerHTML = `
+      <div class="stage-head">
+        <div class="stage-num">${s.num}</div>
+        <div><h2>${s.title}</h2><p>${s.subtitle}</p></div>
+      </div>
+      <div class="stage-body"></div>`;
+    main.appendChild(el);
+    s.build(el.querySelector(".stage-body"));
+    // {{gpt4note}} 占位替换
+    el.querySelectorAll(".why").forEach(w => {
+      w.innerHTML = w.innerHTML.replace("{{gpt4note}}",
+        `<span style="color:var(--muted)">（这里只是为了让读者知道真实规模；本页不展示任何真实模型的内部数据。）</span>`);
+    });
+  }
+
+  // 整页渲染完、DOM 已布局，按真实容器宽度重排所有热图。
+  // 首页布局可能在窗口尺寸确定的下一帧才稳定（例如窄窗口/移动端），所以补两次。
+  relayout();
+  requestAnimationFrame(() => relayout());
+  setTimeout(relayout, 260);
+
+  // 滚动高亮
+  const links = [...nav.querySelectorAll("a")];
+  const io = new IntersectionObserver(es => {
+    for (const e of es) {
+      if (e.isIntersecting) {
+        links.forEach(a => a.classList.toggle("on", a.dataset.id === e.target.id));
+      }
+    }
+  }, { rootMargin: "-25% 0px -65% 0px" });
+  STAGES.forEach(s => io.observe(document.getElementById(s.id)));
+}
+
+/* 主题 */
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  $("#theme-btn").textContent = t === "dark" ? "☀️" : "🌙";
+  localStorage.setItem("tf-theme", t);
+  const y = window.scrollY;   // 重画后 canvas 颜色取自 CSS 变量，滚动位置保持不变
+  render();
+  window.scrollTo(0, y);
+}
+$("#theme-btn").onclick = () =>
+  applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+
+/* 窗口尺寸变化：按新宽度重排热图（防抖，避免拖动时狂重画） */
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(relayout, 220);
+});
+
+/* 视图切换：保留滚动位置，读者才不会跳到"未训练"时被丢回顶部 */
+$("#viewseg").onclick = e => {
+  const btn = e.target.closest("button"); if (!btn) return;
+  $("#viewseg").querySelectorAll("button").forEach(b => b.classList.toggle("on", b === btn));
+  VIEW = btn.dataset.v;
+  const y = window.scrollY;
+  render();
+  window.scrollTo(0, y);
+};
+
+(function init() {
+  const saved = localStorage.getItem("tf-theme");
+  document.documentElement.dataset.theme = saved ||
+    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  $("#theme-btn").textContent = document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙";
+  $("#model-badge").textContent =
+    `d${M.d_model} · ${H}头 · ${M.n_layers}层 · 参数 ${M.params.toLocaleString()} · 准确率 ${(D.accuracy * 100).toFixed(1)}%`;
+  render();
+})();
+</script>
+</body>
+</html>
